@@ -35,7 +35,23 @@ A clear project name and a single sentence describing what it does. No taglines,
 A lightweight tool that converts Markdown files to PDF.
 ```
 
-### 2. Installation (IMMEDIATELY after the title)
+### 2. Requirements (if non-obvious)
+
+If your tool only works on a specific platform or needs specific dependencies, state it immediately after the one-liner. Don't let someone clone and try to install only to discover it won't work.
+
+Good — a one-line badge or sentence:
+
+```markdown
+macOS only.
+```
+
+```markdown
+Requires: Node.js >= 18, PostgreSQL 15.
+```
+
+If the tool is cross-platform, skip this section. Only include it when someone would otherwise waste time on an unsupported system.
+
+### 3. Installation (IMMEDIATELY after requirements)
 The first substantive content. Give the user the exact command they need to get started. Don't explain prerequisites unless truly unusual.
 
 ```markdown
@@ -69,7 +85,7 @@ npm install project-name
 
 **Never** lead into installation with paragraphs about the project's history, design philosophy, or how many stars similar projects have.
 
-### 3. Quick Start / Usage
+### 4. Quick Start / Usage
 A minimal example showing the most common use case. The user should be able to copy, paste, and get a result in under 30 seconds.
 
 ```markdown
@@ -80,7 +96,7 @@ project-name input.md -o output.pdf
 
 If the tool requires configuration, show the minimal config first. Full options go in a reference section later.
 
-### 4. Why This Exists (optional, keep it brief)
+### 5. Why This Exists (optional, keep it brief)
 Only include this if the problem space is genuinely crowded. Two sentences max. The goal is helping users understand whether this is the right tool, not defending your technical choices.
 
 ```markdown
@@ -89,7 +105,7 @@ Only include this if the problem space is genuinely crowded. Two sentences max. 
 Unlike pandoc, project-name focuses exclusively on Markdown-to-PDF and produces pixel-perfect results with zero configuration.
 ```
 
-### 5. API / Configuration Reference (if needed)
+### 6. API / Configuration Reference (if needed)
 Put detailed documentation at the end. Most users will never read this far, and that's fine — those who need it will find it.
 
 ## What to Remove
