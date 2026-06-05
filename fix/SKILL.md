@@ -7,18 +7,18 @@ description: Reproduce, diagnose, fix, and verify a frontend bug through an agen
 
 A feedback loop, not a linear process. The agent writes scripts to probe the runtime, infers root causes from the data, fixes the bug, and iterates until the fix is proven.
 
-Two tools, two phases:
+Two tools, two phases. This is not a choice between tools — they solve different halves of the problem.
 
 | Phase | Tool | Why |
 |---|---|---|
-| **Diagnose** | Chrome DevTools MCP | Real-time interactive debugging — console, network, traces, JS evaluation. Agent explores live, no boilerplate. |
-| **Reproduce / Regress** | Playwright script | Deterministic, CI-friendly, saved as permanent regression test. |
+| **Diagnose** | Chrome DevTools MCP | Interactive exploration. Agent calls `list_console_messages`, `evaluate_script`, etc. on-demand — each call returns 200-500 tokens of focused data. No prewritten scripts, no guessing what to capture. |
+| **Reproduce / Regress** | Playwright script | Deterministic batch run. `node reproduce.mjs` in 2 seconds flat, exit code 0 or 1. Can run 50 regression scripts with a shell loop. Saved to git as a permanent artifact. |
 
-If Chrome DevTools MCP is not available, fall back to Playwright probe scripts for diagnosis (see [`scripts/probe-template.mjs`](scripts/probe-template.mjs)).
+Playwright diagnosis would pre-capture console, network, DOM all at once (~2000+ tokens, most irrelevant). MCP pulls data on-demand, 200-500 tokens per question. Fall back to [`scripts/probe-template.mjs`](scripts/probe-template.mjs) when MCP is unavailable.
 
 ## Reproduce Script
 
-The reproduce script lives at `tests/regression/<slug>.mjs`. It triggers the bug and asserts correct behavior. Over the feedback loop it matures from a minimal trigger into a full regression test.
+The reproduce script lives at `tests/regression/<slug>.mjs`. It triggers the bug and asserts correct behavior. Over the feedback loop it matures from a minimal trigger into a full regression test. Scripts accumulate over time — CI can run all of them with `for f in tests/regression/*.mjs; do node "$f" || exit 1; done`.
 
 Always start from [`scripts/reproduce-template.mjs`](scripts/reproduce-template.mjs). Fill in `pageUrl`, `setup`, and `assertions`. Never regenerate the template — fill blanks only. Token and reliability win.
 
@@ -67,8 +67,6 @@ Generate the reproduce script. Run it. Confirm the bug is live.
 
 **With Chrome DevTools MCP (preferred):**
 
-Use MCP tools interactively — no script to write:
-
 - `take_snapshot` — page accessibility tree, fast text snapshot of current state
 - `take_screenshot` — visual state
 - `list_console_messages` — all console output including errors and warnings
@@ -76,7 +74,7 @@ Use MCP tools interactively — no script to write:
 - `evaluate_script` — run arbitrary JS in the page context (e.g. inspect internal state, call debug hooks)
 - `performance_start_trace` / `performance_stop_trace` — record a DevTools trace for timeline/performance analysis
 
-Workflow: navigate to the page, trigger the bug, inspect runtime state through these tools, form a hypothesis, evaluate JS to test it, repeat. This is fast, conversational, zero boilerplate.
+Workflow: navigate → trigger bug → inspect with these tools → form hypothesis → evaluate JS to test it → repeat.
 
 **Fallback (no MCP):**
 
