@@ -32,11 +32,7 @@ The script uses [cac](https://github.com/cacjs/cac) for CLI. Runs as `node tests
 2. **Reproduce** — generate script, run it, confirm bug is live. If not triggerable, stop and ask user.
 3. **Diagnose** — MCP (preferred) or probe script. If root cause not found, describe known/unknown and stop.
 4. **Fix + Verify** — implement fix, run reproduce script. If it fails, iterate: probe → fix → verify.
-5. **Manual Confirm** — always end here. Summarize changes, confirm scripts pass, ask user to verify in real browser.
-
----
-
-**With Chrome DevTools MCP (preferred):**
+5. **Manual Confirm** — summarize changes and test results, ask user to verify in real browser.
 
 ### 2. Diagnose
 
@@ -71,3 +67,25 @@ Implement the fix. Run the reproduce script. If it passes, proceed to manual con
 Then ask: **"Please manually confirm the fix in a real browser. Is it resolved?"**
 
 Do NOT proceed past this step until the user says yes.
+
+### 6. Prevent
+
+After the user confirms the fix, analyze the bug as a symptom of deeper design issues. Ask:
+
+- What class of bug was this? (race condition, missing SSOT, boundary case, stale state, etc.)
+- Could the same class of bug recur elsewhere in the codebase?
+- What architectural or process change would prevent this entire class?
+
+**Examples:**
+
+| Symptom | Root class | Systemic fix |
+|---|---|---|
+| Value used in multiple places diverged | Violates SSOT (single source of truth) | Extract into a shared config or derived value |
+| UI stale after async call | Missing state synchronization | Add state machine or reactive binding |
+| Crash on edge-case input | Boundary not validated | Add validation at system boundary, not call site |
+
+Summarize the analysis and suggest at most 1-2 concrete improvements. Ask the user:
+
+**"This bug reveals a [class] pattern. Would you like to address it systemically — e.g. [concrete suggestion] — to prevent similar bugs?"**
+
+Let the user decide whether to proceed. If yes, plan the improvement; if no, the workflow ends here.
