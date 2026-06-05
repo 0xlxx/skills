@@ -1,4 +1,7 @@
-// Probe toolbox for fix workflow.
+// Probe toolbox for fix workflow — FALLBACK when Chrome DevTools MCP is unavailable.
+// Prefer MCP for diagnosis: list_console_messages, list_network_requests,
+// performance_start_trace, evaluate_script. Use this only when MCP is not an option.
+//
 // Enable only the capabilities needed. Fill in pageUrl and setup,
 // then toggle flags below. Each probe is self-contained — enable one or many.
 

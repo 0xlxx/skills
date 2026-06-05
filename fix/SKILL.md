@@ -5,85 +5,94 @@ description: Reproduce, diagnose, fix, and verify a frontend bug through an agen
 
 # Fix Workflow
 
-A feedback loop, not a linear process. The agent writes scripts to probe the runtime, infers root causes from the data, fixes the bug, and iterates until the fix is proven. Two scripts co-evolve through the loop:
+A feedback loop, not a linear process. The agent writes scripts to probe the runtime, infers root causes from the data, fixes the bug, and iterates until the fix is proven.
 
-- **Reproduce script** (`tests/regression/<slug>.mjs`) — triggers the bug and asserts behavior. Starts minimal, grows precise across iterations, matures into a permanent regression test.
-- **Probe script(s)** — collects runtime data (console, network, traces, call stacks). Generated on-demand when the reproduce output is insufficient to pinpoint root cause. May be discarded after use; fuse useful probes into the reproduce script for richer regression coverage.
+Two tools, two phases:
 
-## Probe Toolkit
-
-The probe script is a single file built from the [`scripts/probe-template.mjs`](scripts/probe-template.mjs) toolbox. Enable only the capabilities needed for the current diagnostic gap. Available probes:
-
-| Capability | Use when | How |
+| Phase | Tool | Why |
 |---|---|---|
-| Console capture | Unknown where an error originates, or need call-stack context | `page.on('console')` + `console.trace/warn/error` |
-| Network intercept | Request/response shape is suspect, SSE/WS streaming involved | `page.route()` or `page.on('websocket')` |
-| Playwright Trace | Timing, order-of-operations, or render-timing issues | `browser.startTracing()` / `context.tracing` |
-| DOM snapshots | Need before/after state at specific moments | `page.screenshot()` / `page.content()` |
+| **Diagnose** | Chrome DevTools MCP | Real-time interactive debugging — console, network, traces, JS evaluation. Agent explores live, no boilerplate. |
+| **Reproduce / Regress** | Playwright script | Deterministic, CI-friendly, saved as permanent regression test. |
 
-**Choosing probes:** after the reproduce script runs, assess what you know vs what you need. Generate a probe script that fills the gap. Never enable probes speculatively — each one adds runtime cost.
+If Chrome DevTools MCP is not available, fall back to Playwright probe scripts for diagnosis (see [`scripts/probe-template.mjs`](scripts/probe-template.mjs)).
 
-## Feedback Loop
+## Reproduce Script
 
-```
-Reproduce ──► Reproduce script passes?
-   │                │
-   │  yes           │  no (bug is live)
-   │                ▼
-   │         Data sufficient to
-   │         diagnose root cause?
-   │           │            │
-   │           │ yes        │ no
-   │           ▼            ▼
-   │       Implement    Generate probe
-   │       fix          script, collect
-   │           │        missing data,
-   │           │        re-evaluate
-   │           │            │
-   │           └────────────┘
-   │                │
-   ▼                ▼
-Regression       Fix applied?
-passes?            │ yes       │ no
-   │               ▼           │
-   │         Reproduce script  │
-   │         passes?           │
-   │           │       │       │
-   │           │ yes   │ no    │
-   │           ▼       ▼       │
-   │       MANUAL   Diagnose   │
-   │       CONFIRM  why, fix   │
-   │                 │         │
-   └─────────────────┘─────────┘
-```
+The reproduce script lives at `tests/regression/<slug>.mjs`. It triggers the bug and asserts correct behavior. Over the feedback loop it matures from a minimal trigger into a full regression test.
 
-### 1. Reproduce
-
-Generate the reproduce script from [`scripts/reproduce-template.mjs`](scripts/reproduce-template.mjs). Fill in `pageUrl`, `setup`, and `assertions`. Never regenerate the template — always start from the file and fill blanks. Token and reliability win.
+Always start from [`scripts/reproduce-template.mjs`](scripts/reproduce-template.mjs). Fill in `pageUrl`, `setup`, and `assertions`. Never regenerate the template — fill blanks only. Token and reliability win.
 
 The script uses [cac](https://github.com/cacjs/cac) for CLI. Runs as `node tests/regression/<slug>.mjs`. Accepts `--debug` for screenshots and DOM dumps. Exits 0 on success, 1 on failure.
 
 **Run it once** to confirm the bug is reproducible before proceeding.
 
+## Feedback Loop
+
+```
+Reproduce script run
+       │
+       ▼
+  Bug reproduced?
+   │          │
+   │ yes      │ no ─── STOP: bug not triggerable
+   ▼
+  MCP available?
+   │          │
+   │ yes      │ no
+   ▼          ▼
+MCP         Probe
+diagnosis   script
+   │          │
+   └────┬─────┘
+        ▼
+  Root cause found?
+   │          │
+   │ yes      │ no ─── STOP: describe known/unknown, ask user
+   ▼
+  Implement fix
+       │
+       ▼
+  Reproduce script passes?
+   │          │
+   │ yes      │ no ─── iterate: probe → fix → verify
+   ▼
+  MANUAL CONFIRM
+```
+
+### 1. Reproduce
+
+Generate the reproduce script. Run it. Confirm the bug is live.
+
 ### 2. Diagnose
 
-If the reproduce output and error message are enough to pinpoint root cause, go directly to the codebase to trace the faulty path and fix it.
+**With Chrome DevTools MCP (preferred):**
 
-If NOT enough — generate a probe script from [`scripts/probe-template.mjs`](scripts/probe-template.mjs), enabling only the relevant capabilities. Run it, read the output, and reason about root cause. Repeat with additional probes if still ambiguous.
+Use MCP tools interactively — no script to write:
 
-**If stuck after reasonable effort:** describe what's known, what's still unknown, and stop for user input.
+- `take_snapshot` — page accessibility tree, fast text snapshot of current state
+- `take_screenshot` — visual state
+- `list_console_messages` — all console output including errors and warnings
+- `list_network_requests` — all HTTP requests, responses, SSE events, WebSocket messages
+- `evaluate_script` — run arbitrary JS in the page context (e.g. inspect internal state, call debug hooks)
+- `performance_start_trace` / `performance_stop_trace` — record a DevTools trace for timeline/performance analysis
+
+Workflow: navigate to the page, trigger the bug, inspect runtime state through these tools, form a hypothesis, evaluate JS to test it, repeat. This is fast, conversational, zero boilerplate.
+
+**Fallback (no MCP):**
+
+Generate a probe script from [`scripts/probe-template.mjs`](scripts/probe-template.mjs). Toggle only the capabilities needed to fill the diagnostic gap. Run it, read output, reason about root cause.
+
+**If stuck:** describe what's known, what's unknown, and stop for user input.
 
 ### 3. Fix + Verify
 
-Implement the fix. Run the reproduce script. If it passes, proceed to manual confirm.
-
-If it still fails, diagnose why (the fix was wrong, the assertion was wrong, or the probe revealed new information). Iterate: probe → diagnose → fix → verify. This loop may run several rounds — each one refines both scripts and narrows the problem.
+Implement the fix. Run the reproduce script. If it passes, proceed to manual confirm. If it fails, iterate: diagnose why → adjust fix → re-verify. This loop may run several rounds.
 
 ### 4. Manual Confirm
 
-**Always end here.** Summarize for the user:
+**Always end here.** Summarize:
 - What was changed and why
-- Which scripts were generated/updated (reproduce + any probes)
+- Which scripts were generated/updated
 - That the reproduce script now passes (it's a regression test going forward)
 
 Then ask: **"Please manually confirm the fix in a real browser. Is it resolved?"**
