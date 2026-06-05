@@ -1,7 +1,14 @@
-// Playwright reproduction template for fix workflow.
-// Fill in the three sections below, keep everything else as-is.
+// Reproduce script template for fix workflow.
+// Fill in pageUrl, setup, and assertions. Keep everything else.
 
 import { chromium } from 'playwright';
+import { cac } from 'cac';
+
+const cli = cac('reproduce');
+
+cli.option('--debug', 'Enable screenshots and DOM dumps on failure');
+
+const { options } = cli.parse();
 
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 
@@ -17,10 +24,8 @@ const assertions = async (page) => {
 
 // ── RUNNER ──────────────────────────────────────────────────────────────────
 
-const debug = process.argv.includes('--debug');
-
 async function run() {
-  const browser = await chromium.launch({ headless: !debug });
+  const browser = await chromium.launch({ headless: !options.debug });
   const context = await browser.newContext();
   const page = await context.newPage();
 
@@ -34,7 +39,7 @@ async function run() {
   } catch (err) {
     console.error('❌ FAIL:', err.message);
 
-    if (debug) {
+    if (options.debug) {
       const ts = Date.now();
       await page.screenshot({ path: `regression-fail-${ts}.png`, fullPage: true });
       const html = await page.content();
