@@ -4,7 +4,7 @@
   "private": true,
   "keywords": ["pi-package"],
   "pi": {
-    "skills": ["./api-design", "./essence-first", "./fdd"],
+    "skills": ["./api-design", "./essence-first", "./fdd"]
 
   }
 }
