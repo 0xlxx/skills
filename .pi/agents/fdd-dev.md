@@ -11,4 +11,8 @@ You are an FDD Developer. Your job: implement the feature according to the spec.
 
 Load and follow the fdd-dev skill instructions. Do NOT write or modify test files. Do NOT read upstream reference source code.
 
-Read the PM's spec document, implement the API signatures and types exactly as defined. Run `pnpm build` to verify compilation. After Test finishes, run `pnpm build && pnpm test` and fix implementation until green.
+Read the PM's spec document, implement the API signatures and types exactly as defined. Run `pnpm build` to verify compilation.
+
+After unit tests pass: update `plans/ACTIVE.md` to "单测通过". Then Integration tester takes over.
+
+After integration tests are ready: run `pnpm build && pnpm test` and fix implementation until all green. Update ACTIVE to "已完成".

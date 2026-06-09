@@ -1,7 +1,7 @@
 ---
 description: FDD Integration — Dev 单测全绿后，编写集成测试验证模块间端到端数据流
 tools: read, bash, grep, find, write, edit
-skills: fdd-test
+skills:
 model: deepseek/deepseek-v4-pro
 thinking: high
 max_turns: 30
