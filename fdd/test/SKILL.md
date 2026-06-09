@@ -9,7 +9,7 @@ description: 根据需求规约编写测试，与 fdd-dev 可并行执行。当�
 
 根据规约写测试。独立于 Dev，可并行执行。
 
-**流程**：
+**新功能流程**：
 
 ```
 PM 出规约
@@ -17,6 +17,16 @@ PM 出规约
     └── Test ↻ Review ────────┘  → Dev 跑测试 → 修复循环 → 全绿
 
 Test 写完 → Review 审查 → 缺覆盖 → Test 补充 → Review 再审 → ✅ → Dev 接手
+```
+
+**Bug 修复流程**：
+
+```
+fdd-fix-pm 出根因分析
+    ├── fdd-fix-dev 分析 ──────┐
+    └── Test 写复现用例 ───────┘  → Dev 修复 → 跑测试 → 循环 → 全绿
+
+Test 先写复现用例（必须红）→ Review 审查 → Dev 修复 → Test 扩展同类场景 → Review → Dev 修复 → 全绿
 ```
 
 ## 文件入口（强制）
@@ -32,6 +42,8 @@ Test 写完 → Review 审查 → 缺覆盖 → Test 补充 → Review 再审 �
 Test 写测试时 Dev 的实现可能还不存在——根据规约和类型定义即可写出测试。
 
 ## 工作流
+
+### 新功能模式
 
 ### 1. 定位任务
 
@@ -76,6 +88,52 @@ Review 输出 `plans/pX-test-review.md` 后：
 - 补充完成后更新 ACTIVE.md，再次提交 Review
 - 循环直到 Review 判 ✅
 
+### Bug 修复模式
+
+### 1. 定位任务
+
+```
+读 plans/ACTIVE.md → 确认 bug 任务 → 读根因分析和复现步骤
+```
+
+### 2. 写复现用例（第一步）
+
+根据 PM 的复现步骤写一个**必须失败的测试**：
+
+```ts
+// tests/pX.test.ts
+describe('PX: Bug 修复 — [简述]', () => {
+  it('复现：Given [步骤], then [预期]', () => {
+    // 当前应该失败
+  });
+});
+```
+
+**如果 bug 需要浏览器环境复现**（渲染异常、DOM 问题、动画等），写 E2E 复现脚本而非单测：
+
+```ts
+// e2e/pX.spec.ts
+test('复现：页面元素不可见', async ({ page }) => {
+  // 用 chrome-devtools MCP 获取 DOM 快照辅助编写
+});
+```
+
+复现用例必须满足：运行即红（证明捕获了 bug），修复后变绿。
+
+### 3. 移交 Dev 分析
+
+更新 ACTIVE 为"待修复"。Dev 读复现用例 + 根因分析，修复代码。
+
+### 4. 扩展同类场景
+
+Dev 第一次修复后，Test 扩展测试覆盖同类可能受影响的场景：
+
+- 同模块的其他函数是否有类似问题？
+- 边界输入是否也会触发？
+- 不同数据组合是否正常？
+
+提交 Review → Dev 修复直到全绿。
+
 ## 不负责运行测试
 
 **测试由 Dev 运行，不是 Test。** Test 只编写测试文件，确保能编译。Dev 在实现完成后运行并修复循环。
@@ -91,4 +149,5 @@ Review 输出 `plans/pX-test-review.md` 后：
 
 ## 交接
 
-Review 判决 ✅ 后，更新 `plans/ACTIVE.md` 状态为"测试就绪"。告知用户测试已通过审查，Dev 可以跑 `pnpm build && pnpm test`。
+新功能：Review 判决 ✅ 后，更新 ACTIVE 为"测试就绪"。
+Bug 修复：扩展测试通过审查后，更新 ACTIVE 为"测试就绪"。
