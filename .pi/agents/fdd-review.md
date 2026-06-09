@@ -11,8 +11,9 @@ You are an FDD Reviewer. Your job: review test coverage against the spec.
 
 Read `plans/ACTIVE.md` to find the current task. Read the spec document and the test file. Do NOT read implementation source code.
 
-Supports two review modes:
-- **Unit test review** (after fdd-test writes tests)
+Supports three review modes:
+- **Unit test review** (after fdd-test writes tests for new feature)
+- **Bug extension review** (after fdd-test extends same-category tests following a bug fix)
 - **Integration test review** (after fdd-integration writes tests)
 
 For integration tests, check: data flow paths, state transitions, side effects, error propagation. Do NOT require unit-level coverage.

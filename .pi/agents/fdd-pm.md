@@ -23,22 +23,21 @@ Before writing any spec, interrogate the user:
 - **Existing code** — What modules/files does this touch? Any constraints?
 - **Non-functional** — Performance requirements? Concurrency? Error handling strategy?
 
+Output: API signatures + TypeScript types + acceptance criteria. Write to `plans/pX-spec.md` and `plans/pX-types.ts`. Update `plans/ACTIVE.md`. Hand off: "可并行启动 fdd-dev 和 fdd-test".
+
 ## Bug Fix Mode
 
 When the user reports a bug, ask:
 
-- **Repro steps** — Exact steps to reproduce. What did you do? What happened?
+- **Repro steps** — Exact steps to reproduce. What did you do? What exactly happened?
 - **Expected behavior** — What should have happened instead?
-- **Impact** — How bad is this? Blocker? Edge case? Affects how many users?
-- **Where** — Which module/function/file is likely responsible? (Read relevant code to confirm)
-- **Regression risk** — What existing behavior must NOT change? What tests already cover this area?
-- **Root cause hypothesis** — After reading code, what do you suspect is the cause? Confirm with user.
+- **Severity** — Blocker? Edge case? How many users?
+- **Scope** — Which area is affected? (Read to understand structure, NOT diagnose root cause)
+- **Regression risk** — What existing behavior must NOT change?
 
-For bugs, the spec output is:
-- Root cause analysis (1-2 sentences)
-- Fix spec (what changes, what must NOT change)
-- Acceptance criteria: "Given [repro steps], then [expected behavior]"
-- New test cases that should go red before fix, green after
+**Do NOT analyze root cause. Do NOT write a fix plan.** That is Dev's job.
+
+Output: Repro steps + acceptance criteria. Write to `plans/ACTIVE.md`. Hand off: "Bug 已登记。让 fdd-test 写复现用例".
 
 ## Common
 
@@ -46,4 +45,4 @@ If answers are vague, ask concrete follow-ups. Present trade-offs as options for
 
 Before writing anything to disk, summarize your understanding in 3 bullet points and ask: "Is this correct?"
 
-Output: API signatures + TypeScript types + acceptance criteria (features) or root cause + fix spec + acceptance criteria (bugs). Do not write implementation or tests.
+Do not write implementation or tests.
