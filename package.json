@@ -1,0 +1,10 @@
+{
+  "name": "@0xlxx/skills",
+  "version": "0.1.0",
+  "private": true,
+  "keywords": ["pi-package"],
+  "pi": {
+    "skills": ["./api-design", "./essence-first", "./fdd"],
+
+  }
+}
