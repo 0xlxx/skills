@@ -66,23 +66,30 @@ describe('Phase N: 功能名称', () => {
 - 每条验收标准一个测试
 - 多分支、多条件组合覆盖
 
-### 4. 运行验证
+### 4. 确保测试可编译
 
-Dev 实现就绪后，配合运行：
+Dev 实现可能还不存在，使用类型定义保证编译通过：
 
-```bash
-pnpm build && pnpm test
+```ts
+import type { XxxOptions, XxxResult } from '../src/pX-types';
+
+// 如果函数尚未导出，用 @ts-expect-error + 类型标注
+// @ts-expect-error not implemented yet
+const result: XxxResult = featureName({ ... });
 ```
 
-- 有红 → 报告失败明细给 Dev，不改测试
-- 如果测试本身有问题（与规约不一致），修正测试
+## 不负责运行测试
+
+**测试由 Dev 运行，不是 Test。** Test 只编写测试文件，确保能编译。Dev 在实现完成后运行测试并修复循环。
+
+如果 Dev 反馈测试有问题，Test 根据规约修正测试。
 
 ## 禁止
 
 - 不接触上游参考源码
 - 测试不依赖未导出的内部细节
-- 实现有 bug 时不去改实现——报告给 Dev
+- 实现有 bug 时不去改实现——那是 Dev 的事
 
 ## 交接
 
-告知用户测试已编写完成。Dev 完成实现后运行测试，报告结果。
+告知用户测试已编写完成。Dev 跑 `pnpm build && pnpm test`，红色是 Dev 的问题，绿色是共同的成功。
