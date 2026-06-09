@@ -9,43 +9,58 @@
 ### 完整流程
 
 ```mermaid
-flowchart TD
-    A[PM 追问用户] --> B{需求确认?}
-    B -->|不明确| A
-    B -->|确认| C[PM 输出规约<br/>plans/ACTIVE.md<br/>plans/pX-spec.md<br/>plans/pX-types.ts<br/>状态: 开发中]
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#6366f1', 'primaryTextColor': '#fff', 'primaryBorderColor': '#4f46e5', 'lineColor': '#94a3b8', 'secondaryColor': '#f1f5f9', 'tertiaryColor': '#f8fafc'}}}%%
+graph TB
+    subgraph PM["👤 PM"]
+        A([追问用户]) --> B{需求明确?}
+        B -->|不明确| A
+        B -->|确认| C[📋 输出规约<br/>spec + types + ACTIVE]
+    end
 
-    C --> D[Dev 实现]
-    C --> E[Test 写单测]
+    C --> D
+    C --> E
 
-    E --> F[tests/pX.test.ts<br/>ACTIVE: 待Review]
+    subgraph Dev["🔧 Dev"]
+        D[实现代码] --> K[跑单测]
+        K --> L{全绿?}
+        L -->|❌| M[修复]
+        M --> K
+        L -->|✅| N[单测通过]
+    end
 
-    F --> G[Review 单测审查]
-    G --> H{覆盖充分?}
-    H -->|⚠️ 缺失| I[Test 补充单测]
-    I --> G
-    H -->|✅| J[ACTIVE: 单测就绪]
+    subgraph TestReview["🧪 Test ⇄ 🔍 Review"]
+        E[写单测] --> F[提交 Review]
+        F --> G{覆盖充分?}
+        G -->|⚠️| H[补充单测]
+        H --> F
+        G -->|✅| J[单测就绪]
+    end
 
-    D --> K[Dev 跑单测]
-    J --> K
-    K --> L{全绿?}
-    L -->|❌| M[Dev 修复实现]
-    M --> K
-    L -->|✅| N[ACTIVE: 单测通过]
+    J -.-> K
+    N --> O
 
-    N --> O[Integration 写集成测试]
-    O --> P[tests/pX-integration.test.ts<br/>ACTIVE: 集成待Review]
+    subgraph Integration["🔗 Integration"]
+        O[写集成测试] --> P[提交 Review]
+        P --> Q{覆盖充分?}
+        Q -->|⚠️| R[补充集成]
+        R --> P
+        Q -->|✅| S[集成就绪]
+    end
 
-    P --> Q[Review 集成审查]
-    Q --> R{覆盖充分?}
-    R -->|⚠️ 缺失| S[Integration 补充]
-    S --> Q
-    R -->|✅| T[ACTIVE: 集成就绪]
+    S -.-> U
 
-    T --> U[Dev 跑全量测试]
-    U --> V{全绿?}
-    V -->|❌| W[Dev 修复实现]
-    W --> U
-    V -->|✅| X[ACTIVE: 已完成<br/>交付]
+    subgraph DevFinal["🔧 Dev 最终"]
+        U[跑全量测试] --> V{全绿?}
+        V -->|❌| W[修复]
+        W --> U
+        V -->|✅| X([✅ 已完成交付])
+    end
+
+    style PM fill:#eef2ff,stroke:#6366f1,stroke-width:2px
+    style Dev fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
+    style TestReview fill:#ecfdf5,stroke:#10b981,stroke-width:2px
+    style Integration fill:#fdf2f8,stroke:#ec4899,stroke-width:2px
+    style DevFinal fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
 ```
 
 ### Agent 职责
