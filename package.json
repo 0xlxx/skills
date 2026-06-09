@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "keywords": ["pi-package"],
+  "scripts": {
+    "postinstall": "mkdir -p $PI_CODING_AGENT_DIR/agents && for f in .pi/agents/*.md; do ln -sf \"$PWD/$f\" \"$PI_CODING_AGENT_DIR/agents/$(basename $f)\"; done"
+  },
   "pi": {
     "skills": ["./api-design", "./essence-first", "./fdd"]
-
   }
 }
