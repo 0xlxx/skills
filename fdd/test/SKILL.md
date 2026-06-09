@@ -17,70 +17,58 @@ PM 出规约
     └── Test 写测试（可并行）──┘  → Dev 跑测试 → 修复循环 → 全绿
 ```
 
+## 文件入口（强制）
+
+**第一步**：读 `plans/ACTIVE.md`，确定当前活跃任务及其规约文件路径。绝不可猜测文件名。
+
 ## 输入
 
-- PM 输出的需求规约文档
-- 如果 PM 用类型做了规约（接口/类型定义），直接 import 使用
+- `plans/ACTIVE.md` → 找到当前任务 → 读规约文件
+- PM 的类型定义文件（从 ACTIVE.md 确定路径）
 - 项目测试框架和目录结构
 
-Test 写测试时 Dev 的实现可能还不存在——这不影响。根据规约和类型定义即可写出测试。
+Test 写测试时 Dev 的实现可能还不存在——根据规约和类型定义即可写出测试。
 
 ## 工作流
 
-### 1. 理解规约
+### 1. 定位任务
 
-- 读 PM 文档——理解输入输出、行为描述、边界情况、验收标准
-- 有类型定义就照着 import
-- 对需求本身的歧义追问 PM
+```
+读 plans/ACTIVE.md → 确认任务 PX → 读规约文件 → 读类型定义
+```
+
+如果 ACTIVE.md 不存在或没有活跃任务，停止并要求用户先启动 PM。
 
 ### 2. 编写测试
 
 ```ts
 // tests/pX.test.ts
-describe('Phase N: 功能名称', () => {
+import type { XxxOptions, XxxResult } from '../plans/pX-types';
 
-  // 正常路径
-  it('T01: 基础场景', () => {
-    // arrange → act → assert
-  });
-
-  // 每条不变量至少一条测试
+describe('P1: 功能名称', () => {
+  it('T01: 基础场景', () => { ... });
   it('T02: 不变量 I1 — ...', () => { ... });
-
-  // 边界
   it('T03: 空输入', () => { ... });
   it('T04: 单个元素', () => { ... });
   it('T05: 极端值', () => { ... });
-
-  // 验收标准：每条一个测试
-  it('T06: 验收 — ...', () => { ... });
 });
 ```
 
-如果实现尚不存在，测试文件中对未实现函数的 import 会导致编译失败。用类型定义的 import 先保证类型检查通过，或用 `@ts-expect-error` 标注。
+如果实现尚不存在，使用 `@ts-expect-error` + 类型标注保证编译通过。
 
 ### 3. 覆盖自查
 
-- 每条不变量至少一个测试
+- 每个验收标准一个测试
 - 每个边界情况一个测试
-- 每条验收标准一个测试
-- 多分支、多条件组合覆盖
+- 不变量至少一个测试
 
-### 4. 确保测试可编译
+### 4. 更新任务清单
 
-Dev 实现可能还不存在，使用类型定义保证编译通过：
-
-```ts
-import type { XxxOptions, XxxResult } from '../src/pX-types';
-
-// 如果函数尚未导出，用 @ts-expect-error + 类型标注
-// @ts-expect-error not implemented yet
-const result: XxxResult = featureName({ ... });
-```
+测试编写完成后，更新 `plans/ACTIVE.md` 中任务状态为"测试就绪"。
 
 ## 不负责运行测试
 
-**测试由 Dev 运行，不是 Test。** Test 只编写测试文件，确保能编译。Dev 在实现完成后运行测试并修复循环。
+**测试由 Dev 运行，不是 Test。** Test 只编写测试文件，确保能编译。Dev 在实现完成后运行并修复循环。
 
 如果 Dev 反馈测试有问题，Test 根据规约修正测试。
 
@@ -89,7 +77,8 @@ const result: XxxResult = featureName({ ... });
 - 不接触上游参考源码
 - 测试不依赖未导出的内部细节
 - 实现有 bug 时不去改实现——那是 Dev 的事
+- 不碰 `plans/` 下非当前任务的遗留文件
 
 ## 交接
 
-告知用户测试已编写完成。Dev 跑 `pnpm build && pnpm test`，红色是 Dev 的问题，绿色是共同的成功。
+告知用户测试已编写完成，已更新 `plans/ACTIVE.md`。Dev 跑 `pnpm build && pnpm test` 验证。
