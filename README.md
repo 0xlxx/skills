@@ -9,6 +9,9 @@
 ### 完整流程
 
 ```
+PM 追问用户 ──→ 确认需求
+    │
+    ↓
 PM ──→ plans/ACTIVE.md (状态: 开发中)
          plans/pX-spec.md
          plans/pX-types.ts
@@ -52,7 +55,7 @@ PM ──→ plans/ACTIVE.md (状态: 开发中)
 
 | Agent | 职责 | 输入 | 输出 | 边界 |
 |-------|------|------|------|------|
-| `fdd-pm` | 需求规约 + API 设计 + 类型定义 | 用户目标、上游源码 | `plans/ACTIVE.md`、规约、类型文件 | 不写实现，不写测试 |
+| `fdd-pm` | 需求规约 + API 设计 + 类型定义 | 用户目标、上游源码（必须追问目标/输入输出/边界/范围/现有代码/非功能需求，确认后才写规约） | `plans/ACTIVE.md`、规约、类型文件 | 不写实现，不写测试，不猜需求 |
 | `fdd-dev` | 实现功能，跑测试修复到全绿 | PM 规约 | `src/pX-*.ts`，更新 ACTIVE | 不写测试，不读上游源码 |
 | `fdd-test` | 编写单元测试，配合 Review 补充 | PM 规约 | `tests/pX.test.ts`，更新 ACTIVE | 不读实现代码 |
 | `fdd-review` | 审查测试覆盖（单测 + 集成） | 规约 + 测试文件 | `plans/pX-test-review.md`，更新 ACTIVE | 不读实现，不改测试 |
@@ -88,6 +91,7 @@ Agent({ subagent_type: "fdd-dev", description: "修复集成", prompt: "运行�
 
 | 状态 | 谁更新 | 下一动作 |
 |------|--------|----------|
+| 需求确认中 | PM（追问用户） | 问清楚后输出规约 |
 | 开发中 | PM | Dev + Test 并行开始 |
 | 待 Review | Test | Review 审查单测 |
 | 单测就绪 | Review | Dev 跑单测 |
