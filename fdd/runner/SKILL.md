@@ -50,25 +50,71 @@ Step 6: fdd-fix-dev → 修复到全绿 → ACTIVE "已完成"
 
 ### 子 agent prompt 必须包含的项目上下文
 
-每个子 agent 的 prompt 尾部都附上以下信息。PM 步骤时 Runner 自己探索，后续步骤从 ACTIVE 和 PM 输出中提取：
+每个子 agent 的 prompt 尾部都附上下文块，但**按角色过滤**——遵守各 agent 的边界：
 
+**PM agent (fdd-pm / fdd-fix-pm)**：
 ```md
 ## 项目上下文
-
-- 规约：[spec 文件路径]
-- 类型定义：[types 文件路径]
 - 活跃任务：plans/ACTIVE.md
-- 源文件（需修改或修改涉及的）：
-  - src/xxx.ts — [一句话说明此文件角色]
-  - src/yyy.ts — [说明]
-- 依赖关系：xxx.ts 依赖 yyy.ts；被 src/app.ts 引用
-- 测试目录：tests/（或项目约定）
+- 项目目录结构：[关键目录简述]
+- 现有类型定义：[路径或概述]
+- 测试目录：tests/
 - 测试框架：[vitest/jest/..]
 - 构建命令：pnpm build
 - 测试命令：pnpm test
 ```
 
-Runner 在 PM 完成后的每个步骤，根据 PM 的输出和 ACTIVE 中的文件路径填充此块。避免子 agent 重复探索 codebase。
+**Dev agent (fdd-dev / fdd-fix-dev)**：
+```md
+## 项目上下文
+- 规约：[spec 文件路径]
+- 类型定义：[types 文件路径]
+- 活跃任务：plans/ACTIVE.md
+- 源文件（需修改或修改涉及的）：
+  - src/xxx.ts — [角色说明]
+- 依赖关系：xxx.ts 依赖 yyy.ts；被 zzz.ts 引用
+- 已有测试文件（只读名称，不读内容）：[列出路径，不透露测试逻辑]
+- 构建命令：pnpm build
+- 测试命令：pnpm test
+- ⚠️ 不读上游参考源码；不改测试文件
+```
+
+**Test agent (fdd-test)**：
+```md
+## 项目上下文
+- 规约：[spec 文件路径]
+- 类型定义：[types 文件路径]
+- 活跃任务：plans/ACTIVE.md
+- 测试目录：tests/
+- 测试框架：[vitest/jest/..]
+- 构建命令：pnpm build（用于验证编译）
+- ⚠️ 不列源文件路径；不读实现代码
+```
+
+**Review agent (fdd-review)**：
+```md
+## 项目上下文
+- 规约：[spec 文件路径]
+- 测试文件：[路径]
+- 活跃任务：plans/ACTIVE.md
+- ⚠️ 不列源文件路径；不读实现代码
+```
+
+**Integration agent (fdd-integration)**：
+```md
+## 项目上下文
+- 规约：[spec 文件路径]
+- 类型定义：[types 文件路径]
+- 活跃任务：plans/ACTIVE.md
+- 源文件：[实现文件路径列表（集成需读实现）]
+- 已有测试文件：[路径]
+- 测试目录：tests/
+- 测试框架：[vitest/jest/..]
+- 构建命令：pnpm build
+- 测试命令：pnpm test
+```
+
+Runner 在 PM 完成后的每个步骤，根据 ACTIVE 和 PM 输出填充对应角色的上下文块。避免子 agent 重复探索 codebase，同时保证边界隔离。
 
 ## 异常处理
 
