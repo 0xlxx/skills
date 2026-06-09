@@ -43,7 +43,9 @@ Report in `plans/pX-test-review.md`:
 ✅ 覆盖充分 / ⚠️ 需要补充 X 条测试
 ```
 
-If missing coverage: tell Test to supplement. If all good: tell the user tests are ready for Dev to run.
+If missing coverage: tell Test to supplement, then **re-review**. Loop until verdict is ✅: Test writes → Review checks → repeat.
+
+Update `plans/ACTIVE.md` with review status after each pass. When verdict is ✅, tell the user tests are ready for Dev to run.
 
 ## Forbidden
 
