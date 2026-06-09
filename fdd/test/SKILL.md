@@ -14,7 +14,9 @@ description: 根据需求规约编写测试，与 fdd-dev 可并行执行。当�
 ```
 PM 出规约
     ├── Dev 实现 ──────────────┐
-    └── Test 写测试（可并行）──┘  → Dev 跑测试 → 修复循环 → 全绿
+    └── Test ↻ Review ────────┘  → Dev 跑测试 → 修复循环 → 全绿
+
+Test 写完 → Review 审查 → 缺覆盖 → Test 补充 → Review 再审 → ✅ → Dev 接手
 ```
 
 ## 文件入口（强制）
@@ -62,9 +64,17 @@ describe('P1: 功能名称', () => {
 - 每个边界情况一个测试
 - 不变量至少一个测试
 
-### 4. 更新任务清单
+### 4. 提交 Review
 
-测试编写完成后，更新 `plans/ACTIVE.md` 中任务状态为"测试就绪"。
+测试初版完成后，更新 `plans/ACTIVE.md` 状态为"待 Review"。告知用户启动 fdd-review agent 审查。
+
+### 5. 补充循环
+
+Review 输出 `plans/pX-test-review.md` 后：
+- 读 review 报告中的 Missing 项
+- 逐条补充测试
+- 补充完成后更新 ACTIVE.md，再次提交 Review
+- 循环直到 Review 判 ✅
 
 ## 不负责运行测试
 
@@ -81,4 +91,4 @@ describe('P1: 功能名称', () => {
 
 ## 交接
 
-告知用户测试已编写完成，已更新 `plans/ACTIVE.md`。Dev 跑 `pnpm build && pnpm test` 验证。
+Review 判决 ✅ 后，更新 `plans/ACTIVE.md` 状态为"测试就绪"。告知用户测试已通过审查，Dev 可以跑 `pnpm build && pnpm test`。
