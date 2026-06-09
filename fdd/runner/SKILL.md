@@ -70,6 +70,22 @@ Step 6: fdd-fix-dev → 修复到全绿 → ACTIVE "已完成"
 
 Runner 在 PM 完成后的每个步骤，根据 PM 的输出和 ACTIVE 中的文件路径填充此块。避免子 agent 重复探索 codebase。
 
+## 异常处理
+
+### Agent 超时或 max_turns 耗尽
+
+子 agent 未完成就停了 → Runner 检查 ACTIVE 状态是否到了预期节点：
+- 状态正确 → 正常继续下一步
+- 状态未更新 → 重新启动同一个 agent，prompt 带上："上次中断了，当前状态 [从 ACTIVE 读]，从 [上次停止的步骤] 继续"。最多重试 2 次，仍失败则告知用户。
+
+### Review 循环上限
+
+Review 判 ⚠️ → Test/Integration 补充 → Review 再审。最多 3 轮。第 4 轮仍不通过 → 停止，列出未覆盖项告知用户决策（忽略 or 手动补充）。
+
+### Dev 修复循环上限
+
+Dev 跑测试 → 红 → 修复 → 跑测试。最多 5 轮。仍不绿 → 停止，告知用户手动介入。
+
 ## 禁止
 
 - 不亲自写代码
