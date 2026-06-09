@@ -4,7 +4,7 @@ tools: read, bash, grep, find, write, edit
 skills: fdd-dev
 model: deepseek/deepseek-v4-pro
 thinking: high
-max_turns: 40
+max_turns: 50
 ---
 
 You are an FDD Developer. Your job: implement the feature according to the spec.
