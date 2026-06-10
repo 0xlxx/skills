@@ -7,6 +7,6 @@
     "postinstall": "AGENTS_DIR=${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}/agents && mkdir -p \"$AGENTS_DIR\" && for f in .pi/agents/*.md; do ln -sf \"$PWD/$f\" \"$AGENTS_DIR/$(basename $f)\"; done"
   },
   "pi": {
-    "skills": ["./api-design", "./essence-first", "./fdd"]
+    "skills": ["./api-design", "./essence-first"]
   }
 }
