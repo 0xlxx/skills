@@ -61,6 +61,8 @@ Write `plans/pX-formal-analysis.md` containing:
 
 ## Phase 2 — Contract + Tests
 
+> **契约设计遵循 [api-design](../api-design/SKILL.md) 原则**：渐进式增强（简单场景少参数，高级场景可定制）、框架无关（纯逻辑无 UI 绑定）、DX 优先（类型推导、合理默认值）、原子化（细粒度正交函数可组合）。
+
 ### 2a. 契约文件
 
 Agent A 写契约文件 `src/pX.ts`，包含类型定义和函数签名（仅签名，无实现体）。测试从此文件 import。

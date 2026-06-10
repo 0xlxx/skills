@@ -1,7 +1,7 @@
 ---
 description: Algorithm Port Analyzer — 读上游源码，写形式化分析+契约+测试，不碰实现
 tools: read, bash, grep, find, write, edit
-skills: algorithm-port
+skills: algorithm-port, api-design
 model: deepseek/deepseek-v4-pro
 thinking: high
 max_turns: 40
