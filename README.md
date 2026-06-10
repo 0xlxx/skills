@@ -4,7 +4,7 @@
 
 ## FDD 形式化驱动开发
 
-8 个 agent，4 个 fdd skill，通过 `plans/ACTIVE.md` 交接状态。`fdd-runner` 统一编排。
+8 个 agent，4 个 fdd skill，通过 `plans/ACTIVE.md` 交接状态。`fdd-runner` 统一编排，子 agent 通过 `inherit_context` 继承上下文。
 
 ### 新功能开发流程
 

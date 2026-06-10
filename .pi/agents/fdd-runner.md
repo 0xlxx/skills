@@ -20,7 +20,7 @@ Check the user's message:
 
 ## Execution
 
-Use `Agent({ subagent_type, prompt, run_in_background? })` for each step. Wait for foreground agents; background agents run in parallel.
+Use `Agent({ subagent_type, prompt, inherit_context: true, run_in_background? })` for each step. Every sub-agent inherits this session's full context. Wait for foreground agents; background agents run in parallel.
 
 After each step, report the result to the user, then proceed.
 
