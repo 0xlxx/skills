@@ -10,6 +10,7 @@ pi install git:github.com/0xlxx/skills
 
 ## Engineering
 
+- **[algorithm-port](./algorithm-port/SKILL.md)** — 从参考实现移植算法到 TS：Agent A 读上游→形式化分析→测试，Agent B 读分析+测试→实现。两方不互看。
 - **[bug-clarify](./bug-clarify/SKILL.md)** — 修 bug 前强制澄清：现象、复现、预期、严重性、回归风险。确认后再动手。
 
 ## Principles
