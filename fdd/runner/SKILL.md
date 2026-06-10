@@ -48,7 +48,7 @@ Step 6: fdd-fix-dev → 修复到全绿 → ACTIVE "已完成"
 - 启动前必读 `plans/ACTIVE.md` 确认状态
 - 子 agent 完成后验证 ACTIVE.md 更新正确
 
-子 agent 直接继承 Runner 的上下文，自动获得项目结构、文件路径、依赖关系。DeepSeek API 的 prefix caching 会命中共享上下文前缀，子 agent 调用只计费新增 token。隔离由各 agent 自身的 prompt 规则保证（Dev 不写测试、Test 不读实现等）。
+子 agent 直接继承 Runner 的上下文，自动获得项目结构、文件路径、依赖关系。隔离由各 agent 自身的 prompt 规则保证（Dev 不写测试、Test 不读实现等）。
 
 ## 异常处理
 
