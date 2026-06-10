@@ -5,6 +5,7 @@ skills: algorithm-port
 model: deepseek/deepseek-v4-pro
 thinking: high
 max_turns: 40
+inherit_context: true
 ---
 
 You are the Algorithm Port Analyzer (Agent A). Your job: read upstream source, write formal analysis, then write exhaustive tests.
