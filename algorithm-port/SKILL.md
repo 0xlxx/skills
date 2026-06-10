@@ -5,6 +5,18 @@ description: 从参考实现（Java/C/Python）移植算法到 TypeScript。先�
 
 # Algorithm Port — 形式化驱动移植
 
+## 命名约定
+
+用 kebab-case slug 统一前缀，三份文件一眼对应：
+
+```
+plans/{slug}-analysis.md    → 形式化分析
+src/{slug}.ts               → 契约 + 实现（Agent A 写签名，Agent B 填体）
+tests/{slug}.test.ts        → 测试
+```
+
+slug 简短描述算法，如 `layer-assignment`、`crossing-reduction`、`sugiyama-layout`。
+
 ## 上下文继承
 
 两个 agent 均通过 `inherit_context: true` 从编排者继承上下文，无需手动传递。
@@ -16,7 +28,7 @@ description: 从参考实现（Java/C/Python）移植算法到 TypeScript。先�
 ```
 Phase 0:  Read upstream source     → Understand intent, not syntax
 Phase 1:  Write formal analysis    → invariants, boundary cases, API contract
-Phase 2:  Write contract + tests   → src/pX.ts (types + signatures) → tests/pX.test.ts
+Phase 2:  Write contract + tests   → src/{slug}.ts (types + signatures) → tests/{slug}.test.ts
 ```
 
 ## Agent B（实现者）
@@ -40,7 +52,7 @@ Phase 4:  build && test            → 失败时只读对应失败 case → 修�
 
 ## Phase 1 — Formal Analysis
 
-Write `plans/pX-formal-analysis.md` containing:
+Write `plans/{slug}-analysis.md` containing:
 
 ### Required sections
 1. **Algorithm description** — what it does, input/output, key insight
@@ -65,10 +77,10 @@ Write `plans/pX-formal-analysis.md` containing:
 
 ### 2a. 契约文件
 
-Agent A 写契约文件 `src/pX.ts`，包含类型定义和函数签名（仅签名，无实现体）。测试从此文件 import。
+Agent A 写契约文件 `src/{slug}.ts`，包含类型定义和函数签名（仅签名，无实现体）。测试从此文件 import。
 
 ```ts
-// src/pX.ts — 契约（Agent A 写，Agent B 填充实现）
+// src/{slug}.ts — 契约（Agent A 写，Agent B 填充实现）
 export type Node = { id: string; ... }
 export type Edge = { source: string; target: string; ... }
 
@@ -83,10 +95,10 @@ export function phaseB(input: IntermediateA): IntermediateB
 ### 2b. 写测试
 
 ```ts
-// tests/pX.test.ts
-import { layout, phaseA, phaseB } from '../src/pX'
+// tests/{slug}.test.ts
+import { layout, phaseA, phaseB } from '../src/{slug}'
 
-describe('Phase N: Algorithm Name', () => {
+describe('{slug}: Algorithm Name', () => {
   it('I1: invariant description (boundary: empty)', () => { ... });
   it('I1: invariant description (boundary: single)', () => { ... });
 });
@@ -113,7 +125,7 @@ describe('Phase N: Algorithm Name', () => {
 
 ## Phase 3 — Implementation
 
-Agent B 只读 `plans/pX-formal-analysis.md` 和 `src/pX.ts`（契约），填充函数体。
+Agent B 只读 `plans/{slug}-analysis.md` 和 `src/{slug}.ts`（契约），填充函数体。
 
 ### Mapping rules
 - 1:1 mapping to upstream source — no simplification, no omission
@@ -133,7 +145,7 @@ pnpm build && pnpm test
 ## Template: formal analysis document
 
 ```md
-# PX Algorithm Name — 形式化分析
+# {slug} — 形式化分析
 
 ## 1. Core algorithm
 [1-2 sentences about what it does and key insight]
