@@ -1,6 +1,6 @@
 ---
 name: visjs-lesson
-description: Guideline for creating interactive D3-based ELK algorithm lessons using vis.js. Use when building or editing lessons in an ELK teaching workspace with /tech, or when user asks to create visual course content with vis.js.
+description: Guideline for creating interactive D3-based algorithm/data-structure/CS lessons using vis.js. Use when building or editing any tutorial that uses HTML + SVG visualizations, or when user asks to create visual course content with vis.js.
 ---
 
 # The key instruction
