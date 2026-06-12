@@ -7,6 +7,8 @@ description: Guideline for creating interactive D3-based algorithm/data-structur
 
 **Do not write raw d3 unless absolutely necessary.**
 
+**Do not pass optional params unless you need to override the default.** Every drawing function has sensible defaults — color, stroke width, size, font. Only pass what you intend to change.
+
 This skill bundles `vis.js` and `theme.css` — read them before writing any lesson code. The API reference is in [REFERENCE.md](REFERENCE.md).
 
 # vis.js lesson authoring

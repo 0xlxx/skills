@@ -176,11 +176,12 @@ V.katexify = (html) => {
   return out;
 };
 
-V.createLayerGuides = (bg, layers, { x1, x2, stroke = 'oklch(0.60 0.03 75 / 0.35)', strokeWidth = 1, dasharray = '4 6' } = {}) => {
+V.createLayerGuides = (bg, layers, { x1 = 68, x2, stroke = 'oklch(0.60 0.03 75 / 0.35)', strokeWidth = 1, dasharray = '4 6' } = {}) => {
+  const xr = x2 ?? 492;
   for (let i = 1; i < layers.length; i++) {
     const y = (layers[i - 1] + layers[i]) / 2;
     bg.append('line').attr('class', 'ly')
-      .attr('x1', x1).attr('x2', x2).attr('y1', y).attr('y2', y)
+      .attr('x1', x1).attr('x2', xr).attr('y1', y).attr('y2', y)
       .attr('stroke', stroke).attr('stroke-width', strokeWidth).attr('stroke-dasharray', dasharray);
   }
 };
