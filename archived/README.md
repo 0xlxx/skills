@@ -4,7 +4,6 @@ No longer used regularly.
 
 - **[algorithm-port](./algorithm-port/SKILL.md)** — 从参考实现移植算法到 TS。
 - **[debug-optimize-lcp](./debug-optimize-lcp/SKILL.md)** — LCP 调试优化。
-- **[essence-first](./essence-first/SKILL.md)** — 本质优先解释法。
 - **[fdd](./fdd/README.md)** — 形式化驱动开发工作流。
 - **[fix](./fix/SKILL.md)** — 前端 bug 修复循环。
 - **[handoff](./handoff/SKILL.md)** — 交接文档。
