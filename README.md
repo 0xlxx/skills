@@ -13,6 +13,11 @@ pi install git:github.com/0xlxx/skills
 - **[algorithm-port](./algorithm-port/SKILL.md)** — 从参考实现移植算法到 TS：Agent A 读上游→形式化分析→测试，Agent B 读分析+测试→实现。两方不互看。
 - **[bug-clarify](./bug-clarify/SKILL.md)** — 修 bug 前强制澄清：现象、复现、预期、严重性、回归风险。确认后再动手。
 
+## Learning
+
+- **[teach](./teach/SKILL.md)** — 交互式教学：MISSION 驱动，生成 lessons + reference + learning-records。
+- **[visjs-lesson](./visjs-lesson/SKILL.md)** — vis.js 课程制作指南：骨架、API、常见模式与陷阱。制作 ELK 交互课时加载。
+
 ## Principles
 
 - **[api-design](./api-design/SKILL.md)** — API 设计原则：渐进式增强、框架无关、DX 优先、原子化。

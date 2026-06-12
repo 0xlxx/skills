@@ -1,0 +1,87 @@
+/* theme.css — clean warm design tokens (OKLCH) */
+
+:root {
+  /* ── Surface ── */
+  --bg:            oklch(0.97 0.005 80);
+  --bg-panel:      oklch(0.94 0.01 75);
+  --bg-card:       oklch(0.96 0.008 78 / 0.85);
+  --bg-node:       oklch(0.92 0.015 75);
+  --bg-layer:      oklch(0.88 0.01 75);
+  --bg-alt:        oklch(0.98 0.003 80);
+
+  /* ── Text ── */
+  --text:          oklch(0.25 0.02 60);
+  --text-muted:    oklch(0.5 0.03 55);
+  --text-body:     oklch(0.38 0.02 60);
+  --text-dim:      oklch(0.55 0.02 65);
+  --text-subtle:   oklch(0.65 0.02 70);
+
+  /* ── Primary: warm amber ── */
+  --blue:          oklch(0.62 0.18 68);
+  --blue-400:      oklch(0.78 0.14 65);
+  --blue-300:      oklch(0.88 0.08 65);
+  --blue-600:      oklch(0.50 0.16 60);
+  --blue-900:      oklch(0.75 0.06 70);  /* lighter fill — readable with dark text */
+
+  /* ── Accent: warm sage ── */
+  --green:         oklch(0.62 0.09 155);
+  --green-400:     oklch(0.78 0.06 150);
+
+  /* ── Warning: golden ── */
+  --yellow:        oklch(0.76 0.17 90);
+
+  /* ── Danger: warm coral ── */
+  --red:           oklch(0.55 0.16 25);
+  --red-400:       oklch(0.72 0.11 22);
+
+  /* ── Pink: warm rose ── */
+  --pink:          oklch(0.62 0.12 10);
+
+  /* ── Borders ── */
+  --border:        oklch(0 0 0 / 0.12);
+  --border-subtle: oklch(0 0 0 / 0.06);
+  --border-dim:    oklch(0 0 0 / 0.04);
+
+  /* ── Effects ── */
+  --shadow:        oklch(0 0 0 / 0.08);
+
+  /* ── Stroke variants (darker, higher contrast for lines) ── */
+  --stroke-blue:   oklch(0.52 0.18 68);
+  --stroke-yellow: oklch(0.62 0.18 85);
+  --stroke-green:  oklch(0.50 0.10 155);
+  --stroke-red:    oklch(0.48 0.18 22);
+
+  /* ── Layout guides (layer lines, grid) ── */
+  --layer-line:    oklch(0.65 0.03 75);
+
+  /* ── Opacity variants (for glows, overlay highlights) ── */
+  --blue-15:  oklch(0.62 0.18 68 / 0.15);
+  --blue-10:  oklch(0.62 0.18 68 / 0.1);
+  --blue-05:  oklch(0.62 0.18 68 / 0.05);
+  --blue-03:  oklch(0.62 0.18 68 / 0.03);
+  --green-15: oklch(0.62 0.09 155 / 0.15);
+  --green-10: oklch(0.62 0.09 155 / 0.1);
+  --green-05: oklch(0.62 0.09 155 / 0.05);
+  --green-03: oklch(0.62 0.09 155 / 0.03);
+  --red-15:   oklch(0.55 0.16 25 / 0.15);
+  --red-10:   oklch(0.55 0.16 25 / 0.1);
+  --red-05:   oklch(0.55 0.16 25 / 0.05);
+  --yellow-15: oklch(0.76 0.17 90 / 0.15);
+  --yellow-10: oklch(0.76 0.17 90 / 0.1);
+
+  /* ── Typography ── */
+  --font:          'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:     'JetBrains Mono', monospace;
+
+  /* font-size scale — gestalt breathing gradient (min 14px) */
+  --fs-sm:  14px;
+  --fs-md:  16px;
+  --fs-lg:  20px;
+  --fs-xl:  26px;
+  --fs-2xl: 34px;
+}
+
+body { font-size: var(--fs-sm); }
+h1 { font-size: var(--fs-2xl); }
+h2 { font-size: var(--fs-md); }
+h3 { font-size: var(--fs-lg); font-weight: 600; }
