@@ -36,6 +36,17 @@ s.math.segment('AB', [x1,y1], [x2,y2]).color('dim').dashed('5 3')
 - 原始线段，不经过偏移
 - 坐标存在 `a`/`b` 字段，渲染器 fallback 链路：`x1/x2 → from/to → a/b → 0`
 
+## polyline
+
+```js
+s.math.polyline('route', [[x1,y1],[x2,y2],[x3,y3],...], { color: 'dim', strokeW: 1.5 })
+```
+
+- 多段折线（开放路径，不闭合），渲染为 SVG `<polyline>`
+- 默认：dim 灰色，strokeW 1.5，`stroke-linejoin: round`
+- 至少 2 个点
+- 链式方法：`.color()` `.strokeW()` `.dashed()` `.opacity()`
+
 ## circle
 
 ```js
