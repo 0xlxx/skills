@@ -14,7 +14,7 @@ This document tracks how learnvis skills are generated and kept in sync with the
 ## Structure
 
 ```
-.pi/skills/learnvis/
+skills/learnvis/               # SSOT — project source
 ├── GENERATION.md              # This file
 ├── README.md                  # agentskills.io metadata
 ├── SKILL.md                   # Main skill file: API tables + quick reference
@@ -75,6 +75,7 @@ git diff HEAD -- vis/
 - [ ] Update `SKILL.md` tables
 - [ ] Update this `GENERATION.md` with date/SHA
 - [ ] Run `pnpm build && pnpm test` to verify nothing broke
+- [ ] Run `pnpm build:skill` to sync to skills repo (`../skills/`)
 
 ## Key Architecture Notes (current)
 
