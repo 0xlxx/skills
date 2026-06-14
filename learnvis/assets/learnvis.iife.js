@@ -168,6 +168,12 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 	function offsetLine(from, to, fromR, toR, _directed = true) {
 		const dx = to[0] - from[0], dy = to[1] - from[1];
 		const l = len(dx, dy);
+		if (l < 1e-9) return {
+			x1: from[0],
+			y1: from[1],
+			x2: to[0],
+			y2: to[1]
+		};
 		const ux = dx / l, uy = dy / l;
 		return {
 			x1: from[0] + ux * fromR,
@@ -4321,11 +4327,11 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 	function createMathRenderer(fm, ctx, palette) {
 		const p = palette;
 		function point(id, pos, opts = {}) {
-			const eid$9 = eid("point", id);
+			const eid$8 = eid("point", id);
 			const { stroke, fill } = resolveColor(p, opts.color);
 			const r = opts.size ?? 4;
 			const label = opts.label ?? "";
-			fm.declare(eid$9, {
+			fm.declare(eid$8, {
 				type: "node",
 				shape: "circle",
 				x: pos[0],
@@ -4341,19 +4347,19 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				pos() {
 					return [pos[0], pos[1]];
 				},
-				...mixColor(eid$9, fm, p),
-				...mixLabelPos(eid$9, fm, {
+				...mixColor(eid$8, fm, p),
+				...mixLabelPos(eid$8, fm, {
 					labelPlace: opts.labelPlace,
 					labelGap: opts.labelGap
 				}),
-				...mixSize(eid$9, fm),
-				...mixFill(eid$9, fm, p),
-				...mixOpacity(eid$9, fm),
-				...mixTranslatePos(eid$9, fm)
+				...mixSize(eid$8, fm),
+				...mixFill(eid$8, fm, p),
+				...mixOpacity(eid$8, fm),
+				...mixTranslatePos(eid$8, fm)
 			};
 		}
 		function vector(id, from, to, opts = {}) {
-			const eid$10 = eid("vector", id);
+			const eid$9 = eid("vector", id);
 			const { stroke } = resolveColor(p, opts.color);
 			const strokeW = opts.strokeW ?? 1.6;
 			const dash = opts.dash ?? "";
@@ -4362,7 +4368,7 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 			const labelPlace = opts.labelPlace ?? "above";
 			const marker = opts.marker ?? null;
 			const a = offsetLine(from, to, 4, 4 + markerHalf(marker ?? void 0), true);
-			fm.declare(eid$10, {
+			fm.declare(eid$9, {
 				type: "line",
 				marker: "arrow",
 				from: [a.x1, a.y1],
@@ -4376,25 +4382,25 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				_markerCfg: marker
 			});
 			return {
-				...mixStroke(eid$10, fm, p),
-				...mixLabelPos(eid$10, fm, {
+				...mixStroke(eid$9, fm, p),
+				...mixLabelPos(eid$9, fm, {
 					labelPlace,
 					labelGap
 				}),
-				...mixStrokeW(eid$10, fm),
-				...mixDashed(eid$10, fm),
-				...mixOpacity(eid$10, fm),
-				...mixTransform(eid$10, fm, "vector")
+				...mixStrokeW(eid$9, fm),
+				...mixDashed(eid$9, fm),
+				...mixOpacity(eid$9, fm),
+				...mixTransform(eid$9, fm, "vector")
 			};
 		}
 		function segment(id, a, b, opts = {}) {
-			const eid$11 = eid("segment", id);
+			const eid$10 = eid("segment", id);
 			const { stroke } = resolveColor(p, opts.color);
 			const strokeW = opts.strokeW ?? 1.5;
 			const dash = opts.dash ?? "";
 			const label = opts.label ?? "";
 			const labelGap = opts.labelGap ?? 10;
-			fm.declare(eid$11, {
+			fm.declare(eid$10, {
 				type: "line",
 				a,
 				b,
@@ -4405,20 +4411,20 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				labelGap
 			});
 			return {
-				...mixStroke(eid$11, fm, p),
-				...mixStrokeW(eid$11, fm),
-				...mixDashed(eid$11, fm),
-				...mixLabel(eid$11, fm),
-				...mixOpacity(eid$11, fm)
+				...mixStroke(eid$10, fm, p),
+				...mixStrokeW(eid$10, fm),
+				...mixDashed(eid$10, fm),
+				...mixLabel(eid$10, fm),
+				...mixOpacity(eid$10, fm)
 			};
 		}
 		function polyline(id, pts, opts = {}) {
-			const eid$12 = eid("segment", id);
+			const eid$11 = eid("segment", id);
 			const { stroke } = resolveColor(p, opts.color);
 			const strokeW = opts.strokeW ?? 1.5;
 			const dash = opts.dash ?? "";
 			const opacity = opts.opacity ?? 1;
-			fm.declare(eid$12, {
+			fm.declare(eid$11, {
 				type: "line",
 				points: pts,
 				stroke,
@@ -4427,20 +4433,20 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				opacity
 			});
 			return {
-				...mixStroke(eid$12, fm, p),
-				...mixStrokeW(eid$12, fm),
-				...mixDashed(eid$12, fm),
-				...mixOpacity(eid$12, fm)
+				...mixStroke(eid$11, fm, p),
+				...mixStrokeW(eid$11, fm),
+				...mixDashed(eid$11, fm),
+				...mixOpacity(eid$11, fm)
 			};
 		}
 		function circle(id, center, radius, opts = {}) {
-			const eid$13 = eid("circle", id);
+			const eid$12 = eid("circle", id);
 			const { stroke, fill } = resolveColor(p, opts.color);
 			const strokeW = opts.strokeW ?? 1.2;
 			const dash = opts.dash ?? "";
 			const opacity = opts.opacity ?? 1;
 			const finalFill = opts.fill ?? p.accent.a(8);
-			fm.declare(eid$13, {
+			fm.declare(eid$12, {
 				type: "region",
 				shape: "circle",
 				cx: center[0],
@@ -4453,21 +4459,21 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				opacity
 			});
 			return {
-				...mixColor(eid$13, fm, p),
-				...mixStrokeW(eid$13, fm),
-				...mixFill(eid$13, fm, p),
-				...mixDashed(eid$13, fm),
-				...mixOpacity(eid$13, fm),
-				...mixTranslatePos(eid$13, fm)
+				...mixColor(eid$12, fm, p),
+				...mixStrokeW(eid$12, fm),
+				...mixFill(eid$12, fm, p),
+				...mixDashed(eid$12, fm),
+				...mixOpacity(eid$12, fm),
+				...mixTranslatePos(eid$12, fm)
 			};
 		}
 		function polygon(id, vertices, opts = {}) {
-			const eid$14 = eid("polygon", id);
+			const eid$13 = eid("polygon", id);
 			const r = resolveColor(p, opts.color);
 			const strokeW = opts.strokeW ?? 1.5;
 			const opacity = opts.opacity ?? 1;
 			const finalFill = opts.fill ?? r.fill;
-			fm.declare(eid$14, {
+			fm.declare(eid$13, {
 				type: "region",
 				shape: "polygon",
 				vertices,
@@ -4477,16 +4483,16 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				opacity
 			});
 			return {
-				...mixColor(eid$14, fm, p),
-				...mixStrokeW(eid$14, fm),
-				...mixFill(eid$14, fm, p),
-				...mixDashed(eid$14, fm),
-				...mixOpacity(eid$14, fm),
-				...mixTransform(eid$14, fm, "polygon")
+				...mixColor(eid$13, fm, p),
+				...mixStrokeW(eid$13, fm),
+				...mixFill(eid$13, fm, p),
+				...mixDashed(eid$13, fm),
+				...mixOpacity(eid$13, fm),
+				...mixTransform(eid$13, fm, "polygon")
 			};
 		}
 		function rightAngle(id, vertex, ray1, ray2, opts = {}) {
-			const eid$15 = eid("angle", id);
+			const eid$14 = eid("angle", id);
 			const { stroke } = resolveColor(p, opts.color ?? "dim");
 			const sz = opts.size ?? 8;
 			const [vx, vy] = vertex;
@@ -4499,7 +4505,7 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				[vx + (u1x + u2x) * sz, vy + (u1y + u2y) * sz],
 				[vx + u2x * sz, vy + u2y * sz]
 			].map((p) => p.join(",")).join(" ");
-			fm.declare(eid$15, {
+			fm.declare(eid$14, {
 				type: "region",
 				shape: "polygon",
 				d: `M${ptsStr}`,
@@ -4510,19 +4516,19 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				strokeW: 1.5
 			});
 			return {
-				...mixStroke(eid$15, fm, p),
-				...mixStrokeW(eid$15, fm),
-				...mixSize(eid$15, fm),
-				...mixOpacity(eid$15, fm)
+				...mixStroke(eid$14, fm, p),
+				...mixStrokeW(eid$14, fm),
+				...mixSize(eid$14, fm),
+				...mixOpacity(eid$14, fm)
 			};
 		}
 		function angle(id, vertex, ray1, ray2, opts = {}) {
-			const eid$16 = eid("angle", id);
+			const eid$15 = eid("angle", id);
 			const { stroke, fill } = resolveColor(p, opts.color);
 			const label = opts.label ?? "";
 			const arcR = opts.size ?? 30;
 			const finalFill = opts.fill ?? p.warning.a(15);
-			fm.declare(eid$16, {
+			fm.declare(eid$15, {
 				type: "group",
 				subtype: "angle",
 				vertex,
@@ -4534,16 +4540,16 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				arcR
 			});
 			return {
-				...mixColor(eid$16, fm, p),
-				...mixStrokeW(eid$16, fm),
-				...mixFill(eid$16, fm, p),
-				...mixDashed(eid$16, fm),
-				...mixOpacity(eid$16, fm),
-				...mixLabel(eid$16, fm)
+				...mixColor(eid$15, fm, p),
+				...mixStrokeW(eid$15, fm),
+				...mixFill(eid$15, fm, p),
+				...mixDashed(eid$15, fm),
+				...mixOpacity(eid$15, fm),
+				...mixLabel(eid$15, fm)
 			};
 		}
 		function fn(id, f, opts = {}) {
-			const eid$17 = eid("fn", id);
+			const eid$16 = eid("fn", id);
 			const { stroke } = resolveColor(p, opts.color);
 			const strokeW = opts.strokeW ?? 1.5;
 			const dash = opts.dash ?? "";
@@ -4555,7 +4561,7 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 			const oy = opts.y ?? 300;
 			const pw = opts.width ?? 780;
 			const ph = opts.height ?? 460;
-			fm.declare(eid$17, {
+			fm.declare(eid$16, {
 				type: "curve",
 				f: f.toString(),
 				domain,
@@ -4572,17 +4578,17 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				label
 			});
 			return {
-				...mixStroke(eid$17, fm, p),
-				...mixStrokeW(eid$17, fm),
-				...mixDashed(eid$17, fm),
-				...mixOpacity(eid$17, fm),
-				...mixLabel(eid$17, fm)
+				...mixStroke(eid$16, fm, p),
+				...mixStrokeW(eid$16, fm),
+				...mixDashed(eid$16, fm),
+				...mixOpacity(eid$16, fm),
+				...mixLabel(eid$16, fm)
 			};
 		}
 		function grid(id, origin, opts = {}) {
-			const eid$18 = eid("grid", id);
+			const eid$17 = eid("grid", id);
 			const { stroke } = resolveColor(p, opts.color);
-			fm.declare(eid$18, {
+			fm.declare(eid$17, {
 				type: "group",
 				subtype: "grid",
 				ox: origin[0],
@@ -4595,9 +4601,9 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 			});
 		}
 		function axes(id, origin, opts = {}) {
-			const eid$19 = eid("axes", id);
+			const eid$18 = eid("axes", id);
 			const { stroke } = resolveColor(p, opts.color);
-			fm.declare(eid$19, {
+			fm.declare(eid$18, {
 				type: "group",
 				subtype: "axes",
 				ox: origin[0],
@@ -4636,7 +4642,7 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 			return polygon(id, verts);
 		}
 		function symbol(id, pos, opts = {}) {
-			const eid$20 = eid("path", id);
+			const eid$19 = eid("path", id);
 			const t = {
 				circle: circle_default,
 				cross: cross_default,
@@ -4650,7 +4656,7 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 			const d = sy ? `${sy}` : "";
 			const r = resolveColor(p, opts.color);
 			const rf = opts.fill ? resolveColor(p, opts.fill).fill : r.fill;
-			fm.declare(eid$20, {
+			fm.declare(eid$19, {
 				type: "region",
 				shape: "polygon",
 				d,
@@ -4661,17 +4667,17 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				strokeW: 1.2
 			});
 			return {
-				...mixStroke(eid$20, fm, p),
-				...mixStrokeW(eid$20, fm),
-				...mixDashed(eid$20, fm),
-				...mixSize(eid$20, fm),
-				...mixFill(eid$20, fm, p),
-				...mixOpacity(eid$20, fm),
-				...mixTranslatePos(eid$20, fm)
+				...mixStroke(eid$19, fm, p),
+				...mixStrokeW(eid$19, fm),
+				...mixDashed(eid$19, fm),
+				...mixSize(eid$19, fm),
+				...mixFill(eid$19, fm, p),
+				...mixOpacity(eid$19, fm),
+				...mixTranslatePos(eid$19, fm)
 			};
 		}
 		function arc(id, center, opts) {
-			const eid$21 = eid("path", id);
+			const eid$20 = eid("path", id);
 			const a = arc_default()({
 				innerRadius: opts.innerR ?? 0,
 				outerRadius: opts.outerR,
@@ -4680,7 +4686,7 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 			}) || "";
 			const r = resolveColor(p, opts.color);
 			const rf = opts.fill ? resolveColor(p, opts.fill).fill : r.fill;
-			fm.declare(eid$21, {
+			fm.declare(eid$20, {
 				type: "region",
 				shape: "polygon",
 				d: `${a}`,
@@ -4691,13 +4697,13 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				strokeW: opts.strokeW ?? 1.2
 			});
 			return {
-				...mixStroke(eid$21, fm, p),
-				...mixStrokeW(eid$21, fm),
-				...mixDashed(eid$21, fm),
-				...mixSize(eid$21, fm),
-				...mixFill(eid$21, fm, p),
-				...mixOpacity(eid$21, fm),
-				...mixTranslatePos(eid$21, fm)
+				...mixStroke(eid$20, fm, p),
+				...mixStrokeW(eid$20, fm),
+				...mixDashed(eid$20, fm),
+				...mixSize(eid$20, fm),
+				...mixFill(eid$20, fm, p),
+				...mixOpacity(eid$20, fm),
+				...mixTranslatePos(eid$20, fm)
 			};
 		}
 		function projection(id, pt, lf, lt, opts = {}) {
@@ -4739,9 +4745,9 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 			};
 		}
 		function fill(id, pts, opts = {}) {
-			const eid$22 = eid("fill", id);
+			const eid$21 = eid("fill", id);
 			const r = resolveColor(p, opts.color);
-			fm.declare(eid$22, {
+			fm.declare(eid$21, {
 				type: "region",
 				shape: "fill",
 				pts,
@@ -4749,12 +4755,12 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				opacity: opts.opacity
 			});
 			return {
-				...mixFill(eid$22, fm, p),
-				...mixOpacity(eid$22, fm)
+				...mixFill(eid$21, fm, p),
+				...mixOpacity(eid$21, fm)
 			};
 		}
 		function fillFn(id, f, opts = {}) {
-			const eid$23 = eid("fill", id);
+			const eid$22 = eid("fill", id);
 			const domain = opts.domain ?? [0, 10];
 			const samples = opts.samples ?? 200;
 			const ox = opts.x ?? 0, oy = opts.y ?? 300;
@@ -4781,7 +4787,7 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 			pts.push([sx(d0), sy(baseline)]);
 			for (let i = 0; i < samples; i++) pts.push([sx(d0 + i * step), sy(f(d0 + i * step))]);
 			pts.push([sx(d1), sy(baseline)]);
-			fm.declare(eid$23, {
+			fm.declare(eid$22, {
 				type: "region",
 				shape: "fill",
 				pts,
@@ -4789,8 +4795,8 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				opacity: opts.opacity ?? .45
 			});
 			return {
-				...mixFill(eid$23, fm, p),
-				...mixOpacity(eid$23, fm)
+				...mixFill(eid$22, fm, p),
+				...mixOpacity(eid$22, fm)
 			};
 		}
 		function coords(id, origin, opts = {}) {
@@ -4892,11 +4898,11 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 		}
 		const _vertices = /* @__PURE__ */ new Map();
 		function vertex(id, pos) {
-			const eid$7 = eid("vertex", id);
+			const eid$6 = eid("vertex", id);
 			const r = 10;
 			const stroke = p.primary.fg;
 			const fill = p.primary.a(15);
-			fm.declare(eid$7, {
+			fm.declare(eid$6, {
 				type: "node",
 				x: pos[0],
 				y: pos[1],
@@ -4919,24 +4925,24 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 					const resolved = resolveColor(c);
 					this._stroke = resolved.stroke;
 					this._fill = resolved.fill;
-					fm.patch(eid$7, {
+					fm.patch(eid$6, {
 						stroke: this._stroke,
 						fill: this._fill
 					});
 					return this;
 				},
 				label(t) {
-					fm.patch(eid$7, { label: t });
+					fm.patch(eid$6, { label: t });
 					return this;
 				},
 				size(r) {
 					this._r = r;
-					fm.patch(eid$7, { r });
+					fm.patch(eid$6, { r });
 					return this;
 				},
 				fill(c) {
 					this._fill = c;
-					fm.patch(eid$7, { fill: c });
+					fm.patch(eid$6, { fill: c });
 					return this;
 				}
 			};
@@ -4944,14 +4950,14 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 			return v;
 		}
 		function edge(a, b, opts) {
-			const eid$8 = eid("edge", a.id + ":" + b.id);
+			const eid$7 = eid("edge", a.id + ":" + b.id);
 			const stroke = p.dim.fg;
 			const strokeW = 1.8;
 			const directed = opts?.directed !== false;
 			const gap = opts?.gap ?? 4;
 			const marker = opts?.marker;
 			const { x1, y1, x2, y2 } = offsetLine([a.x, a.y], [b.x, b.y], a._r + gap, b._r + markerHalf(marker), directed);
-			fm.declare(eid$8, {
+			fm.declare(eid$7, {
 				type: "line",
 				from: a.id,
 				to: b.id,
@@ -4968,15 +4974,15 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 			return {
 				color(c) {
 					const resolved = resolveColor(c);
-					fm.patch(eid$8, { stroke: resolved.stroke });
+					fm.patch(eid$7, { stroke: resolved.stroke });
 					return this;
 				},
 				strokeW(n) {
-					fm.patch(eid$8, { strokeW: n });
+					fm.patch(eid$7, { strokeW: n });
 					return this;
 				},
 				dashed(d = "5 4") {
-					fm.patch(eid$8, { dash: d });
+					fm.patch(eid$7, { dash: d });
 					return this;
 				},
 				label(t) {
@@ -5301,46 +5307,12 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				...mixStrokeW(eid$5, fm)
 			};
 		}
-		function enclosure(id, x, y, w, h, opts = {}) {
-			const eid$6 = eid("polygon", id);
-			const r = resolveColor(p, opts.color ?? "dim");
-			const rx = opts.rx ?? 8;
-			const pts = [
-				[x, y],
-				[x + w, y],
-				[x + w, y + h],
-				[x, y + h]
-			];
-			fm.declare(eid$6, {
-				type: "region",
-				shape: "polygon",
-				vertices: pts,
-				stroke: r.stroke,
-				fill: r.fill + " / 0.05",
-				strokeW: opts.strokeW ?? 1.5,
-				dash: opts.dash ?? "6 3",
-				opacity: opts.opacity ?? 1,
-				_rx: rx,
-				label: opts.label ?? ""
-			});
-			return {
-				color(c) {
-					patch(eid$6, fm, { stroke: resolveColor(p, c).stroke });
-					return this;
-				},
-				...mixDashed(eid$6, fm),
-				...mixStrokeW(eid$6, fm),
-				...mixOpacity(eid$6, fm),
-				...mixLabel(eid$6, fm)
-			};
-		}
 		return {
 			node,
 			block,
 			port,
 			edge,
-			layer,
-			enclosure
+			layer
 		};
 	}
 
@@ -5837,11 +5809,16 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				const dx = x2 - x1, dy = y2 - y1;
 				const ang = Math.atan2(dy, dx);
 				const rev = ang > 0 ? ang - Math.PI : ang + Math.PI;
-				const from = ld._fromPort ?? "", to = ld._toPort ?? "";
-				if (!edgeAngles.has(from)) edgeAngles.set(from, []);
-				if (!edgeAngles.has(to)) edgeAngles.set(to, []);
-				edgeAngles.get(from).push(ang);
-				edgeAngles.get(to).push(rev);
+				const fromNode = (ld._fromPort ?? "").split("-")[0] || ld.from?.id;
+				const toNode = (ld._toPort ?? "").split("-")[0] || ld.to?.id;
+				if (fromNode) {
+					if (!edgeAngles.has(fromNode)) edgeAngles.set(fromNode, []);
+					edgeAngles.get(fromNode).push(ang);
+				}
+				if (toNode) {
+					if (!edgeAngles.has(toNode)) edgeAngles.set(toNode, []);
+					edgeAngles.get(toNode).push(rev);
+				}
 			}
 			const dirs = [
 				{
@@ -5887,7 +5864,8 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 				const nd = h.state;
 				const label = nd.label || "";
 				if (!label) continue;
-				const angles = edgeAngles.get(label) ?? [];
+				const nodeKey = id.includes(":") ? id.split(":")[1] : label;
+				const angles = edgeAngles.get(nodeKey) ?? edgeAngles.get(label) ?? [];
 				let place = dirs[0];
 				for (const dir of dirs) if (angles.every((a) => angleDiff(a, dir.angle) >= Math.PI / 4)) {
 					place = dir;
