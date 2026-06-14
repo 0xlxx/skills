@@ -9,8 +9,14 @@ description: 高阶 SVG 可视化 — 开箱即用的绘制原语，用于交互
 
 ## Quick Start
 
+skill 自带 IIFE 文件。生成 HTML 时复制到输出目录：
+
+```bash
+cp ~/.claude/skills/learnvis/assets/learnvis.iife.js ./lessons/
+```
+
 ```html
-<script src="https://cdn.jsdelivr.net/gh/0xlxx/skills@main/learnvis/assets/learnvis.iife.js"></script>
+<script src="./learnvis.iife.js"></script>
 <script>
 const s = LearnVis.stage('#stage', { width: 780, height: 460 });
 s.frames.begin();
@@ -18,6 +24,8 @@ s.math.point('O', [390, 230]).color('danger').label('O');
 s.frames.commit();
 </script>
 ```
+
+> 详见 [references/guide-standalone.md](references/guide-standalone.md)
 
 ## Math
 
