@@ -1,11 +1,11 @@
 ---
 name: learnvis
-description: D3+SVG visualization — math, graph, layout primitives for algorithm lessons
+description: 高阶 SVG 可视化 — 开箱即用的绘制原语，用于交互式教学（数学、数据结构、算法、图形学等）
 ---
 
 # learnvis
 
-D3+SVG 可视化库，用于算法教学。80% 场景只传 id + 坐标。
+高阶 SVG 可视化库。点、线、节点、端口、边——开箱即用，80% 场景只传 id + 坐标。用于数学公式、数据结构、算法流程、图形学等交互式教学。
 
 ## Quick Start
 
