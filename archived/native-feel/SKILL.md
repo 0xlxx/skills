@@ -1,6 +1,7 @@
 ---
 name: native-feel-cross-platform-desktop
 description: Use when the user is designing, prototyping, or rewriting a desktop app that must run on multiple OSes (macOS + Windows, optionally Linux) AND feel indistinguishable from a native app to its users — fast launch, native windowing, native input handling, native materials. Trigger words include "cross-platform desktop", "Electron alternative", "Tauri vs native", "WebView wrapper", "near-native performance", "Raycast architecture", "WebKit/WebView2 quirks", "WKWebView", "system tray app", "global hotkey app", "launcher app". Do NOT trigger this skill for pure web apps, pure mobile apps, or for greenfield projects that have no native-feel requirement.
+metadata.internal: true
 ---
 
 # Native-Feel Cross-Platform Desktop

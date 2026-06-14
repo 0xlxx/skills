@@ -1,6 +1,7 @@
 ---
 name: zhihu-answer
 description: Draft Zhihu answers in the user's voice from a real Zhihu question URL or pasted question. Use when the user asks to answer a Zhihu question, says "试一下这题", "帮我回答这个问题", "用我的语气和风格回答", or otherwise wants a Markdown Zhihu answer grounded in the local Knowledge corpus, prior high-upvote Zhihu answers, qmd search, and Wiki concepts.
+metadata.internal: true
 ---
 
 # Zhihu Answer

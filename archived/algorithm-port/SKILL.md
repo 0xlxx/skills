@@ -1,6 +1,7 @@
 ---
 name: algorithm-port
 description: 从参考实现（Java/C/Python）移植算法到 TypeScript。先读上游源码写形式化分析+不变量+边界情况，再输出契约+测试，最后用地道 TS 实现。适用于算法移植、布局算法、数学/CS 正确性关键场景。
+metadata.internal: true
 ---
 
 # Algorithm Port — 形式化驱动移植

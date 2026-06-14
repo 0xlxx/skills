@@ -1,6 +1,7 @@
 ---
 name: readme-direct
 description: Write and review README files that get straight to the point — installation commands first, clear problem/solution, no fluff. Use when writing, reviewing, or improving README files.
+metadata.internal: true
 ---
 
 # readme-direct

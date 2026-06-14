@@ -1,9 +1,11 @@
 # Skills
 
+[![skills.sh](https://skills.sh/b/0xlxx/skills)](https://skills.sh/0xlxx/skills)
+
 Agent skills I use every day.
 
 ```bash
-pi install git:github.com/0xlxx/skills
+npx skills add 0xlxx/skills -g
 ```
 
 - **[api-design](./api-design/SKILL.md)** — API 设计原则：渐进式增强、框架无关、DX 优先、原子化。

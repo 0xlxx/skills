@@ -1,6 +1,7 @@
 ---
 name: fix
 description: Reproduce, diagnose, fix, and verify a frontend bug through an agent-driven feedback loop. Use when user describes a browser bug and wants a fix confirmed by automated regression testing plus manual approval. Triggers on "fix this bug", "reproduce then fix", "debug stream render", or similar fix-verify workflows.
+metadata.internal: true
 ---
 
 # Fix Workflow

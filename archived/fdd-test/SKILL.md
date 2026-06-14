@@ -1,6 +1,7 @@
 ---
 name: fdd-test
 description: 根据需求规约编写测试，与 fdd-dev 可并行执行。当用户说"给这个功能写测试"、PM完成规约后需要编写测试验证时使用。
+metadata.internal: true
 ---
 
 # FDD Test — 测试验证

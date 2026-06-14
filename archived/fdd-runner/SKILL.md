@@ -1,6 +1,7 @@
 ---
 name: fdd-runner
 description: FDD 工作流编排。根据用户意图（新功能/Bug）按流程串行调度子 agent，跟踪 ACTIVE.md 状态机。当用户说"用FDD"、"跑流程"、"按流程"时使用。
+metadata.internal: true
 ---
 
 # FDD Runner — 工作流编排

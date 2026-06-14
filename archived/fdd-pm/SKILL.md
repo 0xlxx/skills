@@ -1,6 +1,7 @@
 ---
 name: fdd-pm
 description: 定义开发需求、范围与验收标准，以 API 签名+类型为核心输出规约文档，遵循 api-design 原则。不写代码不写测试。当用户说"定义这个功能的需求"、"做形式化分析"、"写规约"或任何需要先厘清要做什么再动手的场景时使用。
+metadata.internal: true
 ---
 
 # FDD PM — 需求与规约

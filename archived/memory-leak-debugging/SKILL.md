@@ -1,6 +1,7 @@
 ---
 name: memory-leak-debugging
 description: Diagnoses and resolves memory leaks in JavaScript/Node.js applications. Use when a user reports high memory usage, OOM errors, or wants to analyze heapsnapshots or run memory leak detection tools like memlab.
+metadata.internal: true
 ---
 
 # Memory Leak Debugging

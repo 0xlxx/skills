@@ -1,6 +1,7 @@
 ---
 name: take
 description: Pick up a handoff document from a previous session and continue where it left off. Use when the user says "take", "/take", "pick up where we left off", "continue last session", "resume handoff", or wants to resume work from a prior agent session.
+metadata.internal: true
 argument-hint: "--list | --all | [name]"
 ---
 

@@ -1,6 +1,7 @@
 ---
 name: fdd-dev
 description: 根据需求规约实现功能，不接触测试代码。与 fdd-test 可并行执行。当用户说"实现这个功能"或PM完成规约后需要编码时使用。实现完成后运行测试并循环修复。
+metadata.internal: true
 ---
 
 # FDD Dev — 功能实现
