@@ -1,0 +1,27 @@
+{
+  "skill_name": "direct-readme",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我给新项目 `auto-clicker` 写个 README。它是一个用来自动点击鼠标的 Python 命令行工具。它使用了创新的多线程架构，非常快，跑分比竞品快 20%！安装的话用 `pip install auto-clicker`。",
+      "expected_output": "README.md 文件，其中安装指令紧跟标题，且头部没有关于跑分或复杂多线程架构的冗余内容，并带有嵌套方块 ▣ 几何图标。",
+      "files": [],
+      "expectations": [
+        "第一段没有大段架构说明或 20% 性能提升的废话",
+        "安装命令 pip install auto-clicker 位于顶部主标题下方",
+        "标题包含了几何美感的嵌套方块 ▣ 图标，例如 ▣ Installation 和 ▣ Quick Start"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "我要发布一个 Node.js 小众库 `json-to-csv-fast`。作用就是把 json 转换成 csv 文件，适合想快速转换文件的用户。安装命令是 `npm install -g json-to-csv-fast`，使用方法是终端里输入 `json2csv input.json`。帮我写个 README。",
+      "expected_output": "极简 README.md 文件，没有废话自我推销，直接给出安装和使用方法，并使用 ▣ 几何图标。",
+      "files": [],
+      "expectations": [
+        "第一段是简要的痛点描述",
+        "紧接着提供 npm install -g json-to-csv-fast 安装命令",
+        "标题包含了几何美感的嵌套方块 ▣ 图标"
+      ]
+    }
+  ]
+}
