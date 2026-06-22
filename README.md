@@ -10,9 +10,8 @@ npx skills add 0xlxx/skills -g
 
 - **[api-design](./api-design/SKILL.md)** — API 设计原则：渐进式增强、框架无关、DX 优先、原子化。
 - **[bug-clarify](./bug-clarify/SKILL.md)** — 修 bug 前强制澄清：现象、复现、预期、严重性、回归风险。
+- **[direct-readme](./direct-readme/SKILL.md)** — 编写 GitHub 项目 README，简单、直接、开箱即用。
 - **[essence-first](./essence-first/SKILL.md)** — 本质优先解释法：先给上下文和本质，不堆砌细节。
-- **[visjs-lesson](./visjs-lesson/SKILL.md)** — vis.js 课程制作指南。
-- **[learnvis](./learnvis/SKILL.md)** — D3+SVG 可视化库：数学/图论/布局原语，含 IIFE 构建产物。
-- **[teach](./teach/SKILL.md)** — 教学技能：生成交互式 HTML 课程，基于 learnvis 做可视化。
+- **[manifest](./manifest/SKILL.md)** — 生成并维护 skills/GENERATION.md 溯源清单。
 
 [Archived →](./archived/)
