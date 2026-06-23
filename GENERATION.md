@@ -27,6 +27,8 @@ skills/
 ├── api-design/                 # Active
 │   ├── SKILL.md                # Main skill file
 │   └── ANTIPATTERNS.md         # API design anti-patterns reference
+├── ast-grep/                   # Active
+│   └── SKILL.md                # Main skill file
 ├── bug-clarify/                # Active
 │   └── SKILL.md                # Main skill file
 ├── direct-readme/              # Active
@@ -67,11 +69,12 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (8)
+## Active Skills (9)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
 | `api-design` | API 设计指南——渐进式增强、框架无关、DX 优先、原子化。设计 API、评审接口、重构签名时使用。 | SKILL.md, ANTIPATTERNS.md |
+| `ast-grep` | 使用 ast-grep outline 在读取文件前先了解其结构——声明、导入、导出、成员。探索代码库、定位符号、理解文件形态时使用。大仓库收益最大。 | SKILL.md |
 | `bug-clarify` | 修复 bug 前强制澄清——追问现象、复现步骤、预期、严重性、回归风险，确认后才动手。 | SKILL.md |
 | `direct-readme` | 编写或生成 GitHub 项目 README 文件，强调简单、直接、开箱即用。 | SKILL.md, evals/evals.json |
 | `essence-first` | 本质先行——解释概念时先给上下文和一句话本质，再递进到细节。 | SKILL.md |
@@ -173,6 +176,7 @@ git log --oneline 08de9cd..HEAD -- '*/SKILL.md'
 | 2026-06-22 | 15ac974  | Add tourist and visual-teaching — 7 active skills |
 | 2026-06-23 | 14961d0  | Add unit-test — 8 active skills |
 | 2026-06-23 | 08de9cd  | Fix manifest step 0 workspace check branching |
+| 2026-06-23 | —        | Add ast-grep — 9 active skills |
 
 ---
 
