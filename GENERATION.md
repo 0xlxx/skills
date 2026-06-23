@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `14961d0cdb237c87a642be08bbf8847b12ab7233`
+- **Commit SHA**: `08de9cda7b119d08b52af92f7af7f5118b98e6c3`
 - **Date**: 2026-06-23
-- **Commit**: feat: add unit-test skill — FIRST, AAA, Right-BICEP
+- **Commit**: fix(manifest): add step 0 workspace check with dirty/clean branching
 
 **Source documentation:**
 
@@ -122,13 +122,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 14961d0..HEAD -- '*/SKILL.md'
+git diff --name-only 08de9cd..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 14961d0..HEAD -- '*/SKILL.md'
+git diff 08de9cd..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 14961d0..HEAD -- '*/SKILL.md'
+git log --oneline 08de9cd..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -172,8 +172,9 @@ git log --oneline 14961d0..HEAD -- '*/SKILL.md'
 | 2026-06-22 | 636c543  | Initial GENERATION.md — 5 active skills, 14 archived, 2 eval workspaces |
 | 2026-06-22 | 15ac974  | Add tourist and visual-teaching — 7 active skills |
 | 2026-06-23 | 14961d0  | Add unit-test — 8 active skills |
+| 2026-06-23 | 08de9cd  | Fix manifest step 0 workspace check branching |
 
 ---
 
 Last updated: 2026-06-23
-Current SHA: 14961d0
+Current SHA: 08de9cd
