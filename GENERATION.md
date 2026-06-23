@@ -6,16 +6,16 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `15ac974fe8eb090d2bb88bf2ca101feaf4b0f82d`
-- **Date**: 2026-06-22
-- **Commit**: chore: add manifest skill, GENERATION.md, update README
+- **Commit SHA**: `14961d0cdb237c87a642be08bbf8847b12ab7233`
+- **Date**: 2026-06-23
+- **Commit**: feat: add unit-test skill — FIRST, AAA, Right-BICEP
 
 **Source documentation:**
 
 - Project README: `/README.md`
 - Skills are self-contained — each skill's `SKILL.md` is the authoritative source, not generated from external docs.
 
-**Generation date**: 2026-06-22
+**Generation date**: 2026-06-23
 
 ## Structure
 
@@ -38,6 +38,8 @@ skills/
 ├── manifest/                   # Active
 │   └── SKILL.md                # Main skill file
 ├── tourist/                    # Active
+│   └── SKILL.md                # Main skill file
+├── unit-test/                  # Active
 │   └── SKILL.md                # Main skill file
 ├── visual-teaching/            # Active
 │   └── SKILL.md                # Main skill file
@@ -65,7 +67,7 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (7)
+## Active Skills (8)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
@@ -75,6 +77,7 @@ skills/
 | `essence-first` | 本质先行——解释概念时先给上下文和一句话本质，再递进到细节。 | SKILL.md |
 | `manifest` | 生成并维护 skills/GENERATION.md 溯源清单，追踪每个 skill 的来源、结构与更新流程。 | SKILL.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
+| `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
 | `visual-teaching` | 创建可视化教学材料——课程、图解、参考资料。HTML 优先，本质先行，逐层拆解。 | SKILL.md |
 
 ## Archived Skills (14)
@@ -119,13 +122,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 15ac974..HEAD -- '*/SKILL.md'
+git diff --name-only 14961d0..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 15ac974..HEAD -- '*/SKILL.md'
+git diff 14961d0..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 15ac974..HEAD -- '*/SKILL.md'
+git log --oneline 14961d0..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -168,8 +171,9 @@ git log --oneline 15ac974..HEAD -- '*/SKILL.md'
 |------------|----------|---------|
 | 2026-06-22 | 636c543  | Initial GENERATION.md — 5 active skills, 14 archived, 2 eval workspaces |
 | 2026-06-22 | 15ac974  | Add tourist and visual-teaching — 7 active skills |
+| 2026-06-23 | 14961d0  | Add unit-test — 8 active skills |
 
 ---
 
-Last updated: 2026-06-22
-Current SHA: 15ac974
+Last updated: 2026-06-23
+Current SHA: 14961d0
