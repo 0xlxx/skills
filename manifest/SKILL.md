@@ -10,13 +10,14 @@ GENERATION.md 是一份**溯源清单**——记录每个 skill 从哪个 commit
 </core-principle>
 
 <steps>
-0. 检查工作区——`git status --porcelain -- skills/`
-   完成标志：确认哪些 skill 已提交、哪些未提交
+0. 检查工作区——`git status --porcelain`
+   完成标志：确认哪些文件已提交、哪些未提交
    分支：
    **clean**（无未提交变更）→ 继续 step 1
-   **dirty**（有未提交的 skill 变更）→ 列出变更文件，问用户："这些还没提交——先 commit 再更新 GENERATION.md？"
-     → 用户说"是"：`git add` + `git commit`，用新 commit SHA 继续
-     → 用户说"否"：用当前 HEAD SHA 继续，但明确告知用户：GENERATION.md 记录的 SHA 将落后于实际内容
+   **dirty**（有未提交的 skill 变更）→ 列出变更文件，用 AskUserQuestion 工具询问用户："这些还没提交——先 commit 再更新 GENERATION.md？"
+     选项一"Commit first"、选项二"Skip commit"
+     → 用户选 Commit：`git add` + `git commit`，用新 commit SHA 继续
+     → 用户选 Skip：用当前 HEAD SHA 继续，但明确告知用户：GENERATION.md 记录的 SHA 将落后于实际内容
 1. 定位源文档和 skills 目录
    完成标志：确认 skills/ 路径、源文档路径（docs/、README.md、CLAUDE.md）、当前 HEAD 的 commit SHA 和日期
 2. 扫描每个 skill 的结构
