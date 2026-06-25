@@ -1,6 +1,6 @@
 ---
 name: direct-readme
-description: 编写或生成 GitHub 项目的 README 文件。当用户要求为一个仓库写 README，特别是强调简单、直接、开箱即用时，请务必使用此 skill。
+description: 编写或生成 GitHub 项目的 README 文件——开门见山，开箱即用。当用户要求为仓库写 README、强调"简单直接"、"不要废话"、"直接给安装命令"时使用。
 ---
 
 # Direct README Writer

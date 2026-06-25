@@ -57,7 +57,7 @@ outline tells you *what's there*; Read tells you *how it works*. Use outline to 
 
 ### 2. Size matters
 
-On repos above ~500 files, outline almost always earns its keep (benchmarks show 12–67% token savings). On repos under ~100 files, skip it — direct Read is cheaper.
+On repos above ~500 files, outline almost always earns its keep. On repos under ~100 files, skip it — direct Read is cheaper. Full benchmarks in [BENCHMARKS.md](BENCHMARKS.md).
 
 ### 3. One outline, many Reads
 
@@ -73,23 +73,6 @@ Grep: "^(export )?(class|function|struct|enum|interface) " file.ts
 Install: `brew install ast-grep` (macOS) or `cargo install ast-grep` (any platform).
 </rules>
 
-<benchmarks>
-## When outline pays off
-
-Benchmarked across 7 repos (56 independent sessions), outline vs no-outline on architecture-level prompts:
-
-| Repo | Files | Token Δ | Time Δ |
-|---|---|---|---|
-| VS Code | 11,370 | **−45%** | −12% |
-| Django | 3,030 | **−67%** | −33% |
-| OkHttp | 640 | **−40%** | −5% |
-| Tokio | 779 | −12% | −3% |
-| Excalidraw | 625 | −26% | ~even |
-| Gin | 99 | +39% | +13% |
-| Alamofire | 108 | ~even | +26% |
-
-The crossover is around 200–500 files. Below that, outline adds overhead instead of saving it.
-</benchmarks>
 
 <limitations>
 - Language coverage depends on bundled extractor rules — missing languages need contributed rule definitions
