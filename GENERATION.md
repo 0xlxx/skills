@@ -6,16 +6,16 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `08de9cda7b119d08b52af92f7af7f5118b98e6c3`
-- **Date**: 2026-06-23
-- **Commit**: fix(manifest): add step 0 workspace check with dirty/clean branching
+- **Commit SHA**: `fde5ffef8caa3de867d81df1f22e9e837d43673e`
+- **Date**: 2026-06-25
+- **Commit**: feat: add intrinsic-design skill — content-driven CSS layout
 
 **Source documentation:**
 
 - Project README: `/README.md`
 - Skills are self-contained — each skill's `SKILL.md` is the authoritative source, not generated from external docs.
 
-**Generation date**: 2026-06-23
+**Generation date**: 2026-06-25
 
 ## Structure
 
@@ -36,6 +36,8 @@ skills/
 │   └── evals/
 │       └── evals.json          # Evaluation dataset
 ├── essence-first/              # Active
+│   └── SKILL.md                # Main skill file
+├── intrinsic-design/           # Active
 │   └── SKILL.md                # Main skill file
 ├── manifest/                   # Active
 │   └── SKILL.md                # Main skill file
@@ -69,7 +71,7 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (9)
+## Active Skills (10)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
@@ -78,6 +80,7 @@ skills/
 | `bug-clarify` | 修复 bug 前强制澄清——追问现象、复现步骤、预期、严重性、回归风险，确认后才动手。 | SKILL.md |
 | `direct-readme` | 编写或生成 GitHub 项目 README 文件，强调简单、直接、开箱即用。 | SKILL.md, evals/evals.json |
 | `essence-first` | 本质先行——解释概念时先给上下文和一句话本质，再递进到细节。 | SKILL.md |
+| `intrinsic-design` | Intrinsic Web Design — content-driven CSS layout using intrinsic sizing, Grid, Flexbox, and fluid values without media queries. | SKILL.md |
 | `manifest` | 生成并维护 skills/GENERATION.md 溯源清单，追踪每个 skill 的来源、结构与更新流程。 | SKILL.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
 | `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
@@ -125,13 +128,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 08de9cd..HEAD -- '*/SKILL.md'
+git diff --name-only fde5ffe..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 08de9cd..HEAD -- '*/SKILL.md'
+git diff fde5ffe..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 08de9cd..HEAD -- '*/SKILL.md'
+git log --oneline fde5ffe..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -177,8 +180,9 @@ git log --oneline 08de9cd..HEAD -- '*/SKILL.md'
 | 2026-06-23 | 14961d0  | Add unit-test — 8 active skills |
 | 2026-06-23 | 08de9cd  | Fix manifest step 0 workspace check branching |
 | 2026-06-23 | —        | Add ast-grep — 9 active skills |
+| 2026-06-25 | fde5ffe  | Add intrinsic-design — 10 active skills |
 
 ---
 
-Last updated: 2026-06-23
-Current SHA: 08de9cd
+Last updated: 2026-06-25
+Current SHA: fde5ffe
