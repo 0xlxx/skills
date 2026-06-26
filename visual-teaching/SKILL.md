@@ -1,12 +1,12 @@
 ---
 name: visual-teaching
-description: 创建可视化教学材料——HTML 优先，本质先行，逐层拆解。当用户要求创建课程、图解、教学资料、lesson、diagram、visual explanation，或需要讲解、演示概念时使用。
+description: 创建可视化教学材料——HTML 优先，本质先行，逐层拆解，内在响应式。当用户要求创建课程、图解、教学资料、lesson、diagram、visual explanation，或需要讲解、演示概念时使用。
 ---
 
 <visual-teaching>
 
 <core-principle>
-教学内容 = 多文件 HTML 目录，按本质→拆解→合起来的层次组织。**所有视觉内容用 HTML/CSS 表达，禁止完整 SVG 图示。** 浏览器原生渲染在文本换行、字体、响应式、无障碍上全面优于 SVG。
+教学内容 = 多文件 HTML 目录，按本质→拆解→合起来的层次组织。**所有视觉内容用 HTML/CSS 表达，禁止完整 SVG 图示。** 浏览器原生渲染在文本换行、字体、响应式、无障碍上全面优于 SVG。HTML 天然响应式——用内在 Web 设计技巧（@intrinsic-design）让布局随内容自适应，不写 @media。
 </core-principle>
 
 <rules>
@@ -61,6 +61,46 @@ lessons/000N-topic/
 
 ### 6. KaTeX 公式 → [KATEX.md](KATEX.md)
 
+### 7. 响应式优先——内在 Web 设计 → @intrinsic-design
+
+教学 HTML 必须在手机到桌面都可用。不用 @media 断点——用内容驱动、流体值。完整参考 @intrinsic-design，以下为教学材料最常用的四个模式：
+
+**RAM 卡片网格**——自动增减列数，零断点：
+```css
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: clamp(1rem, 3vw, 2rem);
+}
+```
+
+**流体排版**——`clamp()` 一行替代三段 @media：
+```css
+h1 { font-size: clamp(1.5rem, 5vw + 1rem, 3rem); }
+body { font-size: clamp(1rem, 2.5vw, 1.25rem); }
+```
+
+**Flexbox 折行**——宽屏并排，窄屏堆叠：
+```css
+.comparison { display: flex; flex-wrap: wrap; }
+.comparison > * { flex: 1 1 280px; }
+```
+
+**内容驱动尺寸**——标题下划线跟文字走，代码块不溢出：
+```css
+h2 { width: fit-content; border-bottom: 2px solid; }
+pre { width: min(100%, max-content); overflow: auto; }
+```
+
+**默认 CSS 变量**——每个教学页面共享：
+```css
+:root {
+    --gap: clamp(0.75rem, 2vmax, 1.5rem);
+    --padding: clamp(1rem, 4vw, 2.5rem);
+    --radius: clamp(0px, (100vw - 480px) * 1000, 8px);
+}
+```
+
 </rules>
 
 <constraints>
@@ -69,6 +109,8 @@ lessons/000N-topic/
 - 不要在一个大 HTML 里分层（拆成独立文件）
 - 不要用 viewBox 缩放（1:1 像素映射）
 - KaTeX 不写 `$...$` 分隔符（用 `data-latex`）
+- 不要设固定 `width`/`height`——用 `fit-content`、`minmax()`、`clamp()`
+- 不要先写 `@media`——先试 RAM grid、flex-wrap、`clamp()`
 </constraints>
 
 </visual-teaching>
