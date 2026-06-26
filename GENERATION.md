@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `97ed97fa5073786de4387fd1c6f326af54e6f0c3`
+- **Commit SHA**: `67552ee871ed71f2d4e361caa5e8fd2a95e12d65`
 - **Date**: 2026-06-26
-- **Commit**: refine: apply writing-great-skills to 6 active skills
+- **Commit**: refine(essence-first): four-layer structure with 递进理解, five iron rules, and reusable template
 
 **Source documentation:**
 
@@ -78,17 +78,16 @@ skills/
 
 | Skill | Description | Files |
 |-------|-------------|-------|
-| `api-design` | API 设计指南——渐进式增强、框架无关、DX 优先、原子化。设计 API、评审接口、重构签名时使用。 | SKILL.md, ANTIPATTERNS.md |
+| `api-design` | API 设计指南——渐进式增强、框架无关、DX 优先、原子化。设计新 API、评审接口时使用。不涵盖向后兼容。 | SKILL.md, ANTIPATTERNS.md |
 | `ast-grep` | 使用 ast-grep outline 在读取文件前先了解其结构——声明、导入、导出、成员。探索代码库、定位符号、理解文件形态时使用。 | SKILL.md, BENCHMARKS.md |
-| `ast-grep` | 使用 ast-grep outline 在读取文件前先了解其结构——声明、导入、导出、成员。探索代码库、定位符号、理解文件形态时使用。大仓库收益最大。 | SKILL.md |
 | `bug-clarify` | 修复 bug 前强制澄清——追问现象、复现步骤、预期、严重性、回归风险，确认后才动手。 | SKILL.md |
 | `direct-readme` | 编写或生成 GitHub 项目 README 文件——开门见山，开箱即用。 | SKILL.md, evals/evals.json |
-| `essence-first` | 本质先行——解释概念时先给上下文和一句话本质，再递进到细节。 | SKILL.md |
+| `essence-first` | 本质先行——从定锚点到递进理解，用四层结构帮读者搭建认知模型。解释概念、对比事物时使用。 | SKILL.md |
 | `intrinsic-design` | Intrinsic Web Design — content-driven CSS layout using intrinsic sizing, Grid, Flexbox, and fluid values without media queries. | SKILL.md |
 | `manifest` | 生成并维护 skills/GENERATION.md 溯源清单，追踪每个 skill 的来源、结构与更新流程。 | SKILL.md, TEMPLATE.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
 | `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
-| `visual-teaching` | 创建可视化教学材料——HTML 优先，本质先行，逐层拆解。创建课程、图解、教学资料时使用。 | SKILL.md, KATEX.md |
+| `visual-teaching` | 创建可视化教学材料——HTML 优先，本质先行，逐层拆解，内在响应式。创建课程、图解、教学资料时使用。 | SKILL.md, KATEX.md |
 
 ## Archived Skills (14)
 
@@ -132,13 +131,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 97ed97f..HEAD -- '*/SKILL.md'
+git diff --name-only 67552ee..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 97ed97f..HEAD -- '*/SKILL.md'
+git diff 67552ee..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 97ed97f..HEAD -- '*/SKILL.md'
+git log --oneline 67552ee..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -186,8 +185,9 @@ git log --oneline 97ed97f..HEAD -- '*/SKILL.md'
 | 2026-06-23 | —        | Add ast-grep — 9 active skills |
 | 2026-06-25 | fde5ffe  | Add intrinsic-design — 10 active skills |
 | 2026-06-26 | 97ed97f  | Refine 6 skills with writing-great-skills methodology |
+| 2026-06-26 | 67552ee  | Refine api-design (no back-compat), visual-teaching (responsive), essence-first (four-layer + 递进理解) |
 
 ---
 
 Last updated: 2026-06-26
-Current SHA: 97ed97f
+Current SHA: 67552ee
