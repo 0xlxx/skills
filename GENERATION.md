@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `67552ee871ed71f2d4e361caa5e8fd2a95e12d65`
-- **Date**: 2026-06-26
-- **Commit**: refine(essence-first): four-layer structure with 递进理解, five iron rules, and reusable template
+- **Commit SHA**: `b44918fde3b33eb21676d691cb284a36a955153c`
+- **Date**: 2026-06-27
+- **Commit**: merge(teach): consolidate visual-teaching into teach, add natural-mental-model proposal
 
 **Source documentation:**
 
@@ -43,13 +43,22 @@ skills/
 ├── manifest/                   # Active
 │   ├── SKILL.md                # Main skill file
 │   └── TEMPLATE.md             # GENERATION.md template for step 4
+├── teach/                       # Active
+│   ├── SKILL.md                # Main skill file
+│   ├── GLOSSARY-FORMAT.md      # Glossary document format
+│   ├── KATEX.md                # KaTeX formula rendering setup
+│   ├── LEARNING-RECORD-FORMAT.md # Learning record format
+│   ├── LESSON-FORMAT.md        # Lesson production format (essence→layers→synthesis)
+│   ├── MISSION-FORMAT.md       # Mission document format
+│   ├── RESOURCES-FORMAT.md     # Resources document format
+│   └── STYLES.md               # Teaching HTML defaults and intrinsic design
 ├── tourist/                    # Active
 │   └── SKILL.md                # Main skill file
 ├── unit-test/                  # Active
 │   └── SKILL.md                # Main skill file
-├── visual-teaching/            # Active
-│   ├── SKILL.md                # Main skill file
-│   └── KATEX.md                # KaTeX formula rendering setup
+│
+├── proposal/                   # Draft skills (not yet active)
+│   └── SKILL.proposal.md       # natural-mental-model — optimize skills with natural mental constraints
 │
 ├── api-design-workspace/       # Evaluation workspace (not a skill)
 │   └── iteration-*/            # Eval runs with grading, timing, outputs
@@ -71,6 +80,7 @@ skills/
     ├── readme-direct/          # SKILL.md
     ├── take/                   # SKILL.md
     ├── troubleshooting/        # SKILL.md
+	    ├── visual-teaching/       # SKILL.md + KATEX.md + STYLES.md (merged into teach)
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
@@ -85,11 +95,11 @@ skills/
 | `essence-first` | 本质先行——从定锚点到递进理解，用四层结构帮读者搭建认知模型。解释概念、对比事物时使用。 | SKILL.md |
 | `intrinsic-design` | Intrinsic Web Design — content-driven CSS layout using intrinsic sizing, Grid, Flexbox, and fluid values without media queries. | SKILL.md |
 | `manifest` | 生成并维护 skills/GENERATION.md 溯源清单，追踪每个 skill 的来源、结构与更新流程。 | SKILL.md, TEMPLATE.md |
+| `teach` | 在工作区内教授用户一项新技能或概念——使命驱动，最近发展区选课，多文件 HTML 课程。 | SKILL.md, GLOSSARY-FORMAT.md, KATEX.md, LEARNING-RECORD-FORMAT.md, LESSON-FORMAT.md, MISSION-FORMAT.md, RESOURCES-FORMAT.md, STYLES.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
 | `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
-| `visual-teaching` | 创建可视化教学材料——HTML 优先，本质先行，逐层拆解，内在响应式。创建课程、图解、教学资料时使用。 | SKILL.md, KATEX.md |
 
-## Archived Skills (14)
+## Archived Skills (15)
 
 Skills in `archived/` are no longer actively maintained but preserved for reference.
 
@@ -108,6 +118,7 @@ Skills in `archived/` are no longer actively maintained but preserved for refere
 | `readme-direct` | 编写和审查直击要点的 README 文件。 | SKILL.md |
 | `take` | 从 handoff 文档恢复上一会话继续工作。 | SKILL.md |
 | `troubleshooting` | Chrome DevTools MCP 连接与 target 问题排查。 | SKILL.md |
+| `visual-teaching` | 创建可视化教学材料——HTML 优先，本质先行，逐层拆解，内在响应式。已合并到 teach。 | SKILL.md, KATEX.md, STYLES.md |
 | `zhihu-answer` | 以用户语气起草知乎回答，基于知识库和高赞回答。 | SKILL.md, references/ (1) |
 
 ## File Naming Convention
@@ -186,8 +197,9 @@ git log --oneline 67552ee..HEAD -- '*/SKILL.md'
 | 2026-06-25 | fde5ffe  | Add intrinsic-design — 10 active skills |
 | 2026-06-26 | 97ed97f  | Refine 6 skills with writing-great-skills methodology |
 | 2026-06-26 | 67552ee  | Refine api-design (no back-compat), visual-teaching (responsive), essence-first (four-layer + 递进理解) |
+| 2026-06-27 | b44918f  | Merge visual-teaching into teach (8 files), archive visual-teaching, add natural-mental-model proposal |
 
 ---
 
-Last updated: 2026-06-26
-Current SHA: 67552ee
+Last updated: 2026-06-27
+Current SHA: b44918f
