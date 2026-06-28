@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `b44918fde3b33eb21676d691cb284a36a955153c`
-- **Date**: 2026-06-27
-- **Commit**: merge(teach): consolidate visual-teaching into teach, add natural-mental-model proposal
+- **Commit SHA**: `ed71c60`
+- **Date**: 2026-06-28
+- **Commit**: feat: add feature-dev skill, apply natural-mental-model to proposal
 
 **Source documentation:**
 
@@ -38,6 +38,9 @@ skills/
 │       └── evals.json          # Evaluation dataset
 ├── essence-first/              # Active
 │   └── SKILL.md                # Main skill file
+├── feature-dev/                # Active
+│   ├── SKILL.md                # Main skill file
+│   └── TODO_TEMPLATE.md        # TODO.md template for step 3.3
 ├── intrinsic-design/           # Active
 │   └── SKILL.md                # Main skill file
 ├── manifest/                   # Active
@@ -84,7 +87,7 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (10)
+## Active Skills (11)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
@@ -93,6 +96,7 @@ skills/
 | `bug-clarify` | 修复 bug 前强制澄清——追问现象、复现步骤、预期、严重性、回归风险，确认后才动手。 | SKILL.md |
 | `direct-readme` | 编写或生成 GitHub 项目 README 文件——开门见山，开箱即用。 | SKILL.md, evals/evals.json |
 | `essence-first` | 本质先行——从定锚点到递进理解，用四层结构帮读者搭建认知模型。解释概念、对比事物时使用。 | SKILL.md |
+| `feature-dev` | 递阶控制 + DAG 驱动的功能实现流程——从设计方案到逐节点实现再到归档。开始新功能、新模块时手动调用。 | SKILL.md, TODO_TEMPLATE.md |
 | `intrinsic-design` | Intrinsic Web Design — content-driven CSS layout using intrinsic sizing, Grid, Flexbox, and fluid values without media queries. | SKILL.md |
 | `manifest` | 生成并维护 skills/GENERATION.md 溯源清单，追踪每个 skill 的来源、结构与更新流程。 | SKILL.md, TEMPLATE.md |
 | `teach` | 在工作区内教授用户一项新技能或概念——使命驱动，最近发展区选课，多文件 HTML 课程。 | SKILL.md, GLOSSARY-FORMAT.md, KATEX.md, LEARNING-RECORD-FORMAT.md, LESSON-FORMAT.md, MISSION-FORMAT.md, RESOURCES-FORMAT.md, STYLES.md |
@@ -142,13 +146,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 67552ee..HEAD -- '*/SKILL.md'
+git diff --name-only b44918f..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 67552ee..HEAD -- '*/SKILL.md'
+git diff b44918f..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 67552ee..HEAD -- '*/SKILL.md'
+git log --oneline b44918f..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -198,8 +202,9 @@ git log --oneline 67552ee..HEAD -- '*/SKILL.md'
 | 2026-06-26 | 97ed97f  | Refine 6 skills with writing-great-skills methodology |
 | 2026-06-26 | 67552ee  | Refine api-design (no back-compat), visual-teaching (responsive), essence-first (four-layer + 递进理解) |
 | 2026-06-27 | b44918f  | Merge visual-teaching into teach (8 files), archive visual-teaching, add natural-mental-model proposal |
+| 2026-06-28 | ed71c60  | Add feature-dev (递阶控制 + DAG), apply natural-mental-model self-consistency to proposal |
 
 ---
 
-Last updated: 2026-06-27
-Current SHA: b44918f
+Last updated: 2026-06-28
+Current SHA: ed71c60
