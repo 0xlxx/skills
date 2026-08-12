@@ -1,0 +1,18 @@
+# MODULES.tsv — 管线模块清单模板（对齐 Bun LIFETIMES.tsv 思路）
+#
+# 用途: 并行 agent 先查表再动手, 不各自猜。登记每个移植阶段: 源类 ↔ 目标模块 ↔
+#       移植状态 ↔ 算法不变量 ↔ 测试文件 ↔ 根因簇。
+# 权威事实源: <SSOT 路径>。状态以代码+测试实证为准, agent 完成一簇后必须回写本表
+#       (状态/不变量/测试列), 不允许只改代码不改表。
+# 状态图例: ✅ ported (目标存在且管线调用, 差分/单测通过) | 🟡 partial (存在但已知差距)
+#          ❌ missing (无目标对应) | ⛔ n/a (源为空实现/外部依赖, 合理跳过)
+# 基线 (日期): <差分命令> <基线数字>, bdd <N>, oracle <N>, 回归 <N> 0 失败。
+# 差分命令: <verify 脚本> '<glob>';  bdd: <vitest 命令>
+# 更新时间: <日期>
+#
+stage	source_class	target_module	status	invariants	tests	cluster_notes
+# ─── <阶段名> ───
+P1	<SourceClass>	<path/to/target-module>	✅	<算法不变量, 与源语义一致>	<tests/...>	<簇名/提交>
+
+# ─── <待移植阶段> ───
+NLA	<算法族>	-	❌	<语料无触发/未移植原因>	-	<优先级/待办>

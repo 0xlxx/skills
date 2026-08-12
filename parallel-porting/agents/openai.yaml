@@ -1,0 +1,3 @@
+interface:
+  display_name: "Parallel Porting"
+  short_description: "并行移植/重构工作流：worktree 分片 + 对抗审查 + 机器可检查门禁"
