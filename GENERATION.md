@@ -46,6 +46,11 @@ skills/
 ├── manifest/                   # Active
 │   ├── SKILL.md                # Main skill file
 │   └── TEMPLATE.md             # GENERATION.md template for step 4
+├── parallel-porting/           # Active
+│   ├── SKILL.md                # Main skill file
+│   ├── agents/openai.yaml      # UI metadata (display name / short description)
+│   ├── references/             # 4 templates: MODULES.tsv / cluster-brief / agent-remarks / ccx-cheatsheet
+│   └── scripts/                # 3 executables: setup-worktree / dispatch-ccx / check-gates
 ├── teach/                       # Active
 │   ├── SKILL.md                # Main skill file
 │   ├── GLOSSARY-FORMAT.md      # Glossary document format
@@ -99,6 +104,7 @@ skills/
 | `feature-dev` | 递阶控制 + DAG 驱动的功能实现流程——从设计方案到逐节点实现再到归档。开始新功能、新模块时手动调用。 | SKILL.md, TODO_TEMPLATE.md |
 | `intrinsic-design` | Intrinsic Web Design — content-driven CSS layout using intrinsic sizing, Grid, Flexbox, and fluid values without media queries. | SKILL.md |
 | `manifest` | 生成并维护 skills/GENERATION.md 溯源清单，追踪每个 skill 的来源、结构与更新流程。 | SKILL.md, TEMPLATE.md |
+| `parallel-porting` | 大规模 1:1 移植 / 并行重构工作流（Bun 方法论落地）——worktree 分片并行、对抗审查闭环、机器可检查退出条件、备注回流、拓扑合并。移植/port/1:1 对齐/SSOT 场景使用。 | SKILL.md, agents/openai.yaml, references/ (4), scripts/ (3) |
 | `teach` | 在工作区内教授用户一项新技能或概念——使命驱动，最近发展区选课，多文件 HTML 课程。 | SKILL.md, GLOSSARY-FORMAT.md, KATEX.md, LEARNING-RECORD-FORMAT.md, LESSON-FORMAT.md, MISSION-FORMAT.md, RESOURCES-FORMAT.md, STYLES.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
 | `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
@@ -203,8 +209,9 @@ git log --oneline b44918f..HEAD -- '*/SKILL.md'
 | 2026-06-26 | 67552ee  | Refine api-design (no back-compat), visual-teaching (responsive), essence-first (four-layer + 递进理解) |
 | 2026-06-27 | b44918f  | Merge visual-teaching into teach (8 files), archive visual-teaching, add natural-mental-model proposal |
 | 2026-06-28 | ed71c60  | Add feature-dev (递阶控制 + DAG), apply natural-mental-model self-consistency to proposal |
+| 2026-08-12 | e76d545  | Add parallel-porting — 1:1 移植/并行重构工作流 (Bun 方法论落地), 12 active skills |
 
 ---
 
-Last updated: 2026-06-28
-Current SHA: ed71c60
+Last updated: 2026-08-12
+Current SHA: e76d545
