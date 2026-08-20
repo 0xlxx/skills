@@ -141,6 +141,32 @@ curl -sL "https://<SUBLINK_DOMAIN>/c/<SHORT_CODE>" | grep 'name:'   # 短链节�
 fail2ban-client status sshd                    # SSH 防护（主机白名单已含自身 IP）
 ```
 
+## 节点命名规范（命名即信息）
+
+格式：`[旗标][城市]-[来源]-[线路]-[能力]-[协议号]`
+
+| 字段 | 取值 | 含义 |
+|---|---|---|
+| 来源 | `主` / `备` / `转` | 主力节点 / 备用节点 / 中转（入口→出口） |
+| 线路 | `CN2+9929` / `9929` / `直连` | 电信 CN2 GIA + 联通 9929 双线 / 纯 9929 优化 / 普通直连 |
+| 能力 | `全解` / `半解` / `受限` | 见下方能力定义（以实测为准） |
+| 协议号 | `T` / `V` / `R` / `H` | Trojan / VLESS / REALITY(VLESS) / Hysteria2 |
+
+能力定义（以 lmc999 RegionRestrictionCheck 实测为准）：
+- `全解`：ChatGPT / Claude / Gemini / YouTube Premium / Netflix 全库 / Disney+ 均可
+- `半解`：ChatGPT / Claude / Netflix / Disney+ 可，Gemini / YouTube Premium 不可
+- `受限`：ChatGPT / Claude / Gemini 可，但 Netflix 仅自制剧、部分流媒体平台被禁
+
+节点清单（占位；真实节点名/IP 见 Bitwarden nodes.json）：
+
+| 占位节点 | 来源 | 线路 | 能力 |
+|---|---|---|---|
+| `<HOST_A>` 系列（T/V/R/H-xx） | 主 VPS | `CN2+9929` 双线 | 全解 |
+| `<HOST_B>-V-01` | 备用 VPS | `9929` | 半解 |
+| `<RELAY>-V-01` | 主→第三出口 | 中转 | 受限 |
+
+> 新增节点时按上述规范命名，并在 Bitwarden nodes.json 附件同步；线路/能力标签以实测为准，避免虚标。
+
 ## 真实值映射（仅私有记录，禁止提交）
 
 > 本 skill 的所有 `<PLACEHOLDER>` 真实值**集中存放于 Bitwarden**（唯一权威来源）：
