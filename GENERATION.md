@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `3fcc379c8201d6cae6b7786cf132ed3d96dbb13c`
+- **Commit SHA**: `75ac19e8b1bc0c0885ba9ee6474b244e42525836`
 - **Date**: 2026-08-23
-- **Commit**: docs(proxy-nodes): 速查表补充 sui doctor 一键体检
+- **Commit**: docs(proxy-nodes): 主控备份/恢复流程 + 速查表补 inbound 查询
 
 **Source documentation:**
 
@@ -161,13 +161,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 3fcc379..HEAD -- '*/SKILL.md'
+git diff --name-only 75ac19e..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 3fcc379..HEAD -- '*/SKILL.md'
+git diff 75ac19e..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 3fcc379..HEAD -- '*/SKILL.md'
+git log --oneline 75ac19e..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -223,8 +223,9 @@ git log --oneline 3fcc379..HEAD -- '*/SKILL.md'
 | 2026-08-23 | f5c7b8b  | 重构 proxy-nodes（通用工作流/实例分层，FILES.md=部署实例）+ parallel-optimizing 收窄 JS/TS 范围 — 14 active skills |
 | 2026-08-23 | 8a3ba83  | 凭据迁移 Secrets Manager（bws）— proxy-nodes Connection/真实值映射/速查表 — 14 active skills |
 | 2026-08-23 | 3fcc379  | proxy-nodes 速查表补充 sui doctor 一键体检 — 14 active skills |
+| 2026-08-23 | 75ac19e  | proxy-nodes 主控备份/恢复流程 + 速查表补 inbound 查询 — 14 active skills |
 
 ---
 
 Last updated: 2026-08-23
-Current SHA: 3fcc379
+Current SHA: 75ac19e
