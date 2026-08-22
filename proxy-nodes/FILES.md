@@ -102,6 +102,24 @@ sui-backup --keep 10                       # 本地按需备份（远端 sqlite3
 #   （恢复前先另存当前库；只替换 .db，WAL 会自动重建）
 ```
 
+### 凭据轮换（安全项，按需执行）
+
+```bash
+# 1) machine access token 轮换（BWS 机器账户）：
+#    Bitwarden 网页 → Secrets Manager → Machine Accounts → <机器账户> → Create access token
+#    新 token 只显示一次；然后本地覆盖（0600）并验证：
+install -m 600 /path/to/new-token "$HOME/.config/bws/access-token"
+sui doctor                                  # 验证新 token 可用
+#    旧 token 在网页端删除
+
+# 2) 订阅子令牌轮换（client 级）：
+#    ⚠️ 目前 sui-cli 没有 `client reset-token` 命令 —— 需走面板 admin（用户 → 编辑 → 订阅令牌）或 DB 更新 sub_token 后重启 sui。
+#    建议：给 sui-cli 补 `client reset-token --id N`（当前为能力缺口）。
+
+# 3) 清理个人 vault 已迁移条目：
+#    确认 SM 稳定后，删除 bw 中 sui-panel / proxy-vps 已迁移字段（SSOT 只留 Secrets Manager）
+```
+
 ### Cloudflare CLI / 隧道
 
 ```bash
