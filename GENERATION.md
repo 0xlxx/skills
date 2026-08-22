@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `246c699c18ea2bf09782b8b12dbb3d7e6f0f2b4f`
+- **Commit SHA**: `5aaee170bd1046d9d01cfec96d8422a7e4931d8a`
 - **Date**: 2026-08-23
-- **Commit**: security: skills 公共仓库 check-secrets 提交前门禁 + SKILL.md 脱敏段引用
+- **Commit**: ci: 公开仓库 check-secrets 门禁 workflow（push/PR 自动拦截）
 
 **Source documentation:**
 
@@ -161,13 +161,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 246c699..HEAD -- '*/SKILL.md'
+git diff --name-only 5aaee17..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 246c699..HEAD -- '*/SKILL.md'
+git diff 5aaee17..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 246c699..HEAD -- '*/SKILL.md'
+git log --oneline 5aaee17..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -225,8 +225,9 @@ git log --oneline 246c699..HEAD -- '*/SKILL.md'
 | 2026-08-23 | 3fcc379  | proxy-nodes 速查表补充 sui doctor 一键体检 — 14 active skills |
 | 2026-08-23 | 75ac19e  | proxy-nodes 主控备份/恢复流程 + 速查表补 inbound 查询 — 14 active skills |
 | 2026-08-23 | 246c699  | skills 公共仓库 check-secrets 门禁 + SKILL.md 脱敏引用 — 14 active skills |
+| 2026-08-23 | 5aaee17  | skills 公开仓库 CI check-secrets 门禁 — 14 active skills |
 
 ---
 
 Last updated: 2026-08-23
-Current SHA: 246c699
+Current SHA: 5aaee17
