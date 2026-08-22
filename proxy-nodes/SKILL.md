@@ -21,28 +21,29 @@ disable-model-invocation: true
 > - **订阅短码是低熵 bearer 凭据**（约 36 bit，可枚举）：Worker 侧应限流/加访问控制，并周期性轮换短码。
 > - `nodes.example.json`、快照类文件等入库模板**只允许占位符内容**；提交前用 `grep -nE 'BEGIN.*PRIVATE|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'` 校验必须 0 命中。
 
-## Connection（必须通过 Bitwarden）
+## Connection（必须通过 Bitwarden Secrets Manager）
 
-> ⚠️ SSH key **必须**从 Bitwarden 获取；禁止直接使用本机本地 key 文件。
-> SSH key 存放在 Bitwarden item `<BW_SSH_ITEM>` 的 `notes` 字段（含 OPENSSH 格式私钥全文）。
+> ⚠️ SSH key **必须**从 Bitwarden Secrets Manager 获取；禁止直接使用本机本地 key 文件。
+> SSH key 存放在 Secrets Manager secret `<BWS_SSH_KEY_SECRET>`（值 = OPENSSH 格式私钥全文）。
 
 ```bash
-# 1. 解锁 Bitwarden（如未解锁）：bw unlock，然后 export BW_SESSION="..."
+# 1. 加载 machine access token（优先环境变量，其次 ~/.config/bws/access-token，0600）
+[ -n "${BWS_ACCESS_TOKEN:-}" ] || export BWS_ACCESS_TOKEN="$(cat "$HOME/.config/bws/access-token")"
 # 2. 取出 SSH key 到随机临时文件（umask 077 保证权限，mktemp 防符号链接预置攻击）
 umask 077
-SSH_KEY=$(mktemp /tmp/bw-ssh.XXXXXX)
+SSH_KEY=$(mktemp /tmp/bws-ssh.XXXXXX)
 trap 'rm -f "$SSH_KEY"' EXIT INT TERM HUP
-bw get item "<BW_SSH_ITEM>" --raw | jq -r '.notes' > "$SSH_KEY"
-[ -s "$SSH_KEY" ] || { echo "bw 取 key 失败（未解锁或条目缺失？）"; exit 1; }
+bws secret list | jq -r '.[] | select(.key=="<BWS_SSH_KEY_SECRET>") | .value' > "$SSH_KEY"
+[ -s "$SSH_KEY" ] || { echo "bws 取 key 失败（token 失效或 secret 缺失？）"; exit 1; }
 
 # 3. 连接（accept-new：首连记录指纹后严格校验；IdentitiesOnly 只用这把 key）
 ssh -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -i "$SSH_KEY" root@<VPS_IP> "<command>"
 ```
 
-- 前提：`bw` 已登录且解锁（导出 `BW_SESSION`，或每条命令加 `--session <KEY>`）。
+- 前提：`bws` 已安装，machine access token 可用（`export BWS_ACCESS_TOKEN` 或 `~/.config/bws/access-token`）。
 - 用完即删：`trap` 在 `EXIT/INT/TERM/HUP` 时清理 `$SSH_KEY`。
-- 建议把 `known_hosts` 一并存入 Bitwarden，彻底固定主机指纹。
-- 无本地 key 时，恢复入口 = Bitwarden item `<BW_SSH_ITEM>`（见「真实值映射」）。
+- 建议把 `known_hosts` 一并存入 Secrets Manager，彻底固定主机指纹。
+- 无本地 key 时，恢复入口 = Secrets Manager secret `<BWS_SSH_KEY_SECRET>`（见「真实值映射」）。
 - **重启主机的 sing-box 可能断开当前 SSH**（若本机流量经该主机 NAT）——见「Add a node」的 nohup 说明。
 
 ## IP 体检（新 VPS 接入前必做）
@@ -112,17 +113,17 @@ ssh ... root@<VPS_IP> 'apt-get install -y -qq jq >/dev/null 2>&1; \
 
 ## 真实值映射（仅私有记录，禁止提交）
 
-> 本 skill 的所有 `<PLACEHOLDER>` 真实值**集中存放于 Bitwarden**（唯一权威来源）：
+> 本 skill 的所有 `<PLACEHOLDER>` 真实值**集中存放于 Bitwarden Secrets Manager「agent」项目**（唯一权威来源；机器账户 scoped token 读取，端到端加密，有审计日志）：
 >
-> - **SSH key**：Bitwarden 条目的 `notes` 字段（OPENSSH 格式私钥全文）
-> - **IP / 域名 / 订阅短码 / 节点凭据**：条目字段与附件 `nodes.json`（与服务器 SSOT 一致）
-> - **s-ui 面板 / Cloudflare / 订阅域名**：对应 Bitwarden 条目（条目名见私有笔记）
-> - 新增主机 IP、端口等：同 `<BW_SSH_ITEM>` 字段
-> - 条目名与取值见**私有笔记**，禁止写入任何公共文件。
+> - **SSH key**：secret `<BWS_SSH_KEY_SECRET>`（OPENSSH 格式私钥全文）
+> - **IP / 域名 / 订阅短码 / 节点凭据**：secrets 与服务器 SSOT `nodes.json`（两者保持一致）
+> - **s-ui 面板 / Cloudflare / 订阅域名**：对应 secrets（key 名见私有笔记）
+> - 新增主机 IP、端口等：追加到同项目 secrets
+> - key 名与取值见**私有笔记**，禁止写入任何公共文件。
 
 ## 凭据 / 备份
 
-- **SSH key 唯一存放点 = Bitwarden item `<BW_SSH_ITEM>`（notes 字段）**；新增/轮换 key 后必须同步更新该条目。
+- **SSH key 唯一存放点 = Secrets Manager secret `<BWS_SSH_KEY_SECRET>`**；新增/轮换 key 后必须同步更新该 secret。
 - 节点 SSOT 含全部凭据，**严禁提交 git**；新增节点后把凭据同步存入 Bitwarden。
 - 部署相关备份/快照清单见 FILES.md。
 

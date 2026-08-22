@@ -2,7 +2,7 @@
 
 > ⚠️ 这是**实例**，不是通用事实：主机表、端口、命令、命名都是本部署的当前状态。换部署请按你的实际情况调整，并把真实值保持为占位符/存 Bitwarden。
 
-## 实例主机表（真实 IP 见 Bitwarden）
+## 实例主机表（真实 IP 见 Secrets Manager「agent」项目）
 
 | 主机 | 角色 | 线路 | 配额 |
 |------|------|------|------|
@@ -15,7 +15,7 @@
 ## 参考架构（当前实际）
 
 ```
-s-ui 控制面（主 VPS）── apiv2 ──> sui CLI（本机，bw 自动加载 token + CF Access）
+s-ui 控制面（主 VPS）── apiv2 ──> sui CLI（本机，Secrets Manager 自动加载 token + CF Access）
   ├── inbound: 🇺🇸 洛杉矶 CN2 01/02（主 VPS 直连 :443 / trojan :18443）
   ├── inbound: 🇺🇸 洛杉矶 9929 01/02（666 直连 :443 / trojan :18443）
   └── inbound: 🛫 洛杉矶中转 01（主 VPS :24443 → 666 出口，仅手动）
@@ -33,9 +33,11 @@ s-ui 控制面（主 VPS）── apiv2 ──> sui CLI（本机，bw 自动加�
 
 | 文件/条目 | 作用 |
 |------|------|
-| Bitwarden item `<BW_SSH_ITEM>` | **SSH key 唯一存放点**（notes 字段含私钥全文，连接必须经它获取） |
-| Bitwarden item `<BW_PANEL_ITEM>` | s-ui 面板 admin 凭据 + 面板/订阅域名 + 隧道信息 |
+| Secrets Manager secret `SSH_KEY_PROXY_VPS` | **SSH key 唯一存放点**（OPENSSH 私钥全文，连接必须经它获取） |
+| Secrets Manager secrets `PANEL_ADMIN_USER` / `PANEL_ADMIN_PASSWORD` | s-ui 面板 admin 凭据；面板/订阅域名、隧道信息见私有笔记 |
 | `/etc/sing-box/nodes.json` | **SSOT 节点定义**（含全部凭据，gitignored，勿提交） |
+| Secrets Manager secrets `SUI_TOKEN` / `SUI_CF_ACCESS_ID` / `SUI_CF_ACCESS_SECRET` | s-ui 面板 API + Cloudflare Access 认证（`sui` wrapper 自动读取） |
+| Secrets Manager secrets `MAIN_VPS_IP` / `PROXY_DOMAIN` / `SUBLINK_DOMAIN` / `SUB_SHORT_CODE` | 主机 IP / 代理域名 / 订阅域名 / 订阅短码 |
 | `/etc/sing-box/render.py` | 生成器：nodes.json → config-running.json / raw / push |
 | `/etc/sing-box/sub_server.py` | 订阅生成 + 短链推送（读 nodes.json，启动自动推送） |
 | `/etc/sing-box/config-running.json` | sing-box 入站配置（由 render.py 生成，勿手改） |
@@ -46,10 +48,10 @@ s-ui 控制面（主 VPS）── apiv2 ──> sui CLI（本机，bw 自动加�
 
 ## 部署命令（当前栈）
 
-### s-ui 控制面（CLI 在本地：`sui`，自动从 bw 加载认证）
+### s-ui 控制面（CLI 在本地：`sui`，自动从 Secrets Manager 加载认证）
 
 ```bash
-export BW_SESSION="..."                 # bw unlock 后
+# sui 自动从 Secrets Manager 加载认证（无需 bw 解锁）
 sui node list --concise                 # 节点列表
 sui inbound list --concise              # inbound 列表（tag/type/node/port）
 sui client create --name X --volume 1G --inbounds 2,4,6,8 --expiry +3m   # 建用户（expiry 支持 +3m/+1h/+30d）
@@ -57,6 +59,19 @@ sui client list --concise               # 用户/配额/流量/到期
 sui inbound delete --tag "<TAG>"        # 删 inbound（clients 自动解绑）
 sui show sub preview --client test --format clash   # 预览某用户订阅
 sui show settings --key subClashExt --value "<yaml>" # 改 clash 模板（按需）
+```
+
+### 用户管理速查表（sui client）
+
+```bash
+sui client create --name X --volume 20G --inbounds 2,4,6,8 --expiry +30d  # 建号（volume 支持 100G/10T/500M；expiry 支持 +3m/+1h/+30d）
+sui client list --concise                                                  # 看全部：id/name/quota/流量/到期
+sui client edit --id N --volume 100G        # 改额度（流量计数保留）
+sui client edit --id N --expiry +30d        # 改到期（unix 秒或 +30d）
+sui client edit --id N --enable false       # 封禁 / true 解封
+sui client reset-traffic --id N             # 清零已用流量
+sui client delete --id N                    # 删除用户
+sui show sub preview --client X --format clash   # 预览某用户订阅
 ```
 
 ### 直连节点（render.py 栈）
@@ -75,7 +90,7 @@ curl -sL "https://<SUBLINK_DOMAIN>/c/<SHORT_CODE>" | grep '<NODE_NAME>'   # 订�
 ```bash
 cloudflared tunnel list / info <TUNNEL_NAME> / route dns <TUNNEL_NAME> <SUB_DOMAIN> / delete <TUNNEL_NAME>
 # 连接器在 <HOST_666>：systemctl is-active cloudflared；journalctl -u cloudflared | grep 'Registered tunnel'
-# 面板登录：https://<PANEL_DOMAIN>/app/（admin 凭据在 <BW_PANEL_ITEM>）
+# 面板登录：https://<PANEL_DOMAIN>/app/（admin 凭据在 Secrets Manager）
 ```
 
 ### 防火墙
