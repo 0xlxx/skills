@@ -64,6 +64,7 @@ sui show settings --key subClashExt --value "<yaml>" # 改 clash 模板（按需
 ### 用户管理速查表（sui client）
 
 ```bash
+sui doctor                                                        # 一键体检认证链路（token/secret/面板连通）
 sui client create --name X --volume 20G --inbounds 2,4,6,8 --expiry +30d  # 建号（volume 支持 100G/10T/500M；expiry 支持 +3m/+1h/+30d）
 sui client list --concise                                                  # 看全部：id/name/quota/流量/到期
 sui client edit --id N --volume 100G        # 改额度（流量计数保留）
