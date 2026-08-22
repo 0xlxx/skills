@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `5aaee170bd1046d9d01cfec96d8422a7e4931d8a`
+- **Commit SHA**: `8b8226a4f4bf68e1cff46732ebb0092b12ad2db5`
 - **Date**: 2026-08-23
-- **Commit**: ci: 公开仓库 check-secrets 门禁 workflow（push/PR 自动拦截）
+- **Commit**: docs(proxy-nodes): 架构文档对齐实际部署（sui 控制面+sui-agent，旧 sing-box 栈归档）
 
 **Source documentation:**
 
@@ -161,13 +161,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 5aaee17..HEAD -- '*/SKILL.md'
+git diff --name-only 8b8226a..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 5aaee17..HEAD -- '*/SKILL.md'
+git diff 8b8226a..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 5aaee17..HEAD -- '*/SKILL.md'
+git log --oneline 8b8226a..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -226,8 +226,9 @@ git log --oneline 5aaee17..HEAD -- '*/SKILL.md'
 | 2026-08-23 | 75ac19e  | proxy-nodes 主控备份/恢复流程 + 速查表补 inbound 查询 — 14 active skills |
 | 2026-08-23 | 246c699  | skills 公共仓库 check-secrets 门禁 + SKILL.md 脱敏引用 — 14 active skills |
 | 2026-08-23 | 5aaee17  | skills 公开仓库 CI check-secrets 门禁 — 14 active skills |
+| 2026-08-23 | 8b8226a  | proxy-nodes 架构文档对齐实际部署（旧 sing-box 栈归档） — 14 active skills |
 
 ---
 
 Last updated: 2026-08-23
-Current SHA: 5aaee17
+Current SHA: 8b8226a
