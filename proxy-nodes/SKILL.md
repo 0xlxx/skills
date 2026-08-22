@@ -45,6 +45,8 @@ ssh -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -i "$SSH_KEY" root
 |------|------|
 | `<HOST_A>`（主 VPS） | sing-box 出口 + sub-server + 订阅 SSOT（`<PROXY_DOMAIN>`） |
 | `<HOST_B>`（第二台 VPS） | sing-box 出口（示例节点 `<MD_NODE_NAME>`） |
+| `<HOST_MD>`（摩尔多瓦） | s-ui 控制面 + 面板（`<PANEL_PORT>` / `<SUB_PORT>`）+ 节点 agent（trojan `<TROJAN_PORT>`） |
+| `<HOST_666>`（9929） | s-ui 节点 agent（VLESS+Reality :443）+ cloudflared 隧道连接器 |
 
 ## Architecture
 
@@ -72,6 +74,7 @@ ssh -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -i "$SSH_KEY" root
 - **节点定义只改 `/etc/sing-box/nodes.json`**，主机的 sing-box 配置与订阅均由它生成/推送。
 - x-ui (3x-ui) 与 caddy **已停用**（内核已收敛为 sing-box）；如需恢复面板：`systemctl enable --now x-ui caddy`（备份 `/root/x-ui.db.bak-*`）。
 - 健康检查：`/etc/sing-box/healthcheck.py`，cron 每 5 分钟。
+- 另有 s-ui 多节点控制面：主控在 `<HOST_MD>`（面板 `<PANEL_PORT>`，订阅 `<SUB_PORT>`），节点 agent 部署于 `<HOST_MD>` 与 `<HOST_666>`；面板经 Cloudflare Tunnel 暴露在 `<PANEL_DOMAIN>`（见「Cloudflare CLI / 域名与隧道」）。
 
 ## Add a node
 
@@ -141,6 +144,86 @@ curl -sL "https://<SUBLINK_DOMAIN>/c/<SHORT_CODE>" | grep 'name:'   # 短链节�
 fail2ban-client status sshd                    # SSH 防护（主机白名单已含自身 IP）
 ```
 
+## Cloudflare CLI / 域名与隧道（面板/短链接入）
+
+> 用 Cloudflare CLI（`wrangler` + `cloudflared`）管理 `<MAIN_DOMAIN>` 下的子域名与内网服务暴露。
+> 所有真实值（账号密码、隧道 ID、域名）只存 Bitwarden；本文件仅占位符。
+
+### 前置与授权
+
+- 本机已装：`wrangler`（Workers/通用）与 `cloudflared`（隧道）：`brew install cloudflared`。
+- OAuth 登录（需用户在**自己的浏览器**手动授权；自动化浏览器会被 CF Turnstile 人机验证拦截）：
+
+  ```bash
+  wrangler login              # 完成后 wrangler whoami 确认账号
+  cloudflared tunnel login    # 生成 ~/.cloudflared/cert.pem（隧道/DNS 操作必需）
+  ```
+
+- 权限要点：wrangler OAuth 只有 `zone:read`，**不能写 DNS**；DNS 记录必须走
+  `cloudflared tunnel route dns`（其 OAuth 含 Zone DNS 写），或先在 dashboard 生成
+  带 `Zone:DNS:Edit` 的 API Token 再设 `CLOUDFLARE_API_TOKEN`。
+- Cloudflare 账号密码：Bitwarden item `<BW_CF_ITEM>`（账号 `<CF_ACCOUNT>`）。
+
+### 为什么用 Cloudflare Tunnel（而非 A 记录直连）
+
+- origin 的 443 已被 sing-box / s-ui agent 占用，A 记录无法指定端口；
+- 小内存 VPS（如 `<HOST_MD>`）不再多跑常驻进程——连接器放在内存充裕的 `<HOST_666>`；
+- 连接器**出站**连 CF 边缘：无需开新端口、无需公网证书；TLS 由 CF 边缘终结（Universal SSL 自动签发）。
+
+### 新建子域名并暴露面板
+
+```bash
+# 1) 创建隧道（名字唯一；credentials JSON 写到 ~/.cloudflared/<TUNNEL_ID>.json，勿外泄勿提交）
+cloudflared tunnel create <TUNNEL_NAME>
+
+# 2) 建 DNS CNAME：<PANEL_DOMAIN> → 隧道（自动 proxied，CF 边缘 TLS）
+cloudflared tunnel route dns <TUNNEL_NAME> <PANEL_DOMAIN>
+
+# 3) 连接器配置（部署在哪台就放哪台，示例 /etc/cloudflared/config.yml）
+#    tunnel: <TUNNEL_ID>
+#    credentials-file: /etc/cloudflared/<TUNNEL_ID>.json
+#    ingress:
+#      - hostname: <PANEL_DOMAIN>
+#        service: http://<HOST_MD_IP>:<PANEL_PORT>   # s-ui 控制面面板
+#      - hostname: <SUB_DOMAIN>
+#        service: http://<HOST_MD_IP>:<SUB_PORT>     # s-ui 订阅（禁止裸 IP）
+#      - service: http_status:404
+```
+
+连接器部署（示例：`<HOST_666>`，systemd 常驻）：
+
+```bash
+curl -sL -o /usr/local/bin/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 && chmod +x /usr/local/bin/cloudflared
+scp ~/.cloudflared/<TUNNEL_ID>.json root@<HOST_666_IP>:/etc/cloudflared/
+# /etc/cloudflared/config.yml 同第 3) 步（credentials-file 用 /etc/cloudflared/ 绝对路径）
+# systemd: ExecStart=/usr/local/bin/cloudflared tunnel --config /etc/cloudflared/config.yml run
+#          Restart=on-failure；After=network-online.target
+systemctl daemon-reload && systemctl enable --now cloudflared
+```
+
+验证：
+
+```bash
+curl -sS -o /dev/null -w '%{http_code}\n' https://<PANEL_DOMAIN>/app/login   # 200
+systemctl is-active cloudflared                                              # 连接器 active
+journalctl -u cloudflared | grep 'Registered tunnel'                         # 已注册连接
+```
+
+管理命令：
+
+```bash
+cloudflared tunnel list                                   # 全部隧道
+cloudflared tunnel info <TUNNEL_NAME>                     # 隧道详情（含 DNS 路由）
+cloudflared tunnel route dns <TUNNEL_NAME> <NEW_DOMAIN>   # 同一隧道再加子域名
+cloudflared tunnel delete <TUNNEL_NAME>                   # 删除（先删对应 DNS 记录）
+```
+
+> 面板登录：`https://<PANEL_DOMAIN>/app/`，admin 凭据存 Bitwarden item `<BW_PANEL_ITEM>`。
+> **禁止裸 IP 明文**：在 s-ui 设置 `subDomain=<SUB_DOMAIN>`（启用 Host 校验，裸 IP 访问订阅返回 403），
+> 并把 MD 的 `<PANEL_PORT>` / `<SUB_PORT>` 用 ufw 限制为仅连接器 IP（如 `<HOST_666_IP>`），
+> 订阅地址即 `https://<SUB_DOMAIN>/sub/<subToken>`。
+> 管理面板暴露公网属敏感面：建议轮换强密码、必要时套 CF Access，禁止把面板 URL/凭据写入公共文件。
+
 ## 节点命名规范（命名即信息）
 
 格式：`[旗标][城市]-[来源]-[线路]-[能力]-[协议号]`
@@ -174,6 +257,11 @@ fail2ban-client status sshd                    # SSH 防护（主机白名单已
 > - **SSH key**：Bitwarden 条目的 `notes` 字段（OPENSSH 格式私钥全文）
 > - **IP / 域名 / 订阅短码**：同一条目的字段（`主VPS_IP`、`第二VPS_IP`、`旧VPS_IP`、`PROXY_DOMAIN`、`SUBLINK_DOMAIN`、`SHORT_CODE`）
 > - **节点全量凭据**：同一条目的附件 `nodes.json`（与服务器 `/etc/sing-box/nodes.json` 一致，含 uuid/密码/私钥）
+> - **Cloudflare 账号**：Bitwarden item `<BW_CF_ITEM>`（dash.cloudflare.com 登录密码；wrangler / cloudflared OAuth 均用它）
+> - **s-ui 面板**：Bitwarden item `<BW_PANEL_ITEM>`（admin 凭据 + `<PANEL_DOMAIN>` + 隧道 `<TUNNEL_NAME>`/`<TUNNEL_ID>` + 连接器位置）
+> - **订阅域名**：`<SUB_DOMAIN>`（`<BW_PANEL_ITEM>` 内；`sub.bjorn.men` 已被 sublink-worker 占用，勿复用）
+> - **隧道凭证**：`<HOST_666>` 的 `/etc/cloudflared/<TUNNEL_ID>.json`（本地 `~/.cloudflared/` 同款，勿提交）；新建/删除隧道后同步更新 `<BW_PANEL_ITEM>`
+> - 新增主机 IP（`<HOST_MD_IP>`、`<HOST_666_IP>`）与面板/订阅端口（`<PANEL_PORT>`、`<SUB_PORT>`、`<TROJAN_PORT>`）同 `<BW_SSH_ITEM>` 字段
 > - 条目名与取值见**私有笔记**，禁止写入任何公共文件。
 
 ## 凭据 / 备份

@@ -18,5 +18,8 @@
 | `/etc/systemd/system/sub-server.service` | sub-server systemd unit |
 | `/root/x-ui.db.bak-*` | x-ui 数据库备份（面板已停用，可恢复） |
 | `/root/x-ui-config.json.bak-*` | x-ui 配置备份（同上） |
+| `/etc/cloudflared/config.yml`（`<HOST_666>`） | Cloudflare Tunnel 连接器配置（ingress: `<PANEL_DOMAIN>` → `<HOST_MD_IP>:<PANEL_PORT>`；`<SUB_DOMAIN>` → `<HOST_MD_IP>:<SUB_PORT>`） |
+| `/etc/cloudflared/<TUNNEL_ID>.json`（`<HOST_666>`） | 隧道凭证（勿提交；本地 `~/.cloudflared/` 有同款，管理用） |
+| `~/.cloudflared/cert.pem`（本机） | cloudflared OAuth 证书（`cloudflared tunnel login` 生成，建隧道/DNS 用） |
 
 > `<HOST_B>`（第二台 VPS）侧：`/etc/sing-box/config-running.json`（VLESS+Reality :443，静态管理）、旧 shadowsocks 备份（`.bak-ss`）。
