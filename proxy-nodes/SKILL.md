@@ -1,6 +1,6 @@
 ---
 name: proxy-nodes
-description: 管理 VPS 代理节点 —— 增、删、改、验证（SSOT 单一事实来源，SSH 必须通过 Bitwarden，节点凭据不入库）。适用任何「多 VPS + sing-box/s-ui + 订阅生成」的代理节点池；部署实例细节见 FILES.md。
+description: 管理 VPS 代理节点 —— 增、删、改、验证（SSOT 单一事实来源，SSH 必须通过 Bitwarden，节点凭据不入库）。适用任何「多 VPS + s-ui/sing-box 控制面 + 订阅生成」的代理节点池；部署实例细节见 FILES.md。
 disable-model-invocation: true
 ---
 
@@ -45,7 +45,7 @@ ssh -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -i "$SSH_KEY" root
 - 用完即删：`trap` 在 `EXIT/INT/TERM/HUP` 时清理 `$SSH_KEY`。
 - 建议把 `known_hosts` 一并存入 Secrets Manager，彻底固定主机指纹。
 - 无本地 key 时，恢复入口 = Secrets Manager secret `<BWS_SSH_KEY_SECRET>`（见「真实值映射」）。
-- **重启主机的 sing-box 可能断开当前 SSH**（若本机流量经该主机 NAT）——见「Add a node」的 nohup 说明。
+- **重启数据面（sui-agent/sing-box）可能断开当前 SSH**（若本机流量经该主机 NAT）——见「Add a node」的 nohup 说明。
 
 ## IP 体检（新 VPS 接入前必做）
 
@@ -85,12 +85,12 @@ ssh ... root@<VPS_IP> 'apt-get install -y -qq jq >/dev/null 2>&1; \
 ### Add a node
 
 1. 按「Connection」取 key 后 SSH 进主机，在 **SSOT** 追加节点（类型/凭据字段见 FILES.md 模板）。
-2. 生成配置并重启 sing-box。**注意：重启可能断开当前 SSH**，用 nohup 后台执行，稍后重连验证。
+2. 生成配置并重启数据面（sui-agent / sing-box）。**注意：重启可能断开当前 SSH**，用 nohup 后台执行，稍后重连验证。
 3. 推送订阅。
 4. 验证：订阅已含新节点 + 健康检查通过。
 5. 提交版本（SSOT 已 gitignore，凭据不入库）。
 
-> 加在别的 VPS：除更新 SSOT（订阅可见）外，还需在目标 VPS 上同步 sing-box inbound，并在该机放行防火墙端口。
+> 加在别的 VPS：除更新 SSOT（订阅可见）外，还需在目标 VPS 上部署数据面（sui-agent / sing-box）并放行防火墙端口。
 
 ### Remove / Change a node
 

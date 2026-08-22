@@ -6,8 +6,8 @@
 
 | 主机 | 角色 | 线路 | 配额 |
 |------|------|------|------|
-| `<HOST_A>`（主 VPS） | s-ui **控制面** + sing-box 出口（CN2 直连）+ node agent | **CN2 GIA**（电信精品，低延迟） | ~1TB/月 |
-| `<HOST_666>`（9929） | sing-box 出口（9929 直连）+ node agent + cloudflared 隧道连接器 | **9929 优化 + Cogent 双 ISP** | ~800GB/月 |
+| `<HOST_A>`（主 VPS，CN2-GIA 节点） | s-ui **控制面**（:2095 面板 / :2096 订阅 / :2097 portal）+ **sui-agent 数据面**（CN2 直连 :443/:18443/:24443） | **CN2 GIA**（电信精品，低延迟） | ~1TB/月 |
+| `<HOST_666>`（9929，LA-666 节点） | **sui-agent 数据面**（9929 直连 :443/:18443）+ cloudflared 隧道连接器 | **9929 优化 + Cogent 双 ISP** | ~800GB/月 |
 
 - 摩尔多瓦旧落地已退款移除，不在节点池。
 - 主 VPS 实测下载 ~2Gbps、666 ~186Mbps（666 端口慢，不适合扛大流量）。
@@ -15,12 +15,13 @@
 ## 参考架构（当前实际）
 
 ```
-s-ui 控制面（主 VPS）── apiv2 ──> sui CLI（本机，Secrets Manager 自动加载 token + CF Access）
-  ├── inbound: 🇺🇸 洛杉矶 CN2 01/02（主 VPS 直连 :443 / trojan :18443）
-  ├── inbound: 🇺🇸 洛杉矶 9929 01/02（666 直连 :443 / trojan :18443）
-  └── inbound: 🛫 洛杉矶中转 01（主 VPS :24443 → 666 出口，仅手动）
+s-ui 控制面（主 VPS :2095/2096/2097，状态全在 SQLite /etc/s-ui/db/s-ui.db）
+  ── apiv2 ──> sui CLI（本机，Secrets Manager 自动加载 token + CF Access）
+  ├── node CN2-GIA（主 VPS） → inbound 🇺🇸 洛杉矶 CN2 01/02（:443 vless / :18443 trojan，sui-agent 监听）
+  ├── node LA-666（9929）    → inbound 🇺🇸 洛杉矶 9929 01/02（:443 vless / :18443 trojan，sui-agent 监听）
+  └── inbound 🛫 洛杉矶中转 01（主 VPS :24443 → 666 出口，仅手动）
 
-订阅渲染：subs.bjorn.men/sub/<token>（s-ui 原生）→ sub.bjorn.men/clash（sublink-worker 转换器）
+订阅：subs.bjorn.men/sub/<client>（s-ui 原生 :2096）→ sub.bjorn.men/clash（sublink-worker 转换器）；sub.bjorn.men/c/<短码> 302 短链
 面板：panel.bjorn.men/app（CF Access 保护）；订阅域名禁止裸 IP 明文
 ```
 
@@ -35,16 +36,14 @@ s-ui 控制面（主 VPS）── apiv2 ──> sui CLI（本机，Secrets Manag
 |------|------|
 | Secrets Manager secret `SSH_KEY_PROXY_VPS` | **SSH key 唯一存放点**（OPENSSH 私钥全文，连接必须经它获取） |
 | Secrets Manager secrets `PANEL_ADMIN_USER` / `PANEL_ADMIN_PASSWORD` | s-ui 面板 admin 凭据；面板/订阅域名、隧道信息见私有笔记 |
-| `/etc/sing-box/nodes.json` | **SSOT 节点定义**（含全部凭据，gitignored，勿提交） |
+| `/etc/s-ui/db/s-ui.db`（主 VPS） | **控制面 SSOT**（节点/入站/用户/订阅/配置全部状态，SQLite；备份见「主控备份/恢复」） |
 | Secrets Manager secrets `SUI_TOKEN` / `SUI_CF_ACCESS_ID` / `SUI_CF_ACCESS_SECRET` | s-ui 面板 API + Cloudflare Access 认证（`sui` wrapper 自动读取） |
 | Secrets Manager secrets `MAIN_VPS_IP` / `PROXY_DOMAIN` / `SUBLINK_DOMAIN` / `SUB_SHORT_CODE` | 主机 IP / 代理域名 / 订阅域名 / 订阅短码 |
-| `/etc/sing-box/render.py` | 生成器：nodes.json → config-running.json / raw / push |
-| `/etc/sing-box/sub_server.py` | 订阅生成 + 短链推送（读 nodes.json，启动自动推送） |
-| `/etc/sing-box/config-running.json` | sing-box 入站配置（由 render.py 生成，勿手改） |
-| `/etc/sing-box/healthcheck.py` | 健康检查脚本（cron 每 5 分钟） |
-| `/etc/systemd/system/{sing-box,sub-server}.service` | sing-box / sub-server systemd unit |
-| `/etc/cloudflared/config.yml`（`<HOST_666>`） | Cloudflare Tunnel 连接器配置（ingress 面板/订阅域名 → 主 VPS） |
+| `/etc/systemd/system/{sui,sui-agent}.service` | 控制面（:2095/2096/2097）/ 节点数据面（:443/:18443/…）systemd unit |
+| `/etc/cloudflared/config.yml`（`<HOST_666>`） | Cloudflare Tunnel 连接器配置（ingress 面板/订阅/portal 域名 → 主 VPS） |
 | `~/.cloudflared/cert.pem`（本机） | cloudflared OAuth 证书（建隧道/DNS 用） |
+| `~/backups/s-ui/`（本机）+ `/root/sui-backups/`（主 VPS） | 控制面数据库备份（sui-backup / 每日 03:17 cron） |
+| ~~`/etc/sing-box/*`~~（旧栈，已归档 `.bak-*`） | **旧 sing-box + render.py + sub_server.py + nodes.json 栈已停用**（勿恢复） |
 
 ## 部署命令（当前栈）
 
@@ -76,15 +75,22 @@ sui client delete --id N                    # 删除用户
 sui show sub preview --client X --format clash   # 预览某用户订阅
 ```
 
-### 直连节点（render.py 栈）
+### 节点管理（sui CLI + sui-agent 数据面）
 
 ```bash
-# 增/删/改后：
-cd /etc/sing-box && python3 render.py config <HOST_ID>
-nohup systemctl restart sing-box >/tmp/sb-restart.log 2>&1 &   # 重启可能断 SSH，用 nohup
-systemctl restart sub-server                                    # 推送订阅
-curl -sL "https://<SUBLINK_DOMAIN>/c/<SHORT_CODE>" | grep '<NODE_NAME>'   # 订阅已含/已移除
-/etc/sing-box/healthcheck.py                                    # 服务+端口+订阅完整性
+# 新增 VPS 节点：
+sui node create --name <NODE> --address <HOST>            # 返回 nodeId + 节点 token
+sudo bash scripts/install-agent.sh --master https://<PANEL_DOMAIN>/app --token <node-token> --name <NODE>
+sui node list --concise                                   # 验证 online（status/heartbeat）
+
+# 给节点一次性加协议（DNS A 记录 → ACME TLS → 建 inbound → 绑用户 → 防火墙；幂等可重跑）：
+sui node add-protocols --node <NODE> --protocols "trojan:18443,hysteria2:8443" \
+  --domain <NODE_DOMAIN> --dns <IP> --cf-token $CF_TOKEN --clients 1,4 --firewall [--dry-run]
+
+# 改完立即验证订阅（不用等客户端导入）：
+sui show sub preview --client <NAME> --format clash
+sui node status --id N                                    # 节点完整状态
+sui show onlines                                          # 当前在线 inbound/用户
 ```
 
 ### 主控备份 / 恢复（重要：配置曾被误清空）
@@ -119,4 +125,4 @@ ufw allow <port>/tcp          # 放行节点端口
   - `半解`：ChatGPT / Claude / Netflix / Disney+ 可，Gemini / YouTube Premium 不可
   - `受限`：ChatGPT / Claude / Gemini 可，但 Netflix 仅自制剧、部分流媒体平台被禁
 
-> 历史（已归档，勿恢复）：x-ui (3x-ui) 与 caddy 已停用；摩尔多瓦 VPS 已退款移除。
+> 历史（已归档，勿恢复）：x-ui (3x-ui) 与 caddy 已停用；**sing-box + render.py + sub_server.py + nodes.json 旧栈已归档**（服务 disabled，文件在 /etc/sing-box 下改名 .bak-*）；摩尔多瓦 VPS 已退款移除。
