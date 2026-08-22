@@ -76,6 +76,37 @@ ssh -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -i "$SSH_KEY" root
 - 健康检查：`/etc/sing-box/healthcheck.py`，cron 每 5 分钟。
 - 另有 s-ui 多节点控制面：主控在 `<HOST_MD>`（面板 `<PANEL_PORT>`，订阅 `<SUB_PORT>`），节点 agent 部署于 `<HOST_MD>` 与 `<HOST_666>`；面板经 Cloudflare Tunnel 暴露在 `<PANEL_DOMAIN>`（见「Cloudflare CLI / 域名与隧道」）。
 
+## IP 体检（新 VPS 接入前必做）
+
+新主机接入节点池前，先跑一次社区权威体检脚本 **xykt/IPQuality**（整合 Maxmind + IPinfo / ipregistry / ipapi / AbuseIPDB / IP2Location / IPQS / DB-IP / Scamalytics + 400+ 黑名单 + 流媒体/AI 解锁 + 邮局连通），确认 IP 类型、风险与解锁能力，避免把不合格（被标记/高滥用/服务不解锁）的 IP 接进来。
+
+```bash
+# 经 Bitwarden 取 key 登录目标主机后执行：
+#   先装 jq（JSON 输出需要）；-4 只查 IPv4；-n 跳过交互式依赖安装；-p 隐私模式（禁在线报告）
+ssh ... root@<VPS_IP> 'apt-get install -y -qq jq >/dev/null 2>&1; \
+  bash <(curl -Ls https://IP.Check.Place) -4 -n -j'          # JSON，适合 agent 解析
+# 可视化完整报告（含流媒体/邮局排版）：bash <(curl -Ls https://IP.Check.Place) -I
+```
+
+### 看哪些字段（按优先级）
+
+1. **二、IP 类型属性**（各库使用类型 / 公司类型）：`IP2Location=机房` 或多家 `公司类型=机房` → 判机房；IPinfo 系把 Cogent 这类骨干传输商标「家宽」属误判（见下节）。
+2. **四、风险因子**：`服务器=是`（多家）→ 机房 IP；`代理/Tor/VPN=是` → 直接淘汰。
+3. **三、风险评分**：Scamalytics ≥80、ipapi 滥用率偏高、AbuseIPDB 非 0 且黑名单命中多 → 谨慎或换机。
+4. **五、流媒体及 AI 解锁**：记录 ChatGPT / Claude / Gemini / Netflix / YouTube 结果，用于节点命名「能力」标签（全解/半解/受限）。
+5. **六、黑名单**：423 个库里命中数；≥3 个黑名单 → 换机。
+
+### 双 ISP / 住宅的判断（避免被商家话术骗）
+
+- 严格标准：ipinfo 的 `asn.type` 与 `company.type` **都为 `isp`**，且指向**同一家真实家宽运营商**（Comcast / AT&T / Charter 等）。
+- 常见陷阱：Cogent（AS174）这类骨干/传输商在 ipinfo 里 `asn.type=isp`，会被标成「家宽」；但实际是机房段（IP2Location=机房、多家 `服务器=是`），公司字段常显示租用方（IDC/VPS 商）。**各库结论打架时，以 IP2Location「机房」+ 多家「服务器=是」为准。**
+- 需要住宅/双 ISP 的场景（TikTok / 跨境电商矩阵）：机房 IP 不合格，直接排除。
+- 代理节点场景（本 skill）：机房 IP 通常可接受，但要求**原生**（无代理/VPN/Tor）+ 低风险 + 目标服务解锁达标。
+
+### 体检结论 → 节点命名
+
+把体检结果（线路/能力）记入「节点命名规范」的能力标签；同一 IP 不同库结论不一致时，在备注注明实测（如「YouTube 区=CN」「25 端口出站被阻断」）。
+
 ## Add a node
 
 1. 按「Connection」经 Bitwarden 取 key 后 SSH 进主机，编辑 `/etc/sing-box/nodes.json` 的 `nodes` 数组追加（`host` 决定渲染/归属：`<HOST_A_ID>`=主 VPS，`<HOST_B_ID>`=第二台）：
