@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `1793ca87a6fb9d02208506487f5ef4cf593fd9c7`
+- **Commit SHA**: `f5c7b8b1df1bbd88dd3db603e01f16e3e3f28ab2`
 - **Date**: 2026-08-23
-- **Commit**: docs(proxy-nodes): 新增「IP 体检」章节——新 VPS 接入前必做
+- **Commit**: feat(skills): 重构 proxy-nodes（通用工作流/实例分层）+ parallel-optimizing 收窄 JS/TS 范围 + README 索引
 
 **Source documentation:**
 
@@ -112,8 +112,8 @@ skills/
 | `intrinsic-design` | Intrinsic Web Design — content-driven CSS layout using intrinsic sizing, Grid, Flexbox, and fluid values without media queries. | SKILL.md |
 | `manifest` | 生成并维护 skills/GENERATION.md 溯源清单，追踪每个 skill 的来源、结构与更新流程。 | SKILL.md, TEMPLATE.md |
 | `parallel-porting` | 大规模 1:1 移植 / 并行重构工作流（Bun 方法论落地）——worktree 分片并行、对抗审查闭环、机器可检查退出条件、备注回流、拓扑合并。移植/port/1:1 对齐/SSOT 场景使用。 | SKILL.md, agents/openai.yaml, references/ (4), scripts/ (3) |
-| `parallel-optimizing` | 行为等价下的并行算法优化工作流（parallel-porting 优化版）——bit-exact 保持下做性能/体积优化：热点分析、bench 驱动循环、bit-exact 浮点门禁（豁免注册表）、顺序敏感性分类、双运行时校验、tree-shaking 瘦身、拓扑合并。触发词：性能优化/算法优化/提速/benchmark/热点/bundle 瘦身/bit-exact。 | SKILL.md, references/ (5), scripts/ (4) |
-| `proxy-nodes` | 管理 VPS 代理节点——增、删、改、验证（SSOT 单一事实来源，SSH 必须通过 Bitwarden；公共版真实值全部脱敏为占位符）。 | SKILL.md, FILES.md |
+| `parallel-optimizing` | 行为等价下的并行算法优化工作流（parallel-porting 优化版，**面向 JS/TS**）——bit-exact 保持下做性能/体积优化：热点分析、bench 驱动循环、bit-exact 浮点门禁（豁免注册表）、顺序敏感性分类、双运行时校验（bun/Chrome）、tree-shaking 瘦身、拓扑合并。触发词：JS/TS 性能优化/算法优化/提速/benchmark/热点/bundle 瘦身/bit-exact。 | SKILL.md, references/ (5), scripts/ (4) |
+| `proxy-nodes` | 管理 VPS 代理节点——通用工作流（Bitwarden 凭据/IP 体检/增删改验证/命名约定/安全红线）+ 部署实例分层（FILES.md=实例，SKILL.md=通用）；SSOT 单一事实来源，SSH 必须通过 Bitwarden，公共版真实值全部脱敏。 | SKILL.md, FILES.md |
 | `teach` | 在工作区内教授用户一项新技能或概念——使命驱动，最近发展区选课，多文件 HTML 课程。 | SKILL.md, GLOSSARY-FORMAT.md, KATEX.md, LEARNING-RECORD-FORMAT.md, LESSON-FORMAT.md, MISSION-FORMAT.md, RESOURCES-FORMAT.md, STYLES.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
 | `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
@@ -161,13 +161,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 1793ca8..HEAD -- '*/SKILL.md'
+git diff --name-only f5c7b8b..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 1793ca8..HEAD -- '*/SKILL.md'
+git diff f5c7b8b..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 1793ca8..HEAD -- '*/SKILL.md'
+git log --oneline f5c7b8b..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -220,8 +220,9 @@ git log --oneline 1793ca8..HEAD -- '*/SKILL.md'
 | 2026-06-28 | ed71c60  | Add feature-dev (递阶控制 + DAG), apply natural-mental-model self-consistency to proposal |
 | 2026-08-12 | e76d545  | Add parallel-porting — 1:1 移植/并行重构工作流 (Bun 方法论落地), 12 active skills |
 | 2026-08-23 | 1793ca8  | Add parallel-optimizing + proxy-nodes — 14 active skills |
+| 2026-08-23 | f5c7b8b  | 重构 proxy-nodes（通用工作流/实例分层，FILES.md=部署实例）+ parallel-optimizing 收窄 JS/TS 范围 — 14 active skills |
 
 ---
 
 Last updated: 2026-08-23
-Current SHA: 1793ca8
+Current SHA: f5c7b8b
