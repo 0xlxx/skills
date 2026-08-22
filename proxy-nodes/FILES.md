@@ -71,6 +71,7 @@ sui client edit --id N --volume 100G        # 改额度（流量计数保留）
 sui client edit --id N --expiry +30d        # 改到期（unix 秒或 +30d）
 sui client edit --id N --enable false       # 封禁 / true 解封
 sui client reset-traffic --id N             # 清零已用流量
+sui client reset-token --id N                # 轮换订阅令牌（泄漏链接立即作废，返回新 subToken）
 sui client delete --id N                    # 删除用户
 sui show sub preview --client X --format clash   # 预览某用户订阅
 ```
@@ -113,8 +114,8 @@ sui doctor                                  # 验证新 token 可用
 #    旧 token 在网页端删除
 
 # 2) 订阅子令牌轮换（client 级）：
-#    ⚠️ 目前 sui-cli 没有 `client reset-token` 命令 —— 需走面板 admin（用户 → 编辑 → 订阅令牌）或 DB 更新 sub_token 后重启 sui。
-#    建议：给 sui-cli 补 `client reset-token --id N`（当前为能力缺口）。
+#    sui client reset-token --id N        # 已实现（需控制面 ≥ 8906f2d；部署后可用）
+#    # 回退：面板 admin（用户 → 编辑 → 订阅令牌）或 DB 更新 sub_token 后重启 sui
 
 # 3) 清理个人 vault 已迁移条目：
 #    确认 SM 稳定后，删除 bw 中 sui-panel / proxy-vps 已迁移字段（SSOT 只留 Secrets Manager）
