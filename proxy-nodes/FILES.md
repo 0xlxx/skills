@@ -65,6 +65,7 @@ sui show settings --key subClashExt --value "<yaml>" # 改 clash 模板（按需
 
 ```bash
 sui doctor                                                        # 一键体检认证链路（token/secret/面板连通）
+sui inbound list --concise                                            # 查 inbound id（建号 --inbounds 用）
 sui client create --name X --volume 20G --inbounds 2,4,6,8 --expiry +30d  # 建号（volume 支持 100G/10T/500M；expiry 支持 +3m/+1h/+30d）
 sui client list --concise                                                  # 看全部：id/name/quota/流量/到期
 sui client edit --id N --volume 100G        # 改额度（流量计数保留）
@@ -84,6 +85,15 @@ nohup systemctl restart sing-box >/tmp/sb-restart.log 2>&1 &   # 重启可能断
 systemctl restart sub-server                                    # 推送订阅
 curl -sL "https://<SUBLINK_DOMAIN>/c/<SHORT_CODE>" | grep '<NODE_NAME>'   # 订阅已含/已移除
 /etc/sing-box/healthcheck.py                                    # 服务+端口+订阅完整性
+```
+
+### 主控备份 / 恢复（重要：配置曾被误清空）
+
+```bash
+sui-backup --keep 10                       # 本地按需备份（远端 sqlite3 在线快照 → 下载 ~/backups/s-ui/）
+# VPS 每日 03:17 自动快照已装：/root/sui-backups/（保留 7 份）
+# 恢复：scp 回主 VPS → systemctl stop sui → 覆盖 /etc/s-ui/db/s-ui.db → systemctl start sui
+#   （恢复前先另存当前库；只替换 .db，WAL 会自动重建）
 ```
 
 ### Cloudflare CLI / 隧道
