@@ -20,6 +20,7 @@ disable-model-invocation: true
 > - 禁止提交：`nodes.json`、私钥、证书、`config-running.json`、`.bak` 备份。
 > - **订阅短码是低熵 bearer 凭据**（约 36 bit，可枚举）：Worker 侧应限流/加访问控制，并周期性轮换短码。
 > - `nodes.example.json`、快照类文件等入库模板**只允许占位符内容**；提交前用 `grep -nE 'BEGIN.*PRIVATE|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'` 校验必须 0 命中。
+> - **提交前门禁**：跑 `bash scripts/check-secrets.sh`（仓库根），0 命中才允许提交。
 
 ## Connection（必须通过 Bitwarden Secrets Manager）
 
