@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `f5c7b8b1df1bbd88dd3db603e01f16e3e3f28ab2`
+- **Commit SHA**: `8a3ba8319d90b0b62fad79d0713d7d8613616735`
 - **Date**: 2026-08-23
-- **Commit**: feat(skills): 重构 proxy-nodes（通用工作流/实例分层）+ parallel-optimizing 收窄 JS/TS 范围 + README 索引
+- **Commit**: feat(proxy-nodes): 凭据从个人 vault 迁移到 Secrets Manager（bws）— Connection/真实值映射/速查表
 
 **Source documentation:**
 
@@ -161,13 +161,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only f5c7b8b..HEAD -- '*/SKILL.md'
+git diff --name-only 8a3ba83..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff f5c7b8b..HEAD -- '*/SKILL.md'
+git diff 8a3ba83..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline f5c7b8b..HEAD -- '*/SKILL.md'
+git log --oneline 8a3ba83..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -221,8 +221,9 @@ git log --oneline f5c7b8b..HEAD -- '*/SKILL.md'
 | 2026-08-12 | e76d545  | Add parallel-porting — 1:1 移植/并行重构工作流 (Bun 方法论落地), 12 active skills |
 | 2026-08-23 | 1793ca8  | Add parallel-optimizing + proxy-nodes — 14 active skills |
 | 2026-08-23 | f5c7b8b  | 重构 proxy-nodes（通用工作流/实例分层，FILES.md=部署实例）+ parallel-optimizing 收窄 JS/TS 范围 — 14 active skills |
+| 2026-08-23 | 8a3ba83  | 凭据迁移 Secrets Manager（bws）— proxy-nodes Connection/真实值映射/速查表 — 14 active skills |
 
 ---
 
 Last updated: 2026-08-23
-Current SHA: f5c7b8b
+Current SHA: 8a3ba83
