@@ -1,0 +1,13 @@
+# OPTIMIZATION_CLASSES.tsv — 优化分类表模板（对应 parallel-porting 的 MODULES.tsv）
+#
+# 用途: 并行 agent 先查表再动手, 不各自猜。登记每个热点模块: 热点占比 ↔ 优化类型 ↔
+#       顺序相关性 ↔ 共享状态风险 ↔ 验证命令。agent 完成一簇后必须回写本表。
+# 顺序相关性: ORDERED（改遍历/求和/排序顺序会漂移, 非 bit-exact 通道）| UNORDERED（顺序无关, 可 swap-remove/重排）
+# 共享状态风险: MUTABLE_SHARED（缓存/复用池返回可变对象 → 别名污染风险）| NONE
+# 基线 (日期): <bit-exact 命令> <N> 覆盖, <对齐命令> <M>/<K>, <回归> <P> 失败, <热点定位> <top 模块占比>, bundle <raw>/<gzip>
+# 更新时间: <日期>
+#
+# 填写示例（来自 references/<project>.md 的热点表）; 项目无关, 模块列填实际路径。
+#
+module	hotspot_pct	opt_type	order_sensitive	shared_state_risk	verify_cmd	cluster_notes
+<模块路径>	<占比>	<免分配/cache/typed-array/属性直读/…>	<ORDERED/UNORDERED>	<NONE/MUTABLE_SHARED>	<bit-exact + 热点定位>	<簇名/优先级>
