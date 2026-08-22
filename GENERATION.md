@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `ed71c60`
-- **Date**: 2026-06-28
-- **Commit**: feat: add feature-dev skill, apply natural-mental-model to proposal
+- **Commit SHA**: `1793ca87a6fb9d02208506487f5ef4cf593fd9c7`
+- **Date**: 2026-08-23
+- **Commit**: docs(proxy-nodes): 新增「IP 体检」章节——新 VPS 接入前必做
 
 **Source documentation:**
 
@@ -51,6 +51,13 @@ skills/
 │   ├── agents/openai.yaml      # UI metadata (display name / short description)
 │   ├── references/             # 4 templates: MODULES.tsv / cluster-brief / agent-remarks / ccx-cheatsheet
 │   └── scripts/                # 3 executables: setup-worktree / dispatch-ccx / check-gates
+├── parallel-optimizing/        # Active
+│   ├── SKILL.md                # Main skill file
+│   ├── references/             # 5 files: OPTIMIZATION_CLASSES.tsv / agent-remarks / bench-commands / cluster-brief / parallel-protocol
+│   └── scripts/                # 4 executables: check-gates / cluster-prompt / dispatch-ccx / setup-worktree
+├── proxy-nodes/                # Active
+│   ├── SKILL.md                # Main skill file
+│   └── FILES.md                # Key files inventory（SSOT nodes.json / render.py / sub_server.py / cloudflared 隧道）
 ├── teach/                       # Active
 │   ├── SKILL.md                # Main skill file
 │   ├── GLOSSARY-FORMAT.md      # Glossary document format
@@ -92,7 +99,7 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (11)
+## Active Skills (14)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
@@ -105,6 +112,8 @@ skills/
 | `intrinsic-design` | Intrinsic Web Design — content-driven CSS layout using intrinsic sizing, Grid, Flexbox, and fluid values without media queries. | SKILL.md |
 | `manifest` | 生成并维护 skills/GENERATION.md 溯源清单，追踪每个 skill 的来源、结构与更新流程。 | SKILL.md, TEMPLATE.md |
 | `parallel-porting` | 大规模 1:1 移植 / 并行重构工作流（Bun 方法论落地）——worktree 分片并行、对抗审查闭环、机器可检查退出条件、备注回流、拓扑合并。移植/port/1:1 对齐/SSOT 场景使用。 | SKILL.md, agents/openai.yaml, references/ (4), scripts/ (3) |
+| `parallel-optimizing` | 行为等价下的并行算法优化工作流（parallel-porting 优化版）——bit-exact 保持下做性能/体积优化：热点分析、bench 驱动循环、bit-exact 浮点门禁（豁免注册表）、顺序敏感性分类、双运行时校验、tree-shaking 瘦身、拓扑合并。触发词：性能优化/算法优化/提速/benchmark/热点/bundle 瘦身/bit-exact。 | SKILL.md, references/ (5), scripts/ (4) |
+| `proxy-nodes` | 管理 VPS 代理节点——增、删、改、验证（SSOT 单一事实来源，SSH 必须通过 Bitwarden；公共版真实值全部脱敏为占位符）。 | SKILL.md, FILES.md |
 | `teach` | 在工作区内教授用户一项新技能或概念——使命驱动，最近发展区选课，多文件 HTML 课程。 | SKILL.md, GLOSSARY-FORMAT.md, KATEX.md, LEARNING-RECORD-FORMAT.md, LESSON-FORMAT.md, MISSION-FORMAT.md, RESOURCES-FORMAT.md, STYLES.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
 | `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
@@ -152,13 +161,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only b44918f..HEAD -- '*/SKILL.md'
+git diff --name-only 1793ca8..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff b44918f..HEAD -- '*/SKILL.md'
+git diff 1793ca8..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline b44918f..HEAD -- '*/SKILL.md'
+git log --oneline 1793ca8..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -210,8 +219,9 @@ git log --oneline b44918f..HEAD -- '*/SKILL.md'
 | 2026-06-27 | b44918f  | Merge visual-teaching into teach (8 files), archive visual-teaching, add natural-mental-model proposal |
 | 2026-06-28 | ed71c60  | Add feature-dev (递阶控制 + DAG), apply natural-mental-model self-consistency to proposal |
 | 2026-08-12 | e76d545  | Add parallel-porting — 1:1 移植/并行重构工作流 (Bun 方法论落地), 12 active skills |
+| 2026-08-23 | 1793ca8  | Add parallel-optimizing + proxy-nodes — 14 active skills |
 
 ---
 
-Last updated: 2026-08-12
-Current SHA: e76d545
+Last updated: 2026-08-23
+Current SHA: 1793ca8
