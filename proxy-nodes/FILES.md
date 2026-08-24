@@ -8,8 +8,9 @@
 |------|------|------|------|
 | `<HOST_A>`（主 VPS，CN2-GIA 节点） | s-ui **控制面**（:2095 面板 / :2096 订阅 / :2097 portal）+ **sui-agent 数据面**（CN2 直连 :443/:18443 vless-reality + :8443/udp hysteria2 + :24443 中转） | **CN2 GIA**（电信精品，低延迟） | ~1TB/月 |
 | `<HOST_666>`（9929，LA-666 节点） | **sui-agent 数据面**（9929 直连 :443/:18443 vless-reality + :8443/udp hysteria2）+ cloudflared 隧道连接器 | **9929 优化 + Cogent 双 ISP** | ~800GB/月 |
+| `<HOST_MD>`（摩尔多瓦，落地/exit） | **sui-agent 数据面**（仅 :443 vless-reality 落地；**防火墙只放行主 VPS IP**，客户端不直连）+ 经主 VPS 中转接入 | 摩尔多瓦（欧洲落地） | 512MB 小内存 |
 
-- 摩尔多瓦落地已退款移除，**不在节点池**；重装（Debian-12）后 SSH/网络待商家修复（root 密码未生效 + 美机房 IP 被网络层挡），恢复后再加回「主 VPS → 摩尔多瓦」中转。
+- 摩尔多瓦落地已接回：重装 Ubuntu 24.04，root 密码已轮换存 Secrets Manager（`MOLDOVA_VPS_PASSWORD`），SSH/ufw/agent 已就绪；接入方式 = 「主 VPS 中转 + 摩尔多瓦落地」，客户端不直连落地机。
 - 主 VPS 实测下载 ~2Gbps、666 ~186Mbps（666 端口慢，不适合扛大流量）。
 
 ## 参考架构（当前实际）
@@ -20,6 +21,8 @@ s-ui 控制面（主 VPS :2095/2096/2097，状态全在 SQLite /etc/s-ui/db/s-ui
   ├── node CN2-GIA（主 VPS） → inbound 🇺🇸 洛杉矶 CN2 01/02/03（:443/:18443 vless-reality，:8443/udp hysteria2）
   ├── node LA-666（9929）    → inbound 🇺🇸 洛杉矶 9929 01/02/03（:443/:18443 vless-reality，:8443/udp hysteria2）
   └── inbound 🛫 洛杉矶中转 01（主 VPS :24443 vless-reality → 666 出口，仅手动）
+  ├── node MD（摩尔多瓦）   → inbound 🇲🇩 摩尔多瓦落地 01（:443 vless-reality，防火墙仅放行主 VPS IP）
+  └── inbound 🛫 摩尔多瓦中转 01（主 VPS :24444 vless-reality → MD 出口，node relay 管理）
 
 订阅：subs.bjorn.men/sub/<client>（s-ui 原生 :2096）→ sub.bjorn.men/clash（sublink-worker 转换器）；sub.bjorn.men/c/<短码> 302 短链
 面板：panel.bjorn.men/app（CF Access 保护）；订阅域名禁止裸 IP 明文
@@ -28,7 +31,7 @@ s-ui 控制面（主 VPS :2095/2096/2097，状态全在 SQLite /etc/s-ui/db/s-ui
 **订阅策略（sublink-worker /clash 模板）**：
 - 自动组默认 **url-test**（每个客户端按自己网络选最快线路：电信→CN2、联通→9929）；`auto_strategy=load-balance` 可切回负载均衡。
 - **中转节点不进自动组**（链式出口双倍烧配额：1GB 用户流量 ≈ 两台面板各 2GB），只在「🚀 节点选择」手动选。
-- 中转只用于需要 666 出口的特定场景（备用/应急）。
+- 中转只用于需要特定出口的备用/应急场景（`🛫 洛杉矶中转 01`→666、`🛫 摩尔多瓦中转 01`→MD）。
 - **hysteria2 也不进自动组**（手动选；避免 url-test 对 UDP 链路误判）。
 
 ## 关键文件
@@ -40,6 +43,7 @@ s-ui 控制面（主 VPS :2095/2096/2097，状态全在 SQLite /etc/s-ui/db/s-ui
 | `/etc/s-ui/db/s-ui.db`（主 VPS） | **控制面 SSOT**（节点/入站/用户/订阅/配置全部状态，SQLite；备份见「主控备份/恢复」） |
 | Secrets Manager secrets `SUI_TOKEN` / `SUI_CF_ACCESS_ID` / `SUI_CF_ACCESS_SECRET` | s-ui 面板 API + Cloudflare Access 认证（`sui` wrapper 自动读取） |
 | Secrets Manager secrets `MAIN_VPS_IP` / `PROXY_DOMAIN` / `SUBLINK_DOMAIN` / `SUB_SHORT_CODE` | 主机 IP / 代理域名 / 订阅域名 / 订阅短码 |
+| Secrets Manager secret `MOLDOVA_VPS_PASSWORD` | 摩尔多瓦 root SSH 密码（2026-08-24 轮换，SSH/ufw/agent 用） |
 | `/etc/systemd/system/{sui,sui-agent}.service` | 控制面（:2095/2096/2097）/ 节点数据面（:443/:18443/…）systemd unit |
 | `/etc/cloudflared/config.yml`（`<HOST_666>`） | Cloudflare Tunnel 连接器配置（ingress 面板/订阅/portal 域名 → 主 VPS） |
 | `~/.cloudflared/cert.pem`（本机） | cloudflared OAuth 证书（建隧道/DNS 用） |
@@ -88,6 +92,14 @@ sui node list --concise                                   # 验证 online（stat
 # 给节点一次性加协议（DNS A 记录 → ACME TLS → 建 inbound → 绑用户 → 防火墙；幂等可重跑）：
 sui node add-protocols --node <NODE> --protocols "trojan:18443,hysteria2:8443" \
   --domain <NODE_DOMAIN> --dns <IP> --cf-token $CF_TOKEN --clients 1,4 --firewall [--dry-run]
+
+# 中转/落地（入口节点 → 落地机，node relay 管理）：
+sui node relay list --node <入口节点>                        # 查看（默认不含 uuid，--verbose 才含）
+sui node relay add --node <入口> --inbound "<🛫 xx中转 01>" \
+  --exit <落地机> --exit-inbound "<🇲🇩 xx落地 01>" --via-client <relay账户> \
+  --tag relay-<地点> --dry-run                               # 派生模式，先看推导再实跑
+sui node relay rm --id N                                      # 或 --node <入口> --tag relay-<地点>
+sui node relay edit --id N --tcp-fast-open                    # fetch-merge 局部改（如开 TFO）
 # Hysteria2 加完还要（add-protocols 不做）：
 #  1) 注入 obfs + 端口跳跃范围（不进 Auto 组）：
 #     sui ops save --object inbounds --action edit --data '{"id":<INBOUND_ID>,"obfs":{"type":"salamander","password":"<pw>"},"server_ports":["8443:8453"]}'
@@ -145,7 +157,7 @@ ufw allow <port>/tcp          # 放行节点端口
 
 ## 命名实例与能力定义
 
-- 当前命名：`🇺🇸 洛杉矶 CN2 01/02/03`、`🇺🇸 洛杉矶 9929 01/02/03`、`🛫 洛杉矶中转 01`。
+- 当前命名：`🇺🇸 洛杉矶 CN2 01/02/03`、`🇺🇸 洛杉矶 9929 01/02/03`、`🛫 洛杉矶中转 01`、`🛫 摩尔多瓦中转 01`、`🇲🇩 摩尔多瓦落地 01`。
   - `01`=VLESS+Reality :443、`02`=VLESS+Reality :18443、`03`=Hysteria2 :8443/udp（obfs-salamander + 端口跳跃）。
   - **trojan 已移除**（曾用 us1/us2 真域名 = 明文 SNI，被墙风险；全部换 Reality）。
 - 能力标签（可选，以 lmc999 RegionRestrictionCheck 实测为准）：
@@ -168,6 +180,8 @@ ufw allow <port>/tcp          # 放行节点端口
 5. **`inferLocation` 用 `-` 切 tag 前缀**，本部署 tag 用空格（`🇺🇸 洛杉矶 9929 01`）→ 自动命名退化为 `proto-id`（如 `hysteria2-30`）；建完 inbound 手动 `sui inbound edit --id N --tag "<规范名>"`。
 6. **端口跳跃**：hysteria2 服务端只监听单端口，跳跃靠客户端随机目标端口 + 服务端 iptables `REDIRECT` 范围到实际端口（两台节点都加：`iptables -t nat -A PREROUTING -p udp --dport 8443:8453 -j REDIRECT --to-ports 8443`）+ ufw 放行范围 `8443:8453/udp`。换机器记得重加。
 7. **运营监控**：主 VPS `/usr/local/bin/sui-alert.sh`（cron */10）→ Telegram：用户配额≥80%、≤3 天到期、节点心跳 >180s 离线、portal/sub/panel HTTP 异常。配置 `/etc/sui-alert/config`（0600，TELEGRAM_BOT_TOKEN/CHAT_ID）。
-8. **中转出站必须用专用中转账户**：relay 出站（node_outbounds）的 uuid 必须是**永久启用、无限量（volume=0）**的专用 client（如 `relay`），不能借用普通用户——普通用户被禁用/到期后 uuid 从出口 inbound users 移除，中转链路静默断开（`sui node` 仍 online，但中转节点连不上）。建法：`sui client create --name relay --volume 0 --inbounds <出口inbound id>`，再把 relay-666 出站 options.uuid 改成它的 uuid（`sui ops save --object nodeoutbounds --action edit`）。
+8. **中转出站必须用专用中转账户**：relay 出站（node_outbounds）的 uuid 必须是**永久启用、无限量（volume=0）**的专用 client（如 `relay`），不能借用普通用户——普通用户被禁用/到期后 uuid 从出口 inbound users 移除，中转链路静默断开（`sui node` 仍 online，但中转节点连不上）。建法：`sui client create --name relay --volume 0 --inbounds <出口inbound id>`，再把 relay 出站 options.uuid 改成它的 uuid（`sui node relay edit --id N --uuid <新uuid>`，fetch-merge 只改这一处）。
+9. **`clients.inbounds` BLOB + SQLite json_each 怪癖**：inbounds 以 BLOB 存储，`json_each` 对特定值（如 `[2,32]`）直接报 `malformed JSON`，把**全部节点**配置渲染拖挂（所有 agent `poll rejected`、主控日志刷 `WARNING - failed : malformed JSON`）。后端已统一 `CAST(... AS TEXT)` 修复（service/inbounds.go、client.go）；再遇到先 `select id,name,json_valid(cast(inbounds as text)) from clients;` 定位坏行。
 
-> 历史（已归档，勿恢复）：x-ui (3x-ui) 与 caddy 已停用；**sing-box + render.py + sub_server.py + nodes.json 旧栈已归档**（服务 disabled，文件在 /etc/sing-box 下改名 .bak-*）；摩尔多瓦 VPS 已退款移除（重装后待恢复接入）。
+
+> 历史（已归档，勿恢复）：x-ui (3x-ui) 与 caddy 已停用；**sing-box + render.py + sub_server.py + nodes.json 旧栈已归档**（服务 disabled，文件在 /etc/sing-box 下改名 .bak-*）；摩尔多瓦 VPS 曾退款移除，2026-08-24 已重装（Ubuntu 24.04）接回为「主 VPS 中转 + 摩尔多瓦落地」。

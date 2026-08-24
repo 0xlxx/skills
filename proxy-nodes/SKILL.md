@@ -102,6 +102,20 @@ ssh ... root@<VPS_IP> 'apt-get install -y -qq jq >/dev/null 2>&1; \
 
 健康检查 + 服务状态 + 端口监听（TCP/UDP）+ 订阅完整性。具体命令见 FILES.md。
 
+## 中转/落地（Relay）
+
+拓扑：**入口节点**（客户端连接，如主 VPS）上的「中转入站」接收流量 → 经一条**中转出站**（`node_outbounds` 行）链到**落地机**（exit node）入站。客户端只连入口，**不直连落地机**。
+
+- 一条链路 = 一条 NodeOutbound 行 + 一条 route 规则（`inbound:[入口tag] → outbound:relay-tag`），用 `sui node relay` 管理（add/list/rm/edit）。
+- add 三种模式（互斥）：① `--exit` 派生（自动推导 server/port/uuid/flow/sni/pbk/sid，需 `--via-client` 提供中转专用账户 uuid）；② 显式 vless flags（`--server --port --uuid --server-name --public-key [--short-id] [--flow]`）；③ `--options '<json>'` 原样（非 vless）。`--dry-run` 先看推导再实跑。
+- **生效机制**：add/edit/rm 会 bump 节点 configVersion，agent 下一轮 poll 应用（约一轮延迟，改完等 5-10s 再断言）。
+- **落地机防火墙**：只放行入口 IP（`ufw allow from <入口IP> to any port <端口> proto tcp` + `default deny incoming`），否则客户端可绕过入口直连落地机。
+- **中转专用账户**：relay 出站 uuid 必须是**永久启用、无限量（volume=0）**的专用 client，不能借用普通用户——普通用户禁用/到期后 uuid 从出口 inbound users 移除，链路静默断开（节点仍 online 但中转连不上）。
+- `node relay list` 默认不含 uuid（与节点 token 同级敏感），`--verbose` 才输出完整 options。
+- 命名：中转入口用「中转」标注（`🛫 洛杉矶中转 01`、`🛫 摩尔多瓦中转 01`），落地机用地点旗标（`🇲🇩 摩尔多瓦落地 01`）。
+
+**排障**：所有节点 agent 同时 `poll rejected`、主控日志刷 `malformed JSON` → 大概率 `clients.inbounds` 的 JSON 坏了（BLOB 存储 + SQLite `json_each` 对特定值如 `[2,32]` 直接报错，拖挂全部节点渲染）。先查 `select id,name,json_valid(cast(inbounds as text)) from clients;`，坏行修回合法数组；后端已统一 `CAST(... AS TEXT)` 修复，勿手改库。
+
 ## 节点命名规范（命名即信息，schema 可按部署调整）
 
 格式（当前部署采用）：`[旗标][城市]-[线路]-[序号]`，例如 `🇺🇸 洛杉矶 CN2 01`、`🇺🇸 洛杉矶 9929 02`、`🛫 洛杉矶中转 01`。
