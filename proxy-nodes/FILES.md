@@ -6,10 +6,10 @@
 
 | 主机 | 角色 | 线路 | 配额 |
 |------|------|------|------|
-| `<HOST_A>`（主 VPS，CN2-GIA 节点） | s-ui **控制面**（:2095 面板 / :2096 订阅 / :2097 portal）+ **sui-agent 数据面**（CN2 直连 :443/:18443/:24443） | **CN2 GIA**（电信精品，低延迟） | ~1TB/月 |
-| `<HOST_666>`（9929，LA-666 节点） | **sui-agent 数据面**（9929 直连 :443/:18443）+ cloudflared 隧道连接器 | **9929 优化 + Cogent 双 ISP** | ~800GB/月 |
+| `<HOST_A>`（主 VPS，CN2-GIA 节点） | s-ui **控制面**（:2095 面板 / :2096 订阅 / :2097 portal）+ **sui-agent 数据面**（CN2 直连 :443/:18443 vless-reality + :8443/udp hysteria2 + :24443 中转） | **CN2 GIA**（电信精品，低延迟） | ~1TB/月 |
+| `<HOST_666>`（9929，LA-666 节点） | **sui-agent 数据面**（9929 直连 :443/:18443 vless-reality + :8443/udp hysteria2）+ cloudflared 隧道连接器 | **9929 优化 + Cogent 双 ISP** | ~800GB/月 |
 
-- 摩尔多瓦旧落地已退款移除，不在节点池。
+- 摩尔多瓦落地已退款移除，**不在节点池**；重装（Debian-12）后 SSH/网络待商家修复（root 密码未生效 + 美机房 IP 被网络层挡），恢复后再加回「主 VPS → 摩尔多瓦」中转。
 - 主 VPS 实测下载 ~2Gbps、666 ~186Mbps（666 端口慢，不适合扛大流量）。
 
 ## 参考架构（当前实际）
@@ -17,9 +17,9 @@
 ```
 s-ui 控制面（主 VPS :2095/2096/2097，状态全在 SQLite /etc/s-ui/db/s-ui.db）
   ── apiv2 ──> sui CLI（本机，Secrets Manager 自动加载 token + CF Access）
-  ├── node CN2-GIA（主 VPS） → inbound 🇺🇸 洛杉矶 CN2 01/02（:443 vless / :18443 trojan，sui-agent 监听）
-  ├── node LA-666（9929）    → inbound 🇺🇸 洛杉矶 9929 01/02（:443 vless / :18443 trojan，sui-agent 监听）
-  └── inbound 🛫 洛杉矶中转 01（主 VPS :24443 → 666 出口，仅手动）
+  ├── node CN2-GIA（主 VPS） → inbound 🇺🇸 洛杉矶 CN2 01/02/03（:443/:18443 vless-reality，:8443/udp hysteria2）
+  ├── node LA-666（9929）    → inbound 🇺🇸 洛杉矶 9929 01/02/03（:443/:18443 vless-reality，:8443/udp hysteria2）
+  └── inbound 🛫 洛杉矶中转 01（主 VPS :24443 vless-reality → 666 出口，仅手动）
 
 订阅：subs.bjorn.men/sub/<client>（s-ui 原生 :2096）→ sub.bjorn.men/clash（sublink-worker 转换器）；sub.bjorn.men/c/<短码> 302 短链
 面板：panel.bjorn.men/app（CF Access 保护）；订阅域名禁止裸 IP 明文
@@ -29,6 +29,7 @@ s-ui 控制面（主 VPS :2095/2096/2097，状态全在 SQLite /etc/s-ui/db/s-ui
 - 自动组默认 **url-test**（每个客户端按自己网络选最快线路：电信→CN2、联通→9929）；`auto_strategy=load-balance` 可切回负载均衡。
 - **中转节点不进自动组**（链式出口双倍烧配额：1GB 用户流量 ≈ 两台面板各 2GB），只在「🚀 节点选择」手动选。
 - 中转只用于需要 666 出口的特定场景（备用/应急）。
+- **hysteria2 也不进自动组**（手动选；避免 url-test 对 UDP 链路误判）。
 
 ## 关键文件
 
@@ -87,6 +88,12 @@ sui node list --concise                                   # 验证 online（stat
 # 给节点一次性加协议（DNS A 记录 → ACME TLS → 建 inbound → 绑用户 → 防火墙；幂等可重跑）：
 sui node add-protocols --node <NODE> --protocols "trojan:18443,hysteria2:8443" \
   --domain <NODE_DOMAIN> --dns <IP> --cf-token $CF_TOKEN --clients 1,4 --firewall [--dry-run]
+# Hysteria2 加完还要（add-protocols 不做）：
+#  1) 注入 obfs + 端口跳跃范围（不进 Auto 组）：
+#     sui ops save --object inbounds --action edit --data '{"id":<INBOUND_ID>,"obfs":{"type":"salamander","password":"<pw>"},"server_ports":["8443:8453"]}'
+#  2) 规范命名（inferLocation 对空格 tag 失效）：
+#     sui inbound edit --id <INBOUND_ID> --tag "<地点-线路-03>"
+#  3) 服务端：iptables REDIRECT 8443:8453→8443 + ufw allow 8443:8453/udp（见「已知坑 6」）
 
 # 改完立即验证订阅（不用等客户端导入）：
 sui show sub preview --client <NAME> --format clash
@@ -138,10 +145,29 @@ ufw allow <port>/tcp          # 放行节点端口
 
 ## 命名实例与能力定义
 
-- 当前命名：`🇺🇸 洛杉矶 CN2 01/02`、`🇺🇸 洛杉矶 9929 01/02`、`🛫 洛杉矶中转 01`（地点-线路-序号；`01`=VLESS+Reality、`02`=Trojan）。
+- 当前命名：`🇺🇸 洛杉矶 CN2 01/02/03`、`🇺🇸 洛杉矶 9929 01/02/03`、`🛫 洛杉矶中转 01`。
+  - `01`=VLESS+Reality :443、`02`=VLESS+Reality :18443、`03`=Hysteria2 :8443/udp（obfs-salamander + 端口跳跃）。
+  - **trojan 已移除**（曾用 us1/us2 真域名 = 明文 SNI，被墙风险；全部换 Reality）。
 - 能力标签（可选，以 lmc999 RegionRestrictionCheck 实测为准）：
   - `全解`：ChatGPT / Claude / Gemini / YouTube Premium / Netflix 全库 / Disney+ 均可
   - `半解`：ChatGPT / Claude / Netflix / Disney+ 可，Gemini / YouTube Premium 不可
   - `受限`：ChatGPT / Claude / Gemini 可，但 Netflix 仅自制剧、部分流媒体平台被禁
 
-> 历史（已归档，勿恢复）：x-ui (3x-ui) 与 caddy 已停用；**sing-box + render.py + sub_server.py + nodes.json 旧栈已归档**（服务 disabled，文件在 /etc/sing-box 下改名 .bak-*）；摩尔多瓦 VPS 已退款移除。
+## 协议安全基线（本部署强制）
+
+- **一律 vless+Reality**（无证书、诱饵 SNI=swdist.apple.com、抗主动探测）或 **hysteria2 + ACME 真证书 + obfs-salamander**（QUIC 含 SNI 全混淆）。
+- **禁止**：明文域名（trojan/anytls 这类真证书明文 SNI）、自签证书、无 TLS。
+- 新协议先查 sing-box 文档/changelog 再引入；`anytls` 也是明文 SNI，**不采用**。
+
+## 已知坑（踩过的，重建/排障必读）
+
+1. **sui-agent 必须带 `with_acme` tag 编译**：缺它时 trojan/hysteria2 这类 ACME inbound 静默失败（agent 一直 keep old config、节点 degraded，日志报 `ACME is not included in this build`）。统一用 `scripts/build.sh` 完整 tag 集（`with_quic,with_grpc,with_utls,with_acme,with_gvisor,with_tailscale,badlinkname,tfogo_checklinkname0`）；交叉编译 `GOOS=linux GOARCH=amd64 ./scripts/build.sh`（需 zig）。
+2. **`server_ports` 是订阅专用字段**：它进 DB Options（订阅渲染 `ports: 8443-8453` 端口跳跃），但 sing-box **inbound 不接受**（outbound-only，报 `unknown field "server_ports"`）。控制面 `GetAllConfigByNode` 已做剥离；手动改配置时别把它塞进节点侧。
+3. **控制面 inbound edit 的节点刷新**：`service/config.go` 已修——edit 带 `id` 即可按 id 反查并 bump 节点 `config_version`（旧版必须 payload 同时含 `node_id`+`tag` 才 bump，`ops save` 只发 `{id, options}` 会静默不刷新）。
+4. **hysteria2 订阅渲染**：`util/outJson.go` 的 `hysteria2Out` 必须复制 `server_ports` 到 OutJson，否则 clash 订阅不出 `ports`。改完要重新触发一次 inbound edit 让 OutJson 重建。
+5. **`inferLocation` 用 `-` 切 tag 前缀**，本部署 tag 用空格（`🇺🇸 洛杉矶 9929 01`）→ 自动命名退化为 `proto-id`（如 `hysteria2-30`）；建完 inbound 手动 `sui inbound edit --id N --tag "<规范名>"`。
+6. **端口跳跃**：hysteria2 服务端只监听单端口，跳跃靠客户端随机目标端口 + 服务端 iptables `REDIRECT` 范围到实际端口（两台节点都加：`iptables -t nat -A PREROUTING -p udp --dport 8443:8453 -j REDIRECT --to-ports 8443`）+ ufw 放行范围 `8443:8453/udp`。换机器记得重加。
+7. **运营监控**：主 VPS `/usr/local/bin/sui-alert.sh`（cron */10）→ Telegram：用户配额≥80%、≤3 天到期、节点心跳 >180s 离线、portal/sub/panel HTTP 异常。配置 `/etc/sui-alert/config`（0600，TELEGRAM_BOT_TOKEN/CHAT_ID）。
+8. **中转出站必须用专用中转账户**：relay 出站（node_outbounds）的 uuid 必须是**永久启用、无限量（volume=0）**的专用 client（如 `relay`），不能借用普通用户——普通用户被禁用/到期后 uuid 从出口 inbound users 移除，中转链路静默断开（`sui node` 仍 online，但中转节点连不上）。建法：`sui client create --name relay --volume 0 --inbounds <出口inbound id>`，再把 relay-666 出站 options.uuid 改成它的 uuid（`sui ops save --object nodeoutbounds --action edit`）。
+
+> 历史（已归档，勿恢复）：x-ui (3x-ui) 与 caddy 已停用；**sing-box + render.py + sub_server.py + nodes.json 旧栈已归档**（服务 disabled，文件在 /etc/sing-box 下改名 .bak-*）；摩尔多瓦 VPS 已退款移除（重装后待恢复接入）。
