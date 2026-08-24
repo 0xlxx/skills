@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `006f47589c8ce1d7376986bb88d1894d9f70156f`
-- **Date**: 2026-08-23
-- **Commit**: docs(proxy-nodes): reset-token 入速查表/轮换清单（控制面部署后生效）
+- **Commit SHA**: `ca80aead5b1054b1708b090f4daa9f0e36ead3c6`
+- **Date**: 2026-08-24
+- **Commit**: docs(proxy-nodes): 协议栈对齐（trojan→reality、hysteria2 obfs+端口跳跃）、协议安全基线、已知坑 8 条（with_acme/server_ports/中转专用账户等）
 
 **Source documentation:**
 
@@ -161,13 +161,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 006f475..HEAD -- '*/SKILL.md'
+git diff --name-only ca80aea..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 006f475..HEAD -- '*/SKILL.md'
+git diff ca80aea..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 006f475..HEAD -- '*/SKILL.md'
+git log --oneline ca80aea..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -229,8 +229,9 @@ git log --oneline 006f475..HEAD -- '*/SKILL.md'
 | 2026-08-23 | 8b8226a  | proxy-nodes 架构文档对齐实际部署（旧 sing-box 栈归档） — 14 active skills |
 | 2026-08-23 | f6c91ae  | proxy-nodes 凭据轮换操作清单 — 14 active skills |
 | 2026-08-23 | 006f475  | proxy-nodes reset-token 入速查表/轮换清单 — 14 active skills |
+| 2026-08-24 | ca80aea  | docs(proxy-nodes): 协议栈对齐（trojan→reality、hysteria2 obfs+端口跳跃）、协议安全基线、已知坑 8 条（with_acme/server_ports/中转专用账户等） — 14 active skills |
 
 ---
 
-Last updated: 2026-08-23
-Current SHA: 006f475
+Last updated: 2026-08-24
+Current SHA: ca80aea
