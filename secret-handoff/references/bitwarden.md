@@ -1,11 +1,13 @@
-# Bitwarden secret handoff
+# Bitwarden secret handoff (`bw`)
 
 Use Bitwarden as a broker. Read the requested item, extract only the needed field, and keep the value out of chat and logs.
+
+For machine-scoped secrets (`bws run`, `BWS_ACCESS_TOKEN`), use [bitwarden-secrets.md](bitwarden-secrets.md) instead.
 
 ## 1. Check state without exposing secrets
 
 ```bash
-bw status
+bw status | jq -r .status      # 只取状态：裸跑 bw status 会带出 userEmail/userId
 printf 'BW_SESSION=%s\n' "${BW_SESSION:+set}"
 printf 'SSH_AUTH_SOCK=%s\n' "${SSH_AUTH_SOCK:+set}"
 ssh-add -l 2>/dev/null || true
@@ -30,18 +32,18 @@ If the agent exposes several keys, identify the intended key by fingerprint/publ
 
 ### Passwords and API tokens
 
-Use an unlocked Bitwarden CLI session. If the CLI is locked, ask the user to create a one-shot session file:
+Use an unlocked Bitwarden CLI session. If the CLI is locked, ask the user to create a one-shot session file in their own terminal:
 
 ```bash
 umask 077
-mkdir -p "$HOME/.vpsmonitor"
-bw unlock --raw > "$HOME/.vpsmonitor/bw_session"
+mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/secret-handoff"
+bw unlock --raw > "${XDG_CACHE_HOME:-$HOME/.cache}/secret-handoff/bw_session"
 ```
 
 Then keep the session in a process-local variable:
 
 ```bash
-SESSION_FILE="${HOME}/.vpsmonitor/bw_session"
+SESSION_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/secret-handoff/bw_session"
 BW_SESSION="$(cat "$SESSION_FILE")"
 export BW_SESSION
 ```
@@ -101,7 +103,7 @@ After the operation succeeds or fails:
 ```bash
 unset BW_SESSION ITEM_JSON PASSWORD
 if [ -f "$SESSION_FILE" ]; then
-  truncate -s 0 "$SESSION_FILE"
+  truncate -s 0 "$SESSION_FILE" 2>/dev/null || : > "$SESSION_FILE"   # 精简容器/BSD 可能没有 truncate
   unlink "$SESSION_FILE"
 fi
 ```
