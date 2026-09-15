@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `b22493a8f10c6813f8f84f6f5136e69486d566e0`
+- **Commit SHA**: `e76e3d88f3b1f98ece32c0cd60b81493ab7d4a73`
 - **Date**: 2026-09-16
-- **Commit**: refactor(secret-handoff): bws Secrets Manager 通道 + 最小凭据索要模板 + 持久凭据规范
+- **Commit**: harden(secret-handoff): 多轮对抗审阅后的 fail-closed 修复
 
 **Source documentation:**
 
@@ -61,7 +61,7 @@ skills/
 ├── secret-handoff/             # Active
 │   ├── SKILL.md                # Main skill file
 │   ├── agents/openai.yaml      # UI metadata (display name / short description)
-│   └── references/             # 3 files: bitwarden.md (bw CLI / SSH Agent) / bitwarden-secrets.md (bws machine token / bws run) / patterns.md (SSH agent、Keychain、one-shot session file)
+│   └── references/             # 3 files: bitwarden.md (bw CLI / SSH Agent / host-only URI 投影) / bitwarden-secrets.md (bws token + run 约束 + fail-closed 取值) / patterns.md (SSH、Keychain、one-shot session、持久化凭据写入守卫)
 ├── teach/                       # Active
 │   ├── SKILL.md                # Main skill file
 │   ├── GLOSSARY-FORMAT.md      # Glossary document format
@@ -118,7 +118,7 @@ skills/
 | `parallel-porting` | 大规模 1:1 移植 / 并行重构工作流（Bun 方法论落地）——worktree 分片并行、对抗审查闭环、机器可检查退出条件、备注回流、拓扑合并。移植/port/1:1 对齐/SSOT 场景使用。 | SKILL.md, agents/openai.yaml, references/ (4), scripts/ (3) |
 | `parallel-optimizing` | 行为等价下的并行算法优化工作流（parallel-porting 优化版，**面向 JS/TS**）——bit-exact 保持下做性能/体积优化：热点分析、bench 驱动循环、bit-exact 浮点门禁（豁免注册表）、顺序敏感性分类、双运行时校验（bun/Chrome）、tree-shaking 瘦身、拓扑合并。触发词：JS/TS 性能优化/算法优化/提速/benchmark/热点/bundle 瘦身/bit-exact。 | SKILL.md, references/ (5), scripts/ (4) |
 | `proxy-nodes` | 管理 VPS 代理节点——通用工作流（Bitwarden 凭据/IP 体检/增删改验证/命名约定/安全红线）+ 部署实例分层（FILES.md=实例，SKILL.md=通用）；SSOT 单一事实来源，SSH 必须通过 Bitwarden，公共版真实值全部脱敏。 | SKILL.md, FILES.md |
-| `secret-handoff` | 安全地向 agent 交接密码、API token、SSH 与 Vault 凭据——broker 优先、最小权限、脱敏、一次性文件与清理；支持 Bitwarden `bw` / Secrets Manager `bws`、1Password、macOS Keychain、SSH Agent。 | SKILL.md, agents/openai.yaml, references/ (3) |
+| `secret-handoff` | 安全地向 agent 交接密码、API token、SSH 与 Vault 凭据——broker 优先、最小权限、脱敏、失败即停（validate-before-consume / 退出码传播 / 只删固定文件名）；支持 Bitwarden `bw` / Secrets Manager `bws`、1Password、macOS Keychain、SSH Agent，并显式声明威胁模型边界。 | SKILL.md, agents/openai.yaml, references/ (3) |
 | `teach` | 在工作区内教授用户一项新技能或概念——使命驱动，最近发展区选课，多文件 HTML 课程。 | SKILL.md, GLOSSARY-FORMAT.md, KATEX.md, LEARNING-RECORD-FORMAT.md, LESSON-FORMAT.md, MISSION-FORMAT.md, RESOURCES-FORMAT.md, STYLES.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
 | `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
@@ -166,13 +166,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only b22493a..HEAD -- '*/SKILL.md'
+git diff --name-only e76e3d8..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff b22493a..HEAD -- '*/SKILL.md'
+git diff e76e3d8..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline b22493a..HEAD -- '*/SKILL.md'
+git log --oneline e76e3d8..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -238,8 +238,9 @@ git log --oneline b22493a..HEAD -- '*/SKILL.md'
 | 2026-08-24 | b673e70  | docs(proxy-nodes): 中转/落地（node relay）工作流 + 摩尔多瓦落地接回（FILES.md 实例）+ BLOB json_each 坑 — 14 active skills |
 | 2026-09-16 | 7016ab3  | Add secret-handoff — secure credential brokering / Bitwarden handoff — 15 active skills |
 | 2026-09-16 | b22493a  | refactor(secret-handoff): bws Secrets Manager 通道 + 最小凭据索要模板 + 持久凭据规范 + references 拆分（3 files） — 15 active skills |
+| 2026-09-16 | e76e3d8  | harden(secret-handoff): 三轮对抗审阅闭环 — 威胁模型边界、一个任务=一条命令、validate-before-consume、退出码传播、URI host 投影、bws run 约束、持久化写入守卫（repo/GIT_DIR/.. /symlink/SOURCE==TARGET）、DIR 守卫与无通配符清理 — 15 active skills |
 
 ---
 
 Last updated: 2026-09-16
-Current SHA: b22493a
+Current SHA: e76e3d8
