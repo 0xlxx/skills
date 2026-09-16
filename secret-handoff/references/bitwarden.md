@@ -35,9 +35,11 @@ Never forward the agent (`-A` / `ForwardAgent yes`): once forwarded, any account
 If the CLI is locked, have the user create a one-shot session file in **their own** terminal (same shape as §3 of the main skill):
 
 ```bash
+umask 077
 BASE="${TMPDIR:-/tmp}"; BASE="${BASE%/}"
 DIR="$(mktemp -d "$BASE/secret-handoff.XXXXXX")"
-(umask 077; set -o noclobber; bw unlock --raw > "$DIR/bw_session") || exit 1
+: > "$DIR/.secret-handoff"                                      # 标记文件：整目录清空的前提
+(set -o noclobber; bw unlock --raw > "$DIR/bw_session") || exit 1
 echo "$DIR"                    # 把**目录**交给 agent（不是文件路径）
 ```
 
@@ -62,23 +64,10 @@ Rules:
 
 ```bash
 set -o pipefail
-DIR='<dir from the user>'          # 目录；若误传文件路径，先归一
-[ -f "$DIR" ] && DIR="$(cd "$(dirname "$DIR")" && pwd -P)"
+SKILL_DIR='<this skill dir>'
+. "$SKILL_DIR/scripts/guard-task-dir.sh" '<dir from the user>' || exit 1
 ITEM_ID='<item-id>'
-# DIR 必须是 §3 模板创建的目录；trap 只删 session 文件，不用通配符
-# DIR 校验：先规范化再判断 —— 字面前缀会被 `..`/symlink 骗过，而用户与 agent 的 TMPDIR 也可能不同
-case "$(basename "$DIR")" in secret-handoff.*) ;; *) echo "refuse: $DIR is not a secret-handoff.* task directory" >&2; exit 1 ;; esac
-[ -d "$DIR" ] && [ ! -L "$DIR" ] && [ -O "$DIR" ] \
-  || { echo "refuse: $DIR must be an existing directory you own, and not a symlink" >&2; exit 1; }
-DIR_REAL="$(cd -P "$DIR" && pwd -P)"
-PARENT_REAL="$(dirname "$DIR_REAL")"
-[ -O "$PARENT_REAL" ] || [ -k "$PARENT_REAL" ] \
-  || { echo "refuse: parent of $DIR is neither yours nor a sticky temp dir" >&2; exit 1; }
-PERMS="$(stat -f %Lp "$DIR_REAL" 2>/dev/null || stat -c %a "$DIR_REAL" 2>/dev/null || echo '?')"
-[ "$PERMS" = "700" ] || { echo "refuse: $DIR must be 0700 (got $PERMS)" >&2; exit 1; }
-cleanup() { rm -f "$DIR_REAL/bw_session"; rmdir "$DIR_REAL" 2>/dev/null; [ -e "$DIR_REAL" ] && echo "cleanup failed: $DIR_REAL" >&2; }
-trap cleanup EXIT INT TERM
-SECRET="$(BW_SESSION="$(<"$DIR/bw_session")" bw get item "$ITEM_ID" \
+SECRET="$(BW_SESSION="$(<"$TASK_DIR/bw_session")" bw get item "$ITEM_ID" \
   | jq -er '.login.password | select(type == "string" and length > 0)')" || exit 1
 printf '%s' "$SECRET" | target-command --password-stdin || exit 1
 unset SECRET
@@ -86,7 +75,7 @@ unset SECRET
 
 - Validate **before** consuming: the consumer only starts after the value is confirmed to be a non-empty string, so a missing field or a broken lookup cannot hand the target an empty value or `null`.
 - `set -o pipefail` + `jq -er` make a failed upstream fail the command instead of feeding the consumer.
-- The `trap` clears the session file and the task directory on success and on failure.
+- The sourced guard wipes the whole validated task directory on success and on failure (single implementation: `scripts/guard-task-dir.sh`); see §4 of the main skill for why a filename whitelist is not enough.
 - For custom fields or SSH-key items, inspect the field **names** first, then select the exact path — e.g. `.fields[] | select(.name == "token") | .value` or `.sshKey.privateKey`.
 
 ## 5. Execute and verify

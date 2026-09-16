@@ -44,8 +44,10 @@ Read, use, and clear a credential inside a **single command**; never carry a val
 
 ```bash
 # 用户在**自己的终端**里执行：交互输入不回显，值不进 history/argv
+umask 077
 BASE="${TMPDIR:-/tmp}"; BASE="${BASE%/}"                      # 去掉尾部斜杠，避免 // 造成路径不一致
 DIR="$(mktemp -d "$BASE/secret-handoff.XXXXXX")"                # 0700, 每任务独立，不用固定路径
+: > "$DIR/.secret-handoff"                                      # 标记文件：只有带它的目录才允许被整目录清空
 printf 'secret (input hidden): ' >&2
 IFS= read -rs TOKEN || exit 1                                   # EOF/Ctrl-D 也要失败
 [ -n "$TOKEN" ] || { echo 'refuse: empty input' >&2; exit 1; }  # 空输入不写文件
@@ -56,28 +58,13 @@ echo "$DIR"            # 把**目录**交给 agent（不是文件路径）
 
 ```bash
 # agent 侧：读取→消费→清理在同一条命令内完成
-# 用户给的是目录；若误传了文件路径，先归一到其父目录
-DIR='<user-provided dir>'
-[ -f "$DIR" ] && DIR="$(cd "$(dirname "$DIR")" && pwd -P)"
-# DIR 必须是 §3 模板创建的目录：先在装 trap 之前校验，避免 trap 在错误的路径上执行
-# DIR 校验：先规范化再判断 —— 字面前缀会被 `..`/symlink 骗过，而用户与 agent 的 TMPDIR 也可能不同
-case "$(basename "$DIR")" in secret-handoff.*) ;; *) echo "refuse: $DIR is not a secret-handoff.* task directory" >&2; exit 1 ;; esac
-[ -d "$DIR" ] && [ ! -L "$DIR" ] && [ -O "$DIR" ] \
-  || { echo "refuse: $DIR must be an existing directory you own, and not a symlink" >&2; exit 1; }
-DIR_REAL="$(cd -P "$DIR" && pwd -P)"
-PARENT_REAL="$(dirname "$DIR_REAL")"
-[ -O "$PARENT_REAL" ] || [ -k "$PARENT_REAL" ] \
-  || { echo "refuse: parent of $DIR is neither yours nor a sticky temp dir" >&2; exit 1; }
-PERMS="$(stat -f %Lp "$DIR_REAL" 2>/dev/null || stat -c %a "$DIR_REAL" 2>/dev/null || echo '?')"
-[ "$PERMS" = "700" ] || { echo "refuse: $DIR must be 0700 (got $PERMS)" >&2; exit 1; }
-# trap 只删本 skill 创建的文件，绝不对目录用通配符
-cleanup() { rm -f "$DIR_REAL/token" "$DIR_REAL/bw_session"; rmdir "$DIR_REAL" 2>/dev/null; }
-trap cleanup EXIT INT TERM
-[ -s "$DIR/token" ] || { echo "refuse: $DIR/token is missing or empty" >&2; exit 1; }
-target-command --token-file "$DIR/token"
+SKILL_DIR='<this skill dir>'                    # 例如 ~/.agents/skills/secret-handoff
+. "$SKILL_DIR/scripts/guard-task-dir.sh" '<user-provided dir>' || exit 1   # 校验 + 装 cleanup trap
+[ -s "$TASK_DIR/token" ] || { echo "refuse: $TASK_DIR/token is missing or empty" >&2; exit 1; }
+target-command --token-file "$TASK_DIR/token"
 ```
 
-If the user pastes a secret anyway: don't echo it, tell them to rotate, and continue through a file or broker.
+The guard lives in **one** place (`scripts/guard-task-dir.sh`, sourced above) so the rules cannot drift between files. It enforces: trailing-slash stripping, no symlink after canonicalization, `secret-handoff.*` name, your ownership, mode `0700`, the `.secret-handoff` marker, a parent that is yours or sticky, and not a mountpoint — then wipes the whole directory (reporting if it could not). Only put this task's own files in that directory — it is wiped wholesale on exit, so it is not a general-purpose temp dir. If the user pastes a secret anyway: don't echo it, tell them to rotate, and continue through a file or broker.
 
 ## 4. Execute safely
 
@@ -85,7 +72,8 @@ Before running any command that touches a secret, check these five — any hit m
 
 - Report metadata only: source, item name/ID, destination, scope, `present`/`missing`. **Derived values are secrets too** — no length, prefix, suffix, hash, or encoded fragment; project URIs to a parsed host and never echo the raw string. `ssh-add -l` fingerprints are the one exception — public metadata.
 - Never carry a value across tool calls: `unset` in the same command that used it, and never `export`.
-- **Validate before you consume**: resolve the value into a variable, assert it is a non-empty string (and, for a lookup, that exactly one item matched), and only then start the consumer — a failing pipeline must not launch the target with an empty, `null`, or concatenated value.
+- **Cleanup must cover everything you create** — wipe the whole task directory (it already passed the shape/ownership check), never a remembered filename list. A partial whitelist fails silently: a real incident left the plaintext in a helper file (`pwform`) that cleanup never named, so "verified clean" was wrong.
+- **Validate before you consume**: resolve into a variable, assert a non-empty string (and exactly one match for a lookup), then start the consumer — a failing pipeline must not launch the target with an empty, `null`, or concatenated value. Mind the trailing byte: `jq -r` appends a newline, so use `jq -j` when the value is compared, hashed, or fed to a consumer — otherwise equality checks report false mismatches and the consumer gets an extra byte.
 - Deliver the value through stdin, a file descriptor, or the tool's own credential-file option: argv is readable by any local user via `ps`, and environment variables via `/proc/<pid>/environ`. Redirecting into the consumer or into the `0600` file is the point; stdout, stderr, a log, or a terminal is not — no `echo` / `cat` / `tee` / debug-log, and `printf` only when redirected into the credential itself.
 - Tracing is not yours alone: a host `DEBUG` trap, `BASH_ENV`, or a parent `set -x` can log what you do — run credential commands in a scrubbed child, `env -i PATH=/usr/bin:/bin HOME="$HOME" bash --noprofile --norc -c '…'`. Keep it to one foreground tool call (no daemon, no background job), and never let a value reach a URL, a `curl -v` / `--debug` run, or an unfiltered listing (`bw list items`, `bws secret list`, `ps e`, `ps eww` print more than asked).
 - State the exact destination and operation before any external mutation. Reading a credential does not authorize deploying, messaging, purchasing, or changing permissions elsewhere.
@@ -110,7 +98,7 @@ Command form, plus the ignore/tracked check for the rare case where the file mus
 4. **Select one field** — only the matching item, and only the needed username/password/token/key field.
 5. **Use once** — inject straight into the target command, narrowest destination and scope, one command end to end.
 6. **Verify by side effect** — hostname, HTTP status, deployed file hash, authenticated success message; never the secret itself.
-7. **Clean up** — unset variables, truncate + unlink every file the value touched, remove the task directory, then re-check the exact paths: a variable you no longer set cannot verify anything.
+7. **Clean up** — unset variables, truncate + unlink every file the value touched, wipe the whole validated task directory (not a filename list), then re-check the exact paths: a variable you no longer set cannot verify anything.
 8. **Quarantine on exposure** — a value that reached a third party, a log, or a transcript is burned; stop using it and do not treat the task as done until it is confirmed dead.
 
 ## 7. Vault references
