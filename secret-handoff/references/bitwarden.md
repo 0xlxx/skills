@@ -38,7 +38,7 @@ If the CLI is locked, have the user create a one-shot session file in **their ow
 umask 077
 BASE="${TMPDIR:-/tmp}"; BASE="${BASE%/}"
 DIR="$(mktemp -d "$BASE/secret-handoff.XXXXXX")"
-: > "$DIR/.secret-handoff"                                      # 标记文件：整目录清空的前提
+: > "$DIR/.secret-handoff"                                      # 标记文件：guard 清理的前提
 (set -o noclobber; bw unlock --raw > "$DIR/bw_session") || exit 1
 echo "$DIR"                    # 把**目录**交给 agent（不是文件路径）
 ```
@@ -62,20 +62,36 @@ Rules:
 
 ## 4. Extract one field and use it in the same command
 
+> Run the extraction below inside the scrubbed child described in §4 of the main skill. The command shown is child-side code; a parent-shell `set -x` or `DEBUG` trap can otherwise print the value.
+
 ```bash
-set -o pipefail
 SKILL_DIR='<this skill dir>'
-. "$SKILL_DIR/scripts/guard-task-dir.sh" '<dir from the user>' || exit 1
+HANDOFF_DIR='<user-provided dir>'
+TARGET_BIN='<absolute path to target command>'
+case "$TARGET_BIN" in /*) ;; *) exit 1 ;; esac
+[ -f "$TARGET_BIN" ] && [ -x "$TARGET_BIN" ] || exit 1
+/usr/bin/env -i HOME="$HOME" PATH="$PATH" SKILL_DIR="$SKILL_DIR" HANDOFF_DIR="$HANDOFF_DIR" TARGET_BIN="$TARGET_BIN" \
+  /bin/bash --noprofile --norc <<'CHILD'
+set -o pipefail
+. "$SKILL_DIR/scripts/guard-task-dir.sh" "$HANDOFF_DIR" || exit 1
 ITEM_ID='<item-id>'
-SECRET="$(BW_SESSION="$(<"$TASK_DIR/bw_session")" bw get item "$ITEM_ID" \
-  | jq -er '.login.password | select(type == "string" and length > 0)')" || exit 1
-printf '%s' "$SECRET" | target-command --password-stdin || exit 1
+[ -s "$TASK_DIR/bw_session" ] && [ ! -L "$TASK_DIR/bw_session" ] || exit 1
+_session_mode="$(command -p stat -c %a "$TASK_DIR/bw_session" 2>/dev/null || command -p stat -f %Lp "$TASK_DIR/bw_session" 2>/dev/null || echo '?')"
+[ "$_session_mode" = "600" ] || exit 1
+BW_BIN="$(type -P bw)" || exit 1
+JQ_BIN="$(type -P jq)" || exit 1
+case "$BW_BIN:$JQ_BIN" in /*:/*) ;; *) exit 1 ;; esac
+[ -f "$BW_BIN" ] && [ -x "$BW_BIN" ] && [ -f "$JQ_BIN" ] && [ -x "$JQ_BIN" ] || exit 1
+SECRET="$(BW_SESSION="$(<"$TASK_DIR/bw_session")" "$BW_BIN" get item "$ITEM_ID" \
+  | "$JQ_BIN" -er '.login.password | select(type == "string" and length > 0)')" || exit 1
+printf '%s' "$SECRET" | "$TARGET_BIN" --password-stdin || exit 1
 unset SECRET
+CHILD
 ```
 
 - Validate **before** consuming: the consumer only starts after the value is confirmed to be a non-empty string, so a missing field or a broken lookup cannot hand the target an empty value or `null`.
 - `set -o pipefail` + `jq -er` make a failed upstream fail the command instead of feeding the consumer.
-- The sourced guard wipes the whole validated task directory on success and on failure (single implementation: `scripts/guard-task-dir.sh`); see §4 of the main skill for why a filename whitelist is not enough.
+- The sourced guard wipes every top-level file in the validated task directory on success and on failure, and fails closed on nested directories (single implementation: `scripts/guard-task-dir.sh`); see §4 of the main skill for why a filename whitelist is not enough. It is Bash-only.
 - For custom fields or SSH-key items, inspect the field **names** first, then select the exact path — e.g. `.fields[] | select(.name == "token") | .value` or `.sshKey.privateKey`.
 
 ## 5. Execute and verify

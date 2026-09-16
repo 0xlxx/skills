@@ -35,6 +35,8 @@ BWS_ACCESS_TOKEN="$(cat "$HOME/.config/bws/access-token")" \
 
 ## 3. One value — validate, then consume
 
+> The snippets in this section are child-side fragments. Run them through the scrubbed child from §4 of the main skill; never execute them in a parent shell with xtrace, `DEBUG`, or `ERR` traps.
+
 Resolve and validate the value first, and only then start the consumer:
 
 ```bash
@@ -65,7 +67,131 @@ unset VALUE
 - Find ids/keys with metadata only (same `BWS_ACCESS_TOKEN="$(cat ~/.config/bws/access-token)"` prefix): `bws project list -o json | jq -r '.[].name'`, then `bws secret list "$PROJECT_ID" -o json | jq -r '.[] | {id, key}'`.
 - `-o env` prints `KEY=value` lines — treat that output exactly like a raw secret.
 
-## 4. Cleanup and rotation
+## 4. Create/edit safely (narrow argv exception)
+
+Use this path only when the user asked to store or rotate a secret and no UI/API route is available. Unlike the normal rule, `bws secret create` and `secret edit --value=…` require the value as an argument, so it appears in the local process argv for the lifetime of the command. Limit this to a trusted, single-user host, state the residual `ps` exposure to the user before writing, and never use it on a shared host. stdout and tracing must not retain the value; stderr may be captured only in the guard-managed `0600` file and is deleted with the task directory.
+
+Run this after the guard is active (`TASK_DIR` exists and `TASK_DIR/token` is a non-empty `0600` file). Both operations use one scrubbed-child function, so a parent `set -x`, `DEBUG` trap, or `BASH_ENV` cannot see the expansion:
+
+```bash
+set -o pipefail
+set +x
+[ -n "${_SECRET_HANDOFF_GUARD_ARMED:-}" ] || exit 1
+BWS_OPERATION="${BWS_OPERATION:-create}"
+BWS_BIN="$(type -P bws)" || exit 1
+case "$BWS_BIN" in /*) ;; *) exit 1 ;; esac
+[ -f "$BWS_BIN" ] && [ -x "$BWS_BIN" ] || exit 1
+JQ_BIN=""
+if [ "$BWS_OPERATION" = "create" ]; then
+  JQ_BIN="$(type -P jq)" || exit 1
+  case "$JQ_BIN" in /*) ;; *) exit 1 ;; esac
+  [ -f "$JQ_BIN" ] && [ -x "$JQ_BIN" ] || exit 1
+fi
+BWS_DIR="${BWS_BIN%/*}"; [ -n "$BWS_DIR" ] || BWS_DIR="/"
+JQ_DIR=""; [ -z "$JQ_BIN" ] || JQ_DIR="${JQ_BIN%/*}"
+[ -z "$JQ_DIR" ] || [ -n "${JQ_DIR##*/}" ] || exit 1
+BWS_PATH="$BWS_DIR:${JQ_DIR:+$JQ_DIR:}/usr/local/bin:/usr/bin:/bin"
+BWS_TOKEN_FILE="${BWS_TOKEN_FILE:-$HOME/.config/bws/access-token}"
+[ -f "$BWS_TOKEN_FILE" ] && [ ! -L "$BWS_TOKEN_FILE" ] || exit 1
+_tokmode="$(command -p stat -c %a "$BWS_TOKEN_FILE" 2>/dev/null || command -p stat -f %Lp "$BWS_TOKEN_FILE" 2>/dev/null || echo '?')"
+[ "$_tokmode" = "600" ] || exit 1
+ERR_FILE="$(umask 077; command -p mktemp "$TASK_DIR/bws.err.XXXXXX")" || exit 1
+
+run_bws_value_child() {
+  local mode="$1"
+  local -a env_args
+  env_args=(
+    HOME="$HOME" PATH="$BWS_PATH" TASK_DIR="$TASK_DIR" PROJECT_ID="${PROJECT_ID:-}"
+    TARGET_KEY="${TARGET_KEY:-}" SECRET_ID="${SECRET_ID:-}" ERR_FILE="$ERR_FILE"
+    BWS_MODE="$mode" BWS_BIN="$BWS_BIN" JQ_BIN="$JQ_BIN" BWS_TOKEN_FILE="$BWS_TOKEN_FILE"
+  )
+  [ -z "${BWS_CONFIG_FILE:-}" ] || env_args+=(BWS_CONFIG_FILE="$BWS_CONFIG_FILE")
+  [ -z "${BWS_PROFILE:-}" ] || env_args+=(BWS_PROFILE="$BWS_PROFILE")
+  case "${BWS_SERVER_URL:-}" in
+    '') ;;
+    http://*|https://*)
+      _server_rest="${BWS_SERVER_URL#*://}"
+      case "$_server_rest" in ''|*@*|*/*|*\?*|*\#*|*' '*|*$'\t'*|*$'\n'*) exit 1 ;; esac
+      _server_host="${_server_rest%%:*}"
+      [ -n "$_server_host" ] || exit 1
+      case "$_server_host" in *[!A-Za-z0-9.-]*) exit 1 ;; esac
+      case "$_server_rest" in
+        *:*)
+          _server_port="${_server_rest##*:}"
+          case "$_server_port" in ''|*[!0-9]*) exit 1 ;; esac
+          [ "$((10#$_server_port))" -ge 1 ] && [ "$((10#$_server_port))" -le 65535 ] || exit 1
+          ;;
+      esac
+      env_args+=(BWS_SERVER_URL="$BWS_SERVER_URL")
+      ;;
+    *) exit 1 ;;
+  esac
+  /usr/bin/env -i "${env_args[@]}" /bin/bash --noprofile --norc <<'CHILD'
+set -o pipefail
+set +x
+[ -s "$TASK_DIR/token" ] && [ ! -L "$TASK_DIR/token" ] || exit 1
+_perms="$(command -p stat -c %a "$TASK_DIR/token" 2>/dev/null || command -p stat -f %Lp "$TASK_DIR/token" 2>/dev/null || echo '?')"
+[ "$_perms" = "600" ] || exit 1
+case "$BWS_MODE" in
+  create) [ -n "$PROJECT_ID" ] && [ -n "$TARGET_KEY" ] || exit 1 ;;
+  edit) [ -n "$SECRET_ID" ] || exit 1 ;;
+  *) exit 2 ;;
+esac
+VALUE="$(command -p cat "$TASK_DIR/token" && printf x)" || exit 1  # sentinel preserves trailing newlines
+VALUE="${VALUE%x}"
+[ -n "$VALUE" ] || exit 1
+
+case "$BWS_MODE" in
+  create)
+    BWS_ACCESS_TOKEN="$(command -p cat "$BWS_TOKEN_FILE")" \
+      "$BWS_BIN" secret create -o json -- "$TARGET_KEY" "$VALUE" "$PROJECT_ID" \
+      2>"$ERR_FILE" \
+      | "$JQ_BIN" -er '.id | select(type == "string" and length > 0)' \
+        2>>"$ERR_FILE" \
+      || exit 1
+    ;;
+  edit)
+    BWS_ACCESS_TOKEN="$(command -p cat "$BWS_TOKEN_FILE")" \
+      "$BWS_BIN" secret edit -o none --value="$VALUE" -- "$SECRET_ID" \
+      >/dev/null 2>"$ERR_FILE" || exit 1
+    ;;
+  *)
+    exit 2
+    ;;
+esac
+unset VALUE BWS_ACCESS_TOKEN
+CHILD
+}
+
+case "${BWS_OPERATION:-create}" in
+  create)
+    SID="$(run_bws_value_child create)" || {
+      echo "bws create failed; stderr withheld (it may echo the value)" >&2
+      exit 1
+    }
+    [ -n "$SID" ] || exit 1
+    unset SID
+    ;;
+  edit)
+    SECRET_ID="${SECRET_ID:?set SECRET_ID to the target id}"
+    run_bws_value_child edit || {
+      echo "bws edit failed; stderr withheld (it may echo the value)" >&2
+      exit 1
+    }
+    ;;
+  *)
+    exit 2
+    ;;
+esac
+```
+
+- Flags go before `--`; `--` goes before the first positional argument. For `secret edit`, `--value="$VALUE"` is one dash-leading token and `-- "$SECRET_ID"` closes option parsing. The two-token `--value "$VALUE"` form can parse a dash-leading value as an option and echo it in the error.
+- Validate parser order before using a real secret: `bws secret create --help` confirms the positional shape, and a dummy `-----BEGIN …` value with an intentionally invalid project id can exercise parsing without creating anything. Redirect its stderr to the task directory and print only pass/fail, never the captured text.
+- If a real remote dummy is unavoidable, delete it and verify by metadata that it is gone. Creating a disposable item permanently or printing its value is not part of validation.
+- A create/edit that fails after echoing the value is an exposure event: stop treating the candidate as production material. Delete/rotate it, report the affected destination and scope, and **do not repeat the value, its length, prefix, or hash**.
+- `SIGKILL`, a crash, or a host-level snapshot can still retain the value; the scrubbed child and top-level cleanup reduce the window, not the provider-side or disk-level retention.
+
+## 5. Cleanup and rotation
 
 - `unset BWS_ACCESS_TOKEN` and every variable holding a value, inside the same command; unlink any file the value passed through (best-effort — snapshots and backups may retain it).
 - On suspected exposure the credential is burned: stop using it, rotate (`bws secret edit <id>` / `create`, or the web UI), **verify the old value now fails**, re-deploy every consumer (`EnvironmentFile=`, `--token-file`, restart the unit), and report the affected scope. Until that verification passes, the task is not complete.

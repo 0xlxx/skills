@@ -28,7 +28,7 @@ The consumer starts only after the value was read successfully. If the tool has 
 
 ## One-shot session file
 
-Use the template in the main skill (§3) — one `mktemp -d` per task, never a shared fixed path. A fixed `~/.cache/.../bw_session` invites races, stale sessions, and symlink tricks; a fresh directory per task removes all three. Cleanup: wipe the whole directory — the guard (`scripts/guard-task-dir.sh`) checks marker + shape + ownership + `0700` + non-mountpoint first; a filename whitelist is not enough (see §4 of the main skill). Verify the **exact path** afterwards (`test ! -e '<dir>'`, not `$DIR` — a later tool call has no such variable).
+Use the template in the main skill (§3) — one `mktemp -d` per task, never a shared fixed path. A fixed `~/.cache/.../bw_session` invites races, stale sessions, and symlink tricks; a fresh directory per task removes all three. Cleanup: let the guard (`scripts/guard-task-dir.sh`) delete every top-level file after checking marker + shape + ownership + `0700` + stable path identity; it refuses nested directories rather than recursing. A filename whitelist is not enough (see §4 of the main skill). Verify the **exact path** afterwards (`test ! -e '<dir>'`, not `$DIR` — a later tool call has no such variable).
 
 ## Credential files that must persist
 

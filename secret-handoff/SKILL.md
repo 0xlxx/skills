@@ -1,6 +1,6 @@
 ---
 name: secret-handoff
-description: Broker an existing, live credential to an agent without exposing its value in chat, command output, logs, argv, or the repo. Use when a task needs the agent to obtain, inject, store, or transmit a password, API key, token, SSH credential, existing cloud session, or vault entry — Bitwarden CLI (`bw`), Bitwarden Secrets Manager (`bws`), 1Password (`op`), macOS Keychain, SSH Agent — or when the user asks how to hand over a secret safely (Bitwarden、Secrets Manager、密码、私钥、API token、敏感信息交接). Not for code that only defines auth flows, hashing, or rotation policy, and not for test fixtures or dummy credentials.
+description: Broker an existing, live credential to an agent without exposing its value in chat, command output, logs, or the repo, and without argv by default; the only bounded argv exception is a provider CLI with no stdin/file form (Bitwarden `bws` create/edit) on a trusted single-user host. Use when a task needs the agent to obtain, inject, store, or transmit a password, API key, token, SSH credential, existing cloud session, or vault entry — Bitwarden CLI (`bw`), Bitwarden Secrets Manager (`bws`), 1Password (`op`), macOS Keychain, SSH Agent — or when the user asks how to hand over a secret safely (Bitwarden、Secrets Manager、密码、私钥、API token、敏感信息交接). Not for code that only defines auth flows, hashing, or rotation policy, and not for test fixtures or dummy credentials.
 ---
 
 # Secret Handoff
@@ -10,7 +10,7 @@ Give the agent **access**, not the secret value: **broker, not paste**.
 **Threat model — read first.**
 
 - **In scope** — accidental exposure through the agent's own surface: transcript, tool arguments, command output, argv, process environment, temp files, repositories.
-- **Out of scope — say so, never imply coverage**: host auditing/EDR, shell history outside this session, core dumps/swap, CI log retention, the remote host's logs, provider-side retention.
+- **Out of scope — say so, never imply coverage**: host auditing/EDR, shell history outside this session, core dumps/swap, CI log retention, the remote host's logs, provider-side retention, and another process already running as the same user. A same-user process is not an isolation boundary: it can read argv/environment where the OS permits, race paths, and retain copies; use a dedicated single-user host or container when that matters.
 - **Never a guarantee**: the shell holding the credential is model-driven, so a malicious or prompt-injected agent can always `printf "$SECRET"`; only a broker that fixes the command and destination outside the model's control helps.
 
 Assume prompts, tool calls, arguments, environments, and logs are retained. So **the model-visible stream must never contain the bytes** — transcript, tool arguments, tool output. The sandbox may hold them briefly, under the rules below, and only inside a single command that also consumes and clears them.
@@ -47,7 +47,7 @@ Read, use, and clear a credential inside a **single command**; never carry a val
 umask 077
 BASE="${TMPDIR:-/tmp}"; BASE="${BASE%/}"                      # 去掉尾部斜杠，避免 // 造成路径不一致
 DIR="$(mktemp -d "$BASE/secret-handoff.XXXXXX")"                # 0700, 每任务独立，不用固定路径
-: > "$DIR/.secret-handoff"                                      # 标记文件：只有带它的目录才允许被整目录清空
+: > "$DIR/.secret-handoff"                                      # 标记文件：只有带它的目录才允许被 guard 清理
 printf 'secret (input hidden): ' >&2
 IFS= read -rs TOKEN || exit 1                                   # EOF/Ctrl-D 也要失败
 [ -n "$TOKEN" ] || { echo 'refuse: empty input' >&2; exit 1; }  # 空输入不写文件
@@ -58,26 +58,48 @@ echo "$DIR"            # 把**目录**交给 agent（不是文件路径）
 
 ```bash
 # agent 侧：读取→消费→清理在同一条命令内完成
+# env -i 去掉父 shell 的 xtrace/DEBUG/BASH_ENV；guard 是 Bash-only。
 SKILL_DIR='<this skill dir>'                    # 例如 ~/.agents/skills/secret-handoff
-. "$SKILL_DIR/scripts/guard-task-dir.sh" '<user-provided dir>' || exit 1   # 校验 + 装 cleanup trap
-[ -s "$TASK_DIR/token" ] || { echo "refuse: $TASK_DIR/token is missing or empty" >&2; exit 1; }
-target-command --token-file "$TASK_DIR/token"
+HANDOFF_DIR='<user-provided dir>'
+TARGET_BIN='<absolute path to target command>'
+case "$TARGET_BIN" in /*) ;; *) echo "refuse: TARGET_BIN must be absolute" >&2; exit 1 ;; esac
+[ -f "$TARGET_BIN" ] && [ -x "$TARGET_BIN" ] || { echo "refuse: TARGET_BIN is not an executable file" >&2; exit 1; }
+case "$PATH" in *::*|:*|*:) echo "refuse: PATH has an empty entry" >&2; exit 1 ;; esac
+_saved_ifs="$IFS"; IFS=:
+for _path_entry in $PATH; do
+  case "$_path_entry" in /*) ;; *) echo "refuse: PATH entry is not absolute: $_path_entry" >&2; exit 1 ;; esac
+done
+IFS="$_saved_ifs"; unset _path_entry
+/usr/bin/env -i HOME="$HOME" PATH="$PATH" SKILL_DIR="$SKILL_DIR" HANDOFF_DIR="$HANDOFF_DIR" TARGET_BIN="$TARGET_BIN" \
+  /bin/bash --noprofile --norc -c '
+    . "$SKILL_DIR/scripts/guard-task-dir.sh" "$HANDOFF_DIR" || exit 1
+    [ -s "$TASK_DIR/token" ] || { echo "refuse: token is missing or empty" >&2; exit 1; }
+    "$TARGET_BIN" --token-file "$TASK_DIR/token"
+  '
 ```
 
-The guard lives in **one** place (`scripts/guard-task-dir.sh`, sourced above) so the rules cannot drift between files. It enforces: trailing-slash stripping, no symlink after canonicalization, `secret-handoff.*` name, your ownership, mode `0700`, the `.secret-handoff` marker, a parent that is yours or sticky, and not a mountpoint — then wipes the whole directory (reporting if it could not). Only put this task's own files in that directory — it is wiped wholesale on exit, so it is not a general-purpose temp dir. If the user pastes a secret anyway: don't echo it, tell them to rotate, and continue through a file or broker.
+The guard lives in **one** place (`scripts/guard-task-dir.sh`) and must be sourced inside the scrubbed child, not in the parent shell, so the rules cannot drift between files and a parent DEBUG trap cannot cross the `env -i` boundary. It enforces: trailing-slash stripping, no symlink after canonicalization, `secret-handoff.*` name, your ownership, mode `0700`, the `.secret-handoff` marker, a parent that is either sticky or owned by you and not group/other-writable, and a stable path identity. It snapshots the canonical path/device/inode into private readonly variables, refuses xtrace, `BASH_XTRACEFD`, or an existing ERR/EXIT/INT/TERM/HUP/QUIT trap it can see, and first deletes every top-level non-directory entry; if a nested directory exists it reports failure and leaves that directory for manual inspection, as it does for a path that changed or could not be wiped. A second INT/TERM during cleanup is ignored; `SIGKILL` and host-level retention cannot be caught. Only put this task's own files directly in that directory — it is not a general-purpose temp dir. If the user pastes a secret anyway: don't echo it, tell them to rotate, and continue through a file or broker.
 
 ## 4. Execute safely
 
-Before running any command that touches a secret, check these five — any hit means stop and change the approach: a literal in the command text, the value in argv, the value in a URL, a debug/verbose flag, an unfiltered listing.
+Treat these as default hard stops; only an item that names an explicit bounded exception may proceed, with that item's controls. Otherwise stop and redesign:
+
+1. A literal value in command text, a tool argument, a URL, or a repository file.
+2. A value in process argv. The only bounded exception is the create/edit path documented in [`references/bitwarden-secrets.md`](references/bitwarden-secrets.md): the CLI has no stdin/file form, so the value is briefly in local argv on a trusted single-user host. State that residual exposure before using it; never use it on a shared host.
+3. A URL containing the value (including query strings and userinfo).
+4. Debug/verbose/tracing output that can echo the value.
+5. An unfiltered credential listing (`bw list items`, `bws secret list`, `ps e`, `ps eww`, …).
+
+Then design the command and cleanup:
 
 - Report metadata only: source, item name/ID, destination, scope, `present`/`missing`. **Derived values are secrets too** — no length, prefix, suffix, hash, or encoded fragment; project URIs to a parsed host and never echo the raw string. `ssh-add -l` fingerprints are the one exception — public metadata.
 - Never carry a value across tool calls: `unset` in the same command that used it, and never `export`.
 - **Brace the boundary** — write `${VAR}` when a variable sits next to non-ASCII text (`"$TARGET（…）"`): in a non-UTF-8 locale the shell swallows the following bytes into the name, and `set -u` aborts mid-script. This bit the same workflow twice; scan for `$VAR` followed by CJK punctuation before shipping a script.
-- **Tidy up only what you recorded** — never sweep by name pattern (e.g. `${TMPDIR}/secret-handoff.*` when housekeeping: a real incident had the agent delete the user's freshly created handoff directory that way). The whole-directory wipe above applies to the directory you are actively using, not to others.
-- **Cleanup must cover everything you create** — wipe the whole task directory (it already passed the shape/ownership check), never a remembered filename list. A partial whitelist fails silently: a real incident left the plaintext in a helper file (`pwform`) that cleanup never named, so "verified clean" was wrong.
+- **Tidy up only what you recorded** — never sweep by name pattern (e.g. `${TMPDIR}/secret-handoff.*` when housekeeping: a real incident had the agent delete the user's freshly created handoff directory that way). The guard's wipe applies to the directory you are actively using, not to others.
+- **Cleanup must cover everything you create** — let the guard wipe every top-level file in the validated task directory, never a remembered filename list. A partial whitelist fails silently: a real incident left the plaintext in a helper file (`pwform`) that cleanup never named, so "verified clean" was wrong. Nested directories are not supported and make cleanup fail closed. The guard is the single implementation of the cleanup and exit-status contract; do not restate or reimplement its algorithm in a caller.
 - **Validate before you consume**: resolve into a variable, assert a non-empty string (and exactly one match for a lookup), then start the consumer — a failing pipeline must not launch the target with an empty, `null`, or concatenated value. Mind the trailing byte: `jq -r` appends a newline, so use `jq -j` when the value is compared, hashed, or fed to a consumer — otherwise equality checks report false mismatches and the consumer gets an extra byte.
-- Deliver the value through stdin, a file descriptor, or the tool's own credential-file option: argv is readable by any local user via `ps`, and environment variables via `/proc/<pid>/environ`. Redirecting into the consumer or into the `0600` file is the point; stdout, stderr, a log, or a terminal is not — no `echo` / `cat` / `tee` / debug-log, and `printf` only when redirected into the credential itself.
-- Tracing is not yours alone: a host `DEBUG` trap, `BASH_ENV`, or a parent `set -x` can log what you do — run credential commands in a scrubbed child, `env -i PATH=/usr/bin:/bin HOME="$HOME" bash --noprofile --norc -c '…'`. Keep it to one foreground tool call (no daemon, no background job), and never let a value reach a URL, a `curl -v` / `--debug` run, or an unfiltered listing (`bw list items`, `bws secret list`, `ps e`, `ps eww` print more than asked).
+- Deliver the value through stdin, a file descriptor, or the tool's own credential-file option: environment variables are readable via `/proc/<pid>/environ`. Redirecting into the consumer or into the `0600` file is the point; stdout, stderr, a log, or a terminal is not — no `echo` / `cat` / `tee` / debug-log, and `printf` only when redirected into the credential itself.
+- Tracing is not yours alone: a host `DEBUG` trap, `BASH_ENV`, or a parent `set -x` can log what you do — run credential commands in a scrubbed child, `env -i PATH=/usr/bin:/bin HOME="$HOME" bash --noprofile --norc -c '…'`. Keep it to one foreground tool call (no daemon, no background job), and never let a value reach a URL, a `curl -v` / `--debug` run, or an unfiltered listing.
 - State the exact destination and operation before any external mutation. Reading a credential does not authorize deploying, messaging, purchasing, or changing permissions elsewhere.
 
 ## 5. Persisted credentials
@@ -100,7 +122,7 @@ Command form, plus the ignore/tracked check for the rare case where the file mus
 4. **Select one field** — only the matching item, and only the needed username/password/token/key field.
 5. **Use once** — inject straight into the target command, narrowest destination and scope, one command end to end.
 6. **Verify by side effect** — hostname, HTTP status, deployed file hash, authenticated success message; never the secret itself.
-7. **Clean up** — unset variables, truncate + unlink every file the value touched, wipe the whole validated task directory (not a filename list), then re-check the exact paths: a variable you no longer set cannot verify anything.
+7. **Clean up** — unset variables, then let the guard clear the validated task directory's top-level files; if it reports a nested directory or identity change, inspect manually and re-verify the exact path.
 8. **Quarantine on exposure** — a value that reached a third party, a log, or a transcript is burned; stop using it and do not treat the task as done until it is confirmed dead.
 
 ### Before you ask for a new credential
