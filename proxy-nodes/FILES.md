@@ -7,10 +7,11 @@
 | 主机 | 角色 | 线路 | 配额 |
 |------|------|------|------|
 | `<HOST_A>`（主 VPS，CN2-GIA 节点） | s-ui **控制面**（:2095 面板 / :2096 订阅 / :2097 portal）+ **sui-agent 数据面**（CN2 直连 :443/:18443 vless-reality + :8443/udp hysteria2 + :24443 中转） | **CN2 GIA**（电信精品，低延迟） | ~1TB/月 |
-| `<HOST_666>`（9929，LA-666 节点） | **sui-agent 数据面**（9929 直连 :443/:18443 vless-reality + :8443/udp hysteria2）+ cloudflared 隧道连接器 | **9929 优化 + Cogent 双 ISP** | ~800GB/月 |
+| `<HOST_LA666>`（9929，LA-666 节点） | **sui-agent 数据面**（9929 直连 :443/:18443 vless-reality + :8443/udp hysteria2）+ cloudflared 隧道连接器 | **9929 优化 + Cogent 双 ISP** | ~800GB/月 |
 | `<HOST_MD>`（摩尔多瓦，落地/exit） | **sui-agent 数据面**（仅 :443 vless-reality 落地；**防火墙只放行主 VPS IP**，客户端不直连）+ 经主 VPS 中转接入 | 摩尔多瓦（欧洲落地） | 512MB 小内存 |
 
-- 摩尔多瓦落地已接回：重装 Ubuntu 24.04，root 密码已轮换存 Secrets Manager（`MOLDOVA_VPS_PASSWORD`），SSH/ufw/agent 已就绪；接入方式 = 「主 VPS 中转 + 摩尔多瓦落地」，客户端不直连落地机。
+- 摩尔多瓦落地已接回：重装 Ubuntu 24.04；有效登录凭据是 `MD_SSH_USER` + `MD_SSH_PASSWORD`，`MOLDOVA_VPS_PASSWORD` 已实测无效，不要再用。接入方式 = 「主 VPS 中转 + 摩尔多瓦落地」，客户端不直连落地机。
+- 主 VPS 用 `SSH_KEY_PROXY_VPS`；LA-666 的 `LA666_SSH_KEY` 已入库，但公钥需先在 666clouds 面板安装后才生效。
 - 主 VPS 实测下载 ~2Gbps、666 ~186Mbps（666 端口慢，不适合扛大流量）。
 
 ## 参考架构（当前实际）
@@ -43,9 +44,10 @@ s-ui 控制面（主 VPS :2095/2096/2097，状态全在 SQLite /etc/s-ui/db/s-ui
 | `/etc/s-ui/db/s-ui.db`（主 VPS） | **控制面 SSOT**（节点/入站/用户/订阅/配置全部状态，SQLite；备份见「主控备份/恢复」） |
 | Secrets Manager secrets `SUI_TOKEN` / `SUI_CF_ACCESS_ID` / `SUI_CF_ACCESS_SECRET` | s-ui 面板 API + Cloudflare Access 认证（`sui` wrapper 自动读取） |
 | Secrets Manager secrets `MAIN_VPS_IP` / `PROXY_DOMAIN` / `SUBLINK_DOMAIN` / `SUB_SHORT_CODE` | 主机 IP / 代理域名 / 订阅域名 / 订阅短码 |
-| Secrets Manager secret `MOLDOVA_VPS_PASSWORD` | 摩尔多瓦 root SSH 密码（2026-08-24 轮换，SSH/ufw/agent 用） |
+| Secrets Manager secrets `MD_SSH_USER` / `MD_SSH_PASSWORD` | 摩尔多瓦 root 登录；旧 `MOLDOVA_VPS_PASSWORD` 已实测无效 |
+| Secrets Manager secret `LA666_SSH_KEY` | LA-666 root SSH 私钥；安装公钥前不可用 |
 | `/etc/systemd/system/{sui,sui-agent}.service` | 控制面（:2095/2096/2097）/ 节点数据面（:443/:18443/…）systemd unit |
-| `/etc/cloudflared/config.yml`（`<HOST_666>`） | Cloudflare Tunnel 连接器配置（ingress 面板/订阅/portal 域名 → 主 VPS） |
+| `/etc/cloudflared/config.yml`（`<HOST_LA666>`） | Cloudflare Tunnel 连接器配置（ingress 面板/订阅/portal 域名 → 主 VPS） |
 | `~/.cloudflared/cert.pem`（本机） | cloudflared OAuth 证书（建隧道/DNS 用） |
 | `~/backups/s-ui/`（本机）+ `/root/sui-backups/`（主 VPS） | 控制面数据库备份（sui-backup / 每日 03:17 cron） |
 | ~~`/etc/sing-box/*`~~（旧栈，已归档 `.bak-*`） | **旧 sing-box + render.py + sub_server.py + nodes.json 栈已停用**（勿恢复） |
@@ -144,7 +146,7 @@ sui doctor                                  # 验证新 token 可用
 
 ```bash
 cloudflared tunnel list / info <TUNNEL_NAME> / route dns <TUNNEL_NAME> <SUB_DOMAIN> / delete <TUNNEL_NAME>
-# 连接器在 <HOST_666>：systemctl is-active cloudflared；journalctl -u cloudflared | grep 'Registered tunnel'
+# 连接器在 <HOST_LA666>：systemctl is-active cloudflared；journalctl -u cloudflared | grep 'Registered tunnel'
 # 面板登录：https://<PANEL_DOMAIN>/app/（admin 凭据在 Secrets Manager）
 ```
 
@@ -181,6 +183,9 @@ ufw allow <port>/tcp          # 放行节点端口
 6. **端口跳跃**：hysteria2 服务端只监听单端口，跳跃靠客户端随机目标端口 + 服务端 iptables `REDIRECT` 范围到实际端口（两台节点都加：`iptables -t nat -A PREROUTING -p udp --dport 8443:8453 -j REDIRECT --to-ports 8443`）+ ufw 放行范围 `8443:8453/udp`。换机器记得重加。
 7. **运营监控**：主 VPS `/usr/local/bin/sui-alert.sh`（cron */10）→ Telegram：用户配额≥80%、≤3 天到期、节点心跳 >180s 离线、portal/sub/panel HTTP 异常。配置 `/etc/sui-alert/config`（0600，TELEGRAM_BOT_TOKEN/CHAT_ID）。
 8. **中转出站必须用专用中转账户**：relay 出站（node_outbounds）的 uuid 必须是**永久启用、无限量（volume=0）**的专用 client（如 `relay`），不能借用普通用户——普通用户被禁用/到期后 uuid 从出口 inbound users 移除，中转链路静默断开（`sui node` 仍 online，但中转节点连不上）。建法：`sui client create --name relay --volume 0 --inbounds <出口inbound id>`，再把 relay 出站 options.uuid 改成它的 uuid（`sui node relay edit --id N --uuid <新uuid>`，fetch-merge 只改这一处）。
+10. **小内存节点先加 swap**：512MB 机器同时跑 agent/监控/面板进程时，先加 1G swap 并设 `vm.swappiness=10`，再排查 OOM；不要只调大应用堆。
+11. **远端启用 ufw 必须带自动回滚**：先把 SSH、面板、订阅、节点和端口范围规则全部装好，再用 5 分钟 watchdog `ufw enable`，外部验证 SSH/HTTP/关键端口后写 keep flag；否则一次误规则会把自己锁在门外。端口跳跃的 `nat` 规则写 `/etc/ufw/before.rules`，不要只留在运行时 `iptables`。
+12. **磁盘/备份保留策略要进部署脚本**：`/usr/local/bin/sui.bak-*`、journal、apt cache、panel-web releases/uploads 都会持续增长。成功部署后保留最近 2 个二进制备份、current+2 个 release、3 个 uploads；journald 设 `SystemMaxUse=200M`，apt 启用周期 autoclean。
 9. **`clients.inbounds` BLOB + SQLite json_each 怪癖**：inbounds 以 BLOB 存储，`json_each` 对特定值（如 `[2,32]`）直接报 `malformed JSON`，把**全部节点**配置渲染拖挂（所有 agent `poll rejected`、主控日志刷 `WARNING - failed : malformed JSON`）。后端已统一 `CAST(... AS TEXT)` 修复（service/inbounds.go、client.go）；再遇到先 `select id,name,json_valid(cast(inbounds as text)) from clients;` 定位坏行。
 
 

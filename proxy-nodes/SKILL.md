@@ -22,30 +22,23 @@ disable-model-invocation: true
 > - `nodes.example.json`、快照类文件等入库模板**只允许占位符内容**；提交前用 `grep -nE 'BEGIN.*PRIVATE|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'` 校验必须 0 命中。
 > - **提交前门禁**：跑 `bash scripts/check-secrets.sh`（仓库根），0 命中才允许提交。
 
-## Connection（必须通过 Bitwarden Secrets Manager）
+## Connection（凭据只从 Secrets Manager 取）
 
-> ⚠️ SSH key **必须**从 Bitwarden Secrets Manager 获取；禁止直接使用本机本地 key 文件。
-> SSH key 存放在 Secrets Manager secret `<BWS_SSH_KEY_SECRET>`（值 = OPENSSH 格式私钥全文）。
+先解析**私有机器清单**：别名 → 提供商 / 地域 / 用途 / secret key。按用途和地域匹配，不要按 IP、提供商品牌或“看起来像哪台机”猜凭据。
+
+优先使用清单配套连接器（若本部署存在）：
 
 ```bash
-# 1. 加载 machine access token（优先环境变量，其次 ~/.config/bws/access-token，0600）
-[ -n "${BWS_ACCESS_TOKEN:-}" ] || export BWS_ACCESS_TOKEN="$(cat "$HOME/.config/bws/access-token")"
-# 2. 取出 SSH key 到随机临时文件（umask 077 保证权限，mktemp 防符号链接预置攻击）
-umask 077
-SSH_KEY=$(mktemp /tmp/bws-ssh.XXXXXX)
-trap 'rm -f "$SSH_KEY"' EXIT INT TERM HUP
-bws secret list | jq -r '.[] | select(.key=="<BWS_SSH_KEY_SECRET>") | .value' > "$SSH_KEY"
-[ -s "$SSH_KEY" ] || { echo "bws 取 key 失败（token 失效或 secret 缺失？）"; exit 1; }
-
-# 3. 连接（accept-new：首连记录指纹后严格校验；IdentitiesOnly 只用这把 key）
-ssh -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -i "$SSH_KEY" root@<VPS_IP> "<command>"
+~/bin/connect-vps.sh <alias|IP> -- '<remote command>'
 ```
 
-- 前提：`bws` 已安装，machine access token 可用（`export BWS_ACCESS_TOKEN` 或 `~/.config/bws/access-token`）。
-- 用完即删：`trap` 在 `EXIT/INT/TERM/HUP` 时清理 `$SSH_KEY`。
-- 建议把 `known_hosts` 一并存入 Secrets Manager，彻底固定主机指纹。
-- 无本地 key 时，恢复入口 = Secrets Manager secret `<BWS_SSH_KEY_SECRET>`（见「真实值映射」）。
+它只读取匹配 secret，密码经 `sshpass -e` 传递，key 只落在受 guard 保护的 0700 任务目录并在退出时清理。
+
+没有连接器时，遵循 [`secret-handoff`](../secret-handoff/SKILL.md)：一次只取一个 secret，读取→消费→清理在同一条命令内完成。禁止未过滤的 `bws secret list`、跨 tool call 保存 key、把 key 写入仓库或在 argv 中出现凭据。
+
+- 认证失败 1–2 次即停，避免 fail2ban；主机密钥变化按“重装”处理，旧密码视为失效。
 - **重启数据面（sui-agent/sing-box）可能断开当前 SSH**（若本机流量经该主机 NAT）——见「Add a node」的 nohup 说明。
+- 真实 IP / 域名 / 短码 / key 名只在 Bitwarden 和私有清单中，公共 repo 保持占位符。
 
 ## IP 体检（新 VPS 接入前必做）
 
