@@ -72,6 +72,7 @@ Before running any command that touches a secret, check these five — any hit m
 
 - Report metadata only: source, item name/ID, destination, scope, `present`/`missing`. **Derived values are secrets too** — no length, prefix, suffix, hash, or encoded fragment; project URIs to a parsed host and never echo the raw string. `ssh-add -l` fingerprints are the one exception — public metadata.
 - Never carry a value across tool calls: `unset` in the same command that used it, and never `export`.
+- **Brace the boundary** — write `${VAR}` when a variable sits next to non-ASCII text (`"$TARGET（…）"`): in a non-UTF-8 locale the shell swallows the following bytes into the name, and `set -u` aborts mid-script. This bit the same workflow twice; scan for `$VAR` followed by CJK punctuation before shipping a script.
 - **Tidy up only what you recorded** — never sweep by name pattern (e.g. `${TMPDIR}/secret-handoff.*` when housekeeping: a real incident had the agent delete the user's freshly created handoff directory that way). The whole-directory wipe above applies to the directory you are actively using, not to others.
 - **Cleanup must cover everything you create** — wipe the whole task directory (it already passed the shape/ownership check), never a remembered filename list. A partial whitelist fails silently: a real incident left the plaintext in a helper file (`pwform`) that cleanup never named, so "verified clean" was wrong.
 - **Validate before you consume**: resolve into a variable, assert a non-empty string (and exactly one match for a lookup), then start the consumer — a failing pipeline must not launch the target with an empty, `null`, or concatenated value. Mind the trailing byte: `jq -r` appends a newline, so use `jq -j` when the value is compared, hashed, or fed to a consumer — otherwise equality checks report false mismatches and the consumer gets an extra byte.
@@ -101,6 +102,17 @@ Command form, plus the ignore/tracked check for the rare case where the file mus
 6. **Verify by side effect** — hostname, HTTP status, deployed file hash, authenticated success message; never the secret itself.
 7. **Clean up** — unset variables, truncate + unlink every file the value touched, wipe the whole validated task directory (not a filename list), then re-check the exact paths: a variable you no longer set cannot verify anything.
 8. **Quarantine on exposure** — a value that reached a third party, a log, or a transcript is burned; stop using it and do not treat the task as done until it is confirmed dead.
+
+### Before you ask for a new credential
+
+A rejected attempt is **not** evidence that the credential is missing. In one real session every blocker was misidentification, so triage first:
+
+1. **Enumerate what already exists** — list Secrets Manager keys and vault item *names* (metadata only). The match is often by purpose, not by the address you were given: a host in Moldova was reachable all along with the secret named `MD_SSH_*`, while the agent kept retrying a key meant for a different fleet.
+2. **Confirm what the destination actually is** before hunting a provider panel — `dig -x`, `whois`, and your own inventory notes. A provider brand, a billing panel, and a machine's location are three different facts; a machine can be bought from one brand and sit in another company's datacentre.
+3. **Check whether a stored credential can still be valid** — a changed SSH host key means a reinstall, and a reinstall invalidates stored passwords; don't spend attempts on them. IP changes orphan credentials too: an item named after the old address will not be found by searching the new one.
+4. **Budget the attempts** — assume fail2ban or account lockout: 1–2 tries, never spray usernames, and prefer a key over a password so the value never reaches argv.
+5. **Prefer the machine-readable store for automation** — Secrets Manager over an interactive vault: every vault unlock costs the user a manual step, and each handover is a chance to lose the session (one was destroyed by an over-broad cleanup).
+6. **Record the mapping once you find it** — a secret's *note* is metadata: put which host it belongs to and what it is for there, so the next session matches in seconds instead of minutes.
 
 ## 7. Vault references
 
