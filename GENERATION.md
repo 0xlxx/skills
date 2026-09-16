@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `3226a64c8c8cc068976ea61af816cd8de74eab1d`
+- **Commit SHA**: `35c4a3ba28102c15f9dfd916c804a93f558a13e7`
 - **Date**: 2026-09-16
-- **Commit**: harden(secret-handoff): cleanup 全量覆盖 + 守卫抽为单一脚本
+- **Commit**: harden(secret-handoff): 清理自身残留时禁止按名字模式扫射
 
 **Source documentation:**
 
@@ -167,13 +167,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 3226a64..HEAD -- '*/SKILL.md'
+git diff --name-only 35c4a3b..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 3226a64..HEAD -- '*/SKILL.md'
+git diff 35c4a3b..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 3226a64..HEAD -- '*/SKILL.md'
+git log --oneline 35c4a3b..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -241,8 +241,9 @@ git log --oneline 3226a64..HEAD -- '*/SKILL.md'
 | 2026-09-16 | b22493a  | refactor(secret-handoff): bws Secrets Manager 通道 + 最小凭据索要模板 + 持久凭据规范 + references 拆分（3 files） — 15 active skills |
 | 2026-09-16 | e76e3d8  | harden(secret-handoff): 三轮对抗审阅闭环 — 威胁模型边界、一个任务=一条命令、validate-before-consume、退出码传播、URI host 投影、bws run 约束、持久化写入守卫（repo/GIT_DIR/.. /symlink/SOURCE==TARGET）、DIR 守卫与无通配符清理 — 15 active skills |
 | 2026-09-16 | 3226a64  | harden(secret-handoff): cleanup 改为整目录清空（文件名白名单漏掉 pwform 明文的事故复盘）+ 守卫抽成 scripts/guard-task-dir.sh 单一实现（消漂移）+ 标记文件/尾斜杠 symlink/挂载点/空参数 防护 + jq -r 尾随换行坑 — 15 active skills |
+| 2026-09-16 | 35c4a3b  | harden(secret-handoff): 清理自身残留禁止按名字模式扫射（误删用户刚交接的会话目录的事故复盘） — 15 active skills |
 
 ---
 
 Last updated: 2026-09-16
-Current SHA: 3226a64
+Current SHA: 35c4a3b
