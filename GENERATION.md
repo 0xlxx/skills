@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `2ee0092740e1f1be5ef53169864bd886bfb5b515`
+- **Commit SHA**: `faa88254794a69f6a2b01b63385a9e9937668598`
 - **Date**: 2026-09-16
-- **Commit**: docs(secret-handoff): 补「找到正确凭据」的排查清单 + shell 非 ASCII 邻接规则
+- **Commit**: docs(proxy-nodes): align credential mapping and VPS operations
 
 **Source documentation:**
 
@@ -167,13 +167,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 2ee0092..HEAD -- '*/SKILL.md'
+git diff --name-only faa8825..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 2ee0092..HEAD -- '*/SKILL.md'
+git diff faa8825..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 2ee0092..HEAD -- '*/SKILL.md'
+git log --oneline faa8825..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -244,7 +244,10 @@ git log --oneline 2ee0092..HEAD -- '*/SKILL.md'
 | 2026-09-16 | 35c4a3b  | harden(secret-handoff): 清理自身残留禁止按名字模式扫射（误删用户刚交接的会话目录的事故复盘） — 15 active skills |
 | 2026-09-16 | 2ee0092  | docs(secret-handoff): 新增「找到正确凭据」排查清单（枚举/确认目标/有效性/试错预算/存储分层/记录映射）+ shell 变量非 ASCII 邻接必须 ${} 包裹 — 15 active skills |
 
+| 2026-09-16 | b297d0c  | harden(secret-handoff): path-safe guard + scrubbed bws create/edit + PATH/cleanup hardening — 15 active skills |
+| 2026-09-16 | faa8825  | docs(proxy-nodes): credential mapping + VPS ops lessons — 15 active skills |
+
 ---
 
 Last updated: 2026-09-16
-Current SHA: 2ee0092
+Current SHA: faa8825
