@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `faa88254794a69f6a2b01b63385a9e9937668598`
-- **Date**: 2026-09-16
-- **Commit**: docs(proxy-nodes): align credential mapping and VPS operations
+- **Commit SHA**: `2d61151c83d9bf223d31511e006e03514798f4c8`
+- **Date**: 2026-09-17
+- **Commit**: refactor(essence-first): 改为第一性原理的本质解释法
 
 **Source documentation:**
 
@@ -112,7 +112,7 @@ skills/
 | `ast-grep` | 使用 ast-grep outline 在读取文件前先了解其结构——声明、导入、导出、成员。探索代码库、定位符号、理解文件形态时使用。 | SKILL.md, BENCHMARKS.md |
 | `bug-clarify` | 修复 bug 前强制澄清——追问现象、复现步骤、预期、严重性、回归风险，确认后才动手。 | SKILL.md |
 | `direct-readme` | 编写或生成 GitHub 项目 README 文件——开门见山，开箱即用。 | SKILL.md, evals/evals.json |
-| `essence-first` | 本质先行——从定锚点到递进理解，用四层结构帮读者搭建认知模型。解释概念、对比事物时使用。 | SKILL.md |
+| `essence-first` | 本质先行——抓住本质、从第一性原理出发解释问题；补齐读者缺失的前置知识，不堆砌细节。解释概念、对比事物时使用。 | SKILL.md |
 | `feature-dev` | 递阶控制 + DAG 驱动的功能实现流程——从设计方案到逐节点实现再到归档。开始新功能、新模块时手动调用。 | SKILL.md, TODO_TEMPLATE.md |
 | `intrinsic-design` | Intrinsic Web Design — content-driven CSS layout using intrinsic sizing, Grid, Flexbox, and fluid values without media queries. | SKILL.md |
 | `manifest` | 生成并维护 skills/GENERATION.md 溯源清单，追踪每个 skill 的来源、结构与更新流程。 | SKILL.md, TEMPLATE.md |
@@ -167,13 +167,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only faa8825..HEAD -- '*/SKILL.md'
+git diff --name-only 2d61151..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff faa8825..HEAD -- '*/SKILL.md'
+git diff 2d61151..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline faa8825..HEAD -- '*/SKILL.md'
+git log --oneline 2d61151..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -246,8 +246,9 @@ git log --oneline faa8825..HEAD -- '*/SKILL.md'
 
 | 2026-09-16 | b297d0c  | harden(secret-handoff): path-safe guard + scrubbed bws create/edit + PATH/cleanup hardening — 15 active skills |
 | 2026-09-16 | faa8825  | docs(proxy-nodes): credential mapping + VPS ops lessons — 15 active skills |
+| 2026-09-17 | 2d61151 | refactor(essence-first): 改为第一性原理的本质解释法（四层结构精简为核心指令） — 15 active skills |
 
 ---
 
-Last updated: 2026-09-16
-Current SHA: faa8825
+Last updated: 2026-09-17
+Current SHA: 2d61151
