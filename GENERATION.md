@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `164c886c358ec1cf3b88e296d9525c90938eb7fc`
+- **Commit SHA**: `8ccbcb496e5f8b11dcf493bdb866598d825351af`
 - **Date**: 2026-09-17
-- **Commit**: feat(explain): 标记为强制 skill（MUST USE）
+- **Commit**: feat(apple-hig): 从本机迁移 Apple HIG Web 设计与 review skill 入仓
 
 **Source documentation:**
 
@@ -27,6 +27,9 @@ skills/
 ├── api-design/                 # Active
 │   ├── SKILL.md                # Main skill file
 │   └── ANTIPATTERNS.md         # API design anti-patterns reference
+├── apple-hig/                  # Active
+│   ├── SKILL.md                # Main skill file
+│   └── references/             # 4 files: foundations（布局/颜色/字体/动效/无障碍/八项设计原则）/ components（侧边栏/工具栏/Popover/菜单/列表与表格/图表）/ patterns（加载/反馈/模态/撤销重做/拖放/搜索/新手引导）/ web-mapping（Apple 概念→Web 等效与不可照搬条目）
 ├── ast-grep/                   # Active
 │   ├── SKILL.md                # Main skill file
 │   └── BENCHMARKS.md           # Token/time benchmarks across 7 repos
@@ -104,11 +107,12 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (15)
+## Active Skills (16)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
 | `api-design` | API 设计指南——渐进式增强、框架无关、DX 优先、原子化。设计新 API、评审接口时使用。不涵盖向后兼容。 | SKILL.md, ANTIPATTERNS.md |
+| `apple-hig` | 把 Apple HIG 提炼为 Web 产品的设计取舍与界面 review 判据——clarity/deference/depth + 可执行清单（目标结构 / 状态与恢复 / 撤销拖放 / 导航搜索 / 无障碍适配）+ 严重度分级与反模式。 | SKILL.md, references/ (4) |
 | `ast-grep` | 使用 ast-grep outline 在读取文件前先了解其结构——声明、导入、导出、成员。探索代码库、定位符号、理解文件形态时使用。 | SKILL.md, BENCHMARKS.md |
 | `bug-clarify` | 修复 bug 前强制澄清——追问现象、复现步骤、预期、严重性、回归风险，确认后才动手。 | SKILL.md |
 | `direct-readme` | 编写或生成 GitHub 项目 README 文件——开门见山，开箱即用。 | SKILL.md, evals/evals.json |
@@ -167,13 +171,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 164c886..HEAD -- '*/SKILL.md'
+git diff --name-only 8ccbcb4..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 164c886..HEAD -- '*/SKILL.md'
+git diff 8ccbcb4..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 164c886..HEAD -- '*/SKILL.md'
+git log --oneline 8ccbcb4..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -249,8 +253,9 @@ git log --oneline 164c886..HEAD -- '*/SKILL.md'
 | 2026-09-17 | 2d61151 | refactor(essence-first): 改为第一性原理的本质解释法（四层结构精简为核心指令） — 15 active skills |
 | 2026-09-17 | 925da04 | rename(essence-first → explain)：skill 更名为 explain，description 简化为一行 — 15 active skills |
 | 2026-09-17 | 164c886 | feat(explain)：标记 explain 为强制 skill（description MUST USE + 正文强制声明） — 15 active skills |
+| 2026-09-17 | 8ccbcb4 | feat(apple-hig)：从本机迁移 Apple HIG skill 入仓（SKILL.md + references/ 4 files），16 active skills |
 
 ---
 
 Last updated: 2026-09-17
-Current SHA: 164c886
+Current SHA: 8ccbcb4
