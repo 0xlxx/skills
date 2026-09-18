@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `8ccbcb496e5f8b11dcf493bdb866598d825351af`
-- **Date**: 2026-09-17
-- **Commit**: feat(apple-hig): 从本机迁移 Apple HIG Web 设计与 review skill 入仓
+- **Commit SHA**: `fd6abe3f43012653a373ff15e0254a9e51f6bf8a`
+- **Date**: 2026-09-19
+- **Commit**: feat(mihomo-dns-config-debug): 从七尺宇视频提炼 mihomo DNS 分流与防泄露 skill
 
 **Source documentation:**
 
@@ -49,6 +49,9 @@ skills/
 ├── manifest/                   # Active
 │   ├── SKILL.md                # Main skill file
 │   └── TEMPLATE.md             # GENERATION.md template for step 4
+├── mihomo-dns-config-debug/    # Active
+│   ├── SKILL.md                # Main skill file
+│   └── references/             # 3 files: flows（三类场景逐跳推演 / UDP 三种优先级 / 探针 / 双路判定 / 视角对齐）/ pitfalls（五个坑 + 泄露检测为什么测不准）/ config-skeleton（参数职责 + 带注释配置骨架）
 ├── parallel-porting/           # Active
 │   ├── SKILL.md                # Main skill file
 │   ├── agents/openai.yaml      # UI metadata (display name / short description)
@@ -107,7 +110,7 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (16)
+## Active Skills (17)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
@@ -120,6 +123,7 @@ skills/
 | `feature-dev` | 递阶控制 + DAG 驱动的功能实现流程——从设计方案到逐节点实现再到归档。开始新功能、新模块时手动调用。 | SKILL.md, TODO_TEMPLATE.md |
 | `intrinsic-design` | Intrinsic Web Design — content-driven CSS layout using intrinsic sizing, Grid, Flexbox, and fluid values without media queries. | SKILL.md |
 | `manifest` | 生成并维护 skills/GENERATION.md 溯源清单，追踪每个 skill 的来源、结构与更新流程。 | SKILL.md, TEMPLATE.md |
+| `mihomo-dns-config-debug` | 配置和排查 mihomo / Clash.Meta 系内核的 DNS 分流与防泄露——fake-ip 名单、探针、双路判定、UDP 精度、QUIC 阻断、专用解析器、五个坑（源自七尺宇 mihomo DNS 深度精讲）。 | SKILL.md, references/ (3) |
 | `parallel-porting` | 大规模 1:1 移植 / 并行重构工作流（Bun 方法论落地）——worktree 分片并行、对抗审查闭环、机器可检查退出条件、备注回流、拓扑合并。移植/port/1:1 对齐/SSOT 场景使用。 | SKILL.md, agents/openai.yaml, references/ (4), scripts/ (3) |
 | `parallel-optimizing` | 行为等价下的并行算法优化工作流（parallel-porting 优化版，**面向 JS/TS**）——bit-exact 保持下做性能/体积优化：热点分析、bench 驱动循环、bit-exact 浮点门禁（豁免注册表）、顺序敏感性分类、双运行时校验（bun/Chrome）、tree-shaking 瘦身、拓扑合并。触发词：JS/TS 性能优化/算法优化/提速/benchmark/热点/bundle 瘦身/bit-exact。 | SKILL.md, references/ (5), scripts/ (4) |
 | `proxy-nodes` | 管理 VPS 代理节点——通用工作流（Bitwarden 凭据/IP 体检/增删改验证/命名约定/安全红线）+ 部署实例分层（FILES.md=实例，SKILL.md=通用）；SSOT 单一事实来源，SSH 必须通过 Bitwarden，公共版真实值全部脱敏。 | SKILL.md, FILES.md |
@@ -171,13 +175,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 8ccbcb4..HEAD -- '*/SKILL.md'
+git diff --name-only fd6abe3..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 8ccbcb4..HEAD -- '*/SKILL.md'
+git diff fd6abe3..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 8ccbcb4..HEAD -- '*/SKILL.md'
+git log --oneline fd6abe3..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -254,8 +258,9 @@ git log --oneline 8ccbcb4..HEAD -- '*/SKILL.md'
 | 2026-09-17 | 925da04 | rename(essence-first → explain)：skill 更名为 explain，description 简化为一行 — 15 active skills |
 | 2026-09-17 | 164c886 | feat(explain)：标记 explain 为强制 skill（description MUST USE + 正文强制声明） — 15 active skills |
 | 2026-09-17 | 8ccbcb4 | feat(apple-hig)：从本机迁移 Apple HIG skill 入仓（SKILL.md + references/ 4 files），16 active skills |
+| 2026-09-19 | fd6abe3 | feat(mihomo-dns-config-debug)：从七尺宇 mihomo DNS 深度精讲视频提炼（SKILL.md + references/ 3 files），17 active skills |
 
 ---
 
-Last updated: 2026-09-17
-Current SHA: 8ccbcb4
+Last updated: 2026-09-19
+Current SHA: fd6abe3
