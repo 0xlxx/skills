@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `2170a80ac58c561bc02fdbe17c77c69319e58662`
+- **Commit SHA**: `20e3a5600a898441b9cfb4c8e6fa7c07ef34e01d`
 - **Date**: 2026-09-19
-- **Commit**: feat(transcribe): 视频/音频转文字稿 skill（字幕优先 + 两遍听写 + 同音串字校对）
+- **Commit**: feat(translate-subtitle): 字幕/文稿翻译 skill（语义块 + 时间轴线性化 + 本地 Hy-MT2）
 
 **Source documentation:**
 
@@ -84,6 +84,10 @@ skills/
 │   ├── SKILL.md                # Main skill file
 │   ├── references/             # 2 files: commands（工具链/模型选择/命令参数/平台差异/故障排查）/ proofreading（同音串字模式 + 校对流程）
 │   └── scripts/transcribe.sh   # 一键流水线：字幕优先 → 取轨归一化 → 两遍听写（每次运行独立 run 目录）
+├── translate-subtitle/         # Active
+│   ├── SKILL.md                # Main skill file
+│   ├── references/             # 1 file: engines（本地 LM Studio + Hy-MT2 官方模板 / 云端 OpenRouter / 模型选择 / 踩坑）
+│   └── scripts/translate_srt.py # 语义块合并 + 滚动字幕去重与时间轴线性化 + 按块翻译 + 回写时间轴（字幕/文稿两种模式）
 ├── unit-test/                  # Active
 │   └── SKILL.md                # Main skill file
 │
@@ -114,7 +118,7 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (18)
+## Active Skills (19)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
@@ -135,6 +139,7 @@ skills/
 | `teach` | 在工作区内教授用户一项新技能或概念——使命驱动，最近发展区选课，多文件 HTML 课程。 | SKILL.md, GLOSSARY-FORMAT.md, KATEX.md, LEARNING-RECORD-FORMAT.md, LESSON-FORMAT.md, MISSION-FORMAT.md, RESOURCES-FORMAT.md, STYLES.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
 | `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
+| `translate-subtitle` | 字幕/文稿翻译——先合并语义块再整块翻（避免逐行翻译截断句子），处理滚动字幕重复与时间重叠，术语表固定译法，回写时校验时间轴单调与单条字数；本地 Hy-MT2 或云端 API 均可。 | SKILL.md, references/ (1), scripts/translate_srt.py |
 | `transcribe` | 把视频/音频转成文字稿——字幕优先（含语言代码挑选与翻译轨陷阱），无字幕则本地 whisper 两遍听写（词表注入救专有名词），再按「同音串字」定点校对并交付词表/改动清单/残留不确定。 | SKILL.md, references/ (2), scripts/transcribe.sh |
 
 ## Archived Skills (15)
@@ -180,13 +185,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 2170a80..HEAD -- '*/SKILL.md'
+git diff --name-only 20e3a56..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 2170a80..HEAD -- '*/SKILL.md'
+git diff 20e3a56..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 2170a80..HEAD -- '*/SKILL.md'
+git log --oneline 20e3a56..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -265,8 +270,9 @@ git log --oneline 2170a80..HEAD -- '*/SKILL.md'
 | 2026-09-17 | 8ccbcb4 | feat(apple-hig)：从本机迁移 Apple HIG skill 入仓（SKILL.md + references/ 4 files），16 active skills |
 | 2026-09-19 | fd6abe3 | feat(mihomo-dns-config-debug)：从七尺宇 mihomo DNS 深度精讲视频提炼（SKILL.md + references/ 3 files），17 active skills |
 | 2026-09-19 | 2170a80 | feat(transcribe)：视频/音频转文字稿 skill（字幕优先 + 两遍听写 + 同音串字校对；含可执行 scripts/transcribe.sh），18 active skills |
+| 2026-09-19 | 20e3a56 | feat(translate-subtitle)：字幕/文稿翻译 skill（语义块 + 时间轴线性化 + 本地 Hy-MT2-1.8B，实测 8 分钟视频 13 秒翻完），19 active skills |
 
 ---
 
 Last updated: 2026-09-19
-Current SHA: 2170a80
+Current SHA: 20e3a56
