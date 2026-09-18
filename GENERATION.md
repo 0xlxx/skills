@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `fd6abe3f43012653a373ff15e0254a9e51f6bf8a`
+- **Commit SHA**: `2170a80ac58c561bc02fdbe17c77c69319e58662`
 - **Date**: 2026-09-19
-- **Commit**: feat(mihomo-dns-config-debug): 从七尺宇视频提炼 mihomo DNS 分流与防泄露 skill
+- **Commit**: feat(transcribe): 视频/音频转文字稿 skill（字幕优先 + 两遍听写 + 同音串字校对）
 
 **Source documentation:**
 
@@ -80,6 +80,10 @@ skills/
 │   └── STYLES.md               # Teaching HTML defaults and intrinsic design
 ├── tourist/                    # Active
 │   └── SKILL.md                # Main skill file
+├── transcribe/                 # Active
+│   ├── SKILL.md                # Main skill file
+│   ├── references/             # 2 files: commands（工具链/模型选择/命令参数/平台差异/故障排查）/ proofreading（同音串字模式 + 校对流程）
+│   └── scripts/transcribe.sh   # 一键流水线：字幕优先 → 取轨归一化 → 两遍听写（每次运行独立 run 目录）
 ├── unit-test/                  # Active
 │   └── SKILL.md                # Main skill file
 │
@@ -110,7 +114,7 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (17)
+## Active Skills (18)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
@@ -131,6 +135,7 @@ skills/
 | `teach` | 在工作区内教授用户一项新技能或概念——使命驱动，最近发展区选课，多文件 HTML 课程。 | SKILL.md, GLOSSARY-FORMAT.md, KATEX.md, LEARNING-RECORD-FORMAT.md, LESSON-FORMAT.md, MISSION-FORMAT.md, RESOURCES-FORMAT.md, STYLES.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
 | `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
+| `transcribe` | 把视频/音频转成文字稿——字幕优先（含语言代码挑选与翻译轨陷阱），无字幕则本地 whisper 两遍听写（词表注入救专有名词），再按「同音串字」定点校对并交付词表/改动清单/残留不确定。 | SKILL.md, references/ (2), scripts/transcribe.sh |
 
 ## Archived Skills (15)
 
@@ -175,13 +180,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only fd6abe3..HEAD -- '*/SKILL.md'
+git diff --name-only 2170a80..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff fd6abe3..HEAD -- '*/SKILL.md'
+git diff 2170a80..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline fd6abe3..HEAD -- '*/SKILL.md'
+git log --oneline 2170a80..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -259,8 +264,9 @@ git log --oneline fd6abe3..HEAD -- '*/SKILL.md'
 | 2026-09-17 | 164c886 | feat(explain)：标记 explain 为强制 skill（description MUST USE + 正文强制声明） — 15 active skills |
 | 2026-09-17 | 8ccbcb4 | feat(apple-hig)：从本机迁移 Apple HIG skill 入仓（SKILL.md + references/ 4 files），16 active skills |
 | 2026-09-19 | fd6abe3 | feat(mihomo-dns-config-debug)：从七尺宇 mihomo DNS 深度精讲视频提炼（SKILL.md + references/ 3 files），17 active skills |
+| 2026-09-19 | 2170a80 | feat(transcribe)：视频/音频转文字稿 skill（字幕优先 + 两遍听写 + 同音串字校对；含可执行 scripts/transcribe.sh），18 active skills |
 
 ---
 
 Last updated: 2026-09-19
-Current SHA: fd6abe3
+Current SHA: 2170a80
