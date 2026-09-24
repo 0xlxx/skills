@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `20e3a5600a898441b9cfb4c8e6fa7c07ef34e01d`
-- **Date**: 2026-09-19
-- **Commit**: feat(translate-subtitle): 字幕/文稿翻译 skill（语义块 + 时间轴线性化 + 本地 Hy-MT2）
+- **Commit SHA**: `85d1222298915e397c688ec5061d622581ad98b4`
+- **Date**: 2026-09-24
+- **Commit**: remove(secret-handoff): 删除凭据交接 skill 及其引用
 
 **Source documentation:**
 
@@ -64,11 +64,6 @@ skills/
 ├── proxy-nodes/                # Active
 │   ├── SKILL.md                # Main skill file
 │   └── FILES.md                # Key files inventory（SSOT nodes.json / render.py / sub_server.py / cloudflared 隧道）
-├── secret-handoff/             # Active
-│   ├── SKILL.md                # Main skill file
-│   ├── agents/openai.yaml      # UI metadata (display name / short description)
-│   ├── references/             # 3 files: bitwarden.md (bw CLI / SSH Agent / host-only URI 投影) / bitwarden-secrets.md (bws token + run 约束 + fail-closed 取值) / patterns.md (SSH、Keychain、one-shot session、持久化凭据写入守卫)
-│   └── scripts/                # 1 executable: guard-task-dir.sh — 任务目录守卫 + 整目录 cleanup（唯一实现）
 ├── teach/                       # Active
 │   ├── SKILL.md                # Main skill file
 │   ├── GLOSSARY-FORMAT.md      # Glossary document format
@@ -118,7 +113,7 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (19)
+## Active Skills (18)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
@@ -135,7 +130,6 @@ skills/
 | `parallel-porting` | 大规模 1:1 移植 / 并行重构工作流（Bun 方法论落地）——worktree 分片并行、对抗审查闭环、机器可检查退出条件、备注回流、拓扑合并。移植/port/1:1 对齐/SSOT 场景使用。 | SKILL.md, agents/openai.yaml, references/ (4), scripts/ (3) |
 | `parallel-optimizing` | 行为等价下的并行算法优化工作流（parallel-porting 优化版，**面向 JS/TS**）——bit-exact 保持下做性能/体积优化：热点分析、bench 驱动循环、bit-exact 浮点门禁（豁免注册表）、顺序敏感性分类、双运行时校验（bun/Chrome）、tree-shaking 瘦身、拓扑合并。触发词：JS/TS 性能优化/算法优化/提速/benchmark/热点/bundle 瘦身/bit-exact。 | SKILL.md, references/ (5), scripts/ (4) |
 | `proxy-nodes` | 管理 VPS 代理节点——通用工作流（Bitwarden 凭据/IP 体检/增删改验证/命名约定/安全红线）+ 部署实例分层（FILES.md=实例，SKILL.md=通用）；SSOT 单一事实来源，SSH 必须通过 Bitwarden，公共版真实值全部脱敏。 | SKILL.md, FILES.md |
-| `secret-handoff` | 安全地向 agent 交接密码、API token、SSH 与 Vault 凭据——broker 优先、最小权限、脱敏、失败即停（validate-before-consume / 退出码传播 / 只删固定文件名）；支持 Bitwarden `bw` / Secrets Manager `bws`、1Password、macOS Keychain、SSH Agent，并显式声明威胁模型边界。 | SKILL.md, agents/openai.yaml, references/ (3), scripts/ (1) |
 | `teach` | 在工作区内教授用户一项新技能或概念——使命驱动，最近发展区选课，多文件 HTML 课程。 | SKILL.md, GLOSSARY-FORMAT.md, KATEX.md, LEARNING-RECORD-FORMAT.md, LESSON-FORMAT.md, MISSION-FORMAT.md, RESOURCES-FORMAT.md, STYLES.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
 | `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
@@ -185,13 +179,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 20e3a56..HEAD -- '*/SKILL.md'
+git diff --name-only 85d1222..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 20e3a56..HEAD -- '*/SKILL.md'
+git diff 85d1222..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 20e3a56..HEAD -- '*/SKILL.md'
+git log --oneline 85d1222..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -271,8 +265,9 @@ git log --oneline 20e3a56..HEAD -- '*/SKILL.md'
 | 2026-09-19 | fd6abe3 | feat(mihomo-dns-config-debug)：从七尺宇 mihomo DNS 深度精讲视频提炼（SKILL.md + references/ 3 files），17 active skills |
 | 2026-09-19 | 2170a80 | feat(transcribe)：视频/音频转文字稿 skill（字幕优先 + 两遍听写 + 同音串字校对；含可执行 scripts/transcribe.sh），18 active skills |
 | 2026-09-19 | 20e3a56 | feat(translate-subtitle)：字幕/文稿翻译 skill（语义块 + 时间轴线性化 + 本地 Hy-MT2-1.8B，实测 8 分钟视频 13 秒翻完），19 active skills |
+| 2026-09-24 | 85d1222 | remove(secret-handoff)：删除凭据交接 skill（SKILL.md + agents + references 3 + scripts 1）并清理 README / proxy-nodes 引用 — 18 active skills |
 
 ---
 
-Last updated: 2026-09-19
-Current SHA: 20e3a56
+Last updated: 2026-09-24
+Current SHA: 85d1222
