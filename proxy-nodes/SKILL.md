@@ -34,7 +34,7 @@ disable-model-invocation: true
 
 它只读取匹配 secret，密码经 `sshpass -e` 传递，key 只落在受 guard 保护的 0700 任务目录并在退出时清理。
 
-没有连接器时，遵循 [`secret-handoff`](../secret-handoff/SKILL.md)：一次只取一个 secret，读取→消费→清理在同一条命令内完成。禁止未过滤的 `bws secret list`、跨 tool call 保存 key、把 key 写入仓库或在 argv 中出现凭据。
+没有连接器时按最小暴露原则手工取用：一次只取一个 secret，读取→消费→清理在同一条命令内完成。禁止未过滤的 `bws secret list`、跨 tool call 保存 key、把 key 写入仓库或在 argv 中出现凭据。
 
 - 认证失败 1–2 次即停，避免 fail2ban；主机密钥变化按“重装”处理，旧密码视为失效。
 - **重启数据面（sui-agent/sing-box）可能断开当前 SSH**（若本机流量经该主机 NAT）——见「Add a node」的 nohup 说明。

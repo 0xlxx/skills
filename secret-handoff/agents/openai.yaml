@@ -1,3 +1,0 @@
-interface:
-  display_name: "Secret Handoff"
-  short_description: "Broker secrets without exposing their values"

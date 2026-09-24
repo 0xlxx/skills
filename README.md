@@ -18,7 +18,6 @@ npx skills add 0xlxx/skills -g
 - **[parallel-porting](./parallel-porting/SKILL.md)** — 大规模 1:1 移植 / 并行重构工作流（Bun 方法论）：worktree 分片、对抗审查、机器可检查门禁、备注回流。
 - **[parallel-optimizing](./parallel-optimizing/SKILL.md)** — 行为等价下的并行算法优化工作流（JS/TS 性能与包体积）：热点分析、bench 驱动、bit-exact 浮点门禁、tree-shaking 瘦身。
 - **[proxy-nodes](./proxy-nodes/SKILL.md)** — 管理 VPS 代理节点：Bitwarden Secrets Manager 凭据、IP 体检、增删改验证、节点命名规范（SSOT 单一事实来源）。
-- **[secret-handoff](./secret-handoff/SKILL.md)** — 安全地向 agent 交接密码、API token、SSH 与 Vault 凭据：broker 优先、最小权限、脱敏与一次性清理（Bitwarden `bw`、Secrets Manager `bws`、SSH Agent、macOS Keychain）。
 - **[transcribe](./transcribe/SKILL.md)** — 把视频/音频转成文字稿：字幕优先，没有就用本地 whisper 听写两遍，再定点校对同音串字。
 - **[translate-subtitle](./translate-subtitle/SKILL.md)** — 字幕/文稿翻译：先合并语义块再翻，保留时间轴，本地 Hy-MT2 或云端 API 都行。
 
