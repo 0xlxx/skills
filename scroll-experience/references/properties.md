@@ -171,7 +171,7 @@ function restoreSnap(container) {
 }
 ```
 
-只在项目未完整可见时滚动。连续按键时不要每次都把项目居中；`nearest` 会尽量保留已有位置。用户滚轮或触控后调用 `restoreSnap`，让捕捉重新接管。
+只在项目未完整可见时滚动。连续按键时不要每次都把项目居中；`nearest` 会尽量保留已有位置。长按产生的高频 repeat 要合并到一帧只滚一次，并使用 `behavior: 'instant'` 跟随最新选中项；单次按键可以让 `behavior: 'auto'` 继承容器的平滑设置。用户滚轮或触控后调用 `restoreSnap`，让捕捉重新接管。
 
 ## 触控与兼容
 
