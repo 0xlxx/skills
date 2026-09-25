@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `ad84068e6608ccad3312efafba4bc5f6cf71aa1e`
+- **Commit SHA**: `5b113c8656e7e49bf10be336a29e53fe5d2fdb92`
 - **Date**: 2026-09-25
-- **Commit**: feat(scroll-experience): 提炼 Web 滚动体验优化 skill
+- **Commit**: docs(scroll-experience): 优化长按 repeat 与滚动捕捉协作
 
 **Source documentation:**
 
@@ -136,7 +136,7 @@ skills/
 | `parallel-porting` | 大规模 1:1 移植 / 并行重构工作流（Bun 方法论落地）——worktree 分片并行、对抗审查闭环、机器可检查退出条件、备注回流、拓扑合并。移植/port/1:1 对齐/SSOT 场景使用。 | SKILL.md, agents/openai.yaml, references/ (4), scripts/ (3) |
 | `parallel-optimizing` | 行为等价下的并行算法优化工作流（parallel-porting 优化版，**面向 JS/TS**）——bit-exact 保持下做性能/体积优化：热点分析、bench 驱动循环、bit-exact 浮点门禁（豁免注册表）、顺序敏感性分类、双运行时校验（bun/Chrome）、tree-shaking 瘦身、拓扑合并。触发词：JS/TS 性能优化/算法优化/提速/benchmark/热点/bundle 瘦身/bit-exact。 | SKILL.md, references/ (5), scripts/ (4) |
 | `proxy-nodes` | 管理 VPS 代理节点——通用工作流（Bitwarden 凭据/IP 体检/增删改验证/命名约定/安全红线）+ 部署实例分层（FILES.md=实例，SKILL.md=通用）；SSOT 单一事实来源，SSH 必须通过 Bitwarden，公共版真实值全部脱敏。 | SKILL.md, FILES.md |
-| `scroll-experience` | 优化、诊断或评审 Web 滚动体验——滚动容器、滚动条回流、滚动链/下拉刷新、平滑滚动、scroll snap、吸附偏移、键盘/触控导航与真实浏览器验收。 | SKILL.md, references/ (2): properties（属性语义、取值、触控兼容）/ patterns（列表、轮播、全屏、嵌套滚动、键盘配方） |
+| `scroll-experience` | 优化、诊断或评审 Web 滚动体验——滚动容器、滚动条回流、滚动链/下拉刷新、平滑滚动、scroll snap、吸附偏移、键盘/触控导航、长按 repeat 与捕捉协作及真实浏览器验收。 | SKILL.md, references/ (2): properties（属性语义、取值、触控兼容）/ patterns（列表、轮播、全屏、嵌套滚动、键盘配方、长按 repeat） |
 | `teach` | 在工作区内教授用户一项新技能或概念——使命驱动，最近发展区选课，多文件 HTML 课程。 | SKILL.md, GLOSSARY-FORMAT.md, KATEX.md, LEARNING-RECORD-FORMAT.md, LESSON-FORMAT.md, MISSION-FORMAT.md, RESOURCES-FORMAT.md, STYLES.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
 | `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
@@ -186,13 +186,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only ad84068..HEAD -- '*/SKILL.md'
+git diff --name-only 5b113c8..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff ad84068..HEAD -- '*/SKILL.md'
+git diff 5b113c8..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline ad84068..HEAD -- '*/SKILL.md'
+git log --oneline 5b113c8..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -274,8 +274,9 @@ git log --oneline ad84068..HEAD -- '*/SKILL.md'
 | 2026-09-19 | 20e3a56 | feat(translate-subtitle)：字幕/文稿翻译 skill（语义块 + 时间轴线性化 + 本地 Hy-MT2-1.8B，实测 8 分钟视频 13 秒翻完），19 active skills |
 | 2026-09-24 | 85d1222 | remove(secret-handoff)：删除凭据交接 skill（SKILL.md + agents + references 3 + scripts 1）并清理 README / proxy-nodes 引用 — 18 active skills |
 | 2026-09-25 | ad84068 | Add scroll-experience — 从《CSS 如何改善滚动体验》和《CSS 的滚动捕捉》提炼滚动容器、滚动条、滚动链、平滑滚动、滚动捕捉、键盘/触控导航、验收流程（SKILL.md + references 2 files） — 19 active skills |
+| 2026-09-25 | 5b113c8 | docs(scroll-experience)：补充长按 repeat 在 scroll snap 下的最佳实践——同帧合并、repeat 即时滚动、单次平滑、捕捉延后交还 — 19 active skills |
 
 ---
 
 Last updated: 2026-09-25
-Current SHA: ad84068
+Current SHA: 5b113c8
