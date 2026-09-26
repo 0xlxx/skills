@@ -11,6 +11,7 @@ npx skills add 0xlxx/skills -g
 - **[api-design](./api-design/SKILL.md)** — API 设计原则：渐进式增强、框架无关、DX 优先、原子化。
 - **[apple-hig](./apple-hig/SKILL.md)** — 把 Apple HIG 提炼为 Web 产品的设计取舍与界面 review 判据：clarity / deference / depth、状态与恢复、无障碍与适配。
 - **[bug-clarify](./bug-clarify/SKILL.md)** — 修 bug 前强制澄清：现象、复现、预期、严重性、回归风险。
+- **[chrome-extension-shortcuts](./chrome-extension-shortcuts/SKILL.md)** — 按 Chrome 官方文档设计扩展快捷键：Commands API、用户重映射、冲突检测、键盘作用域与无障碍。
 - **[direct-readme](./direct-readme/SKILL.md)** — 编写 GitHub 项目 README，简单、直接、开箱即用。
 - **[explain](./explain/SKILL.md)** — 解释概念、原理、机制时**必须**使用：先讲本质，按需补前置知识，不堆砌细节。
 - **[manifest](./manifest/SKILL.md)** — 生成并维护 skills/GENERATION.md 溯源清单。
