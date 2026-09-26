@@ -30,6 +30,7 @@
 - `stable both-edges`：两侧对称预留，适合居中布局。
 - 根元素上的值作用于视窗；`body` 不会向视窗传播这个属性。
 - 覆盖式滚动条通常不占据沟槽，不要为了统一外观而盲目使用。
+- 沟槽只存在于**经典型滚动条**下：macOS 默认是覆盖式滚动条，写 `stable` 也看不到预留效果。验证前先把系统「显示滚动条」设为「始终」，否则很容易把“这条 CSS 没生效”误判成 bug。
 
 ```css
 .panel {
@@ -178,3 +179,4 @@ function restoreSnap(container) {
 - `touch-action` 用来声明浏览器可以处理哪些触控手势。水平轮播通常只需要保留横向平移；设置过窄会影响嵌套纵向滚动。
 - `-webkit-overflow-scrolling: touch` 是旧 iOS 时代的兼容手段。只有目标环境仍需要它时才加入，不要把它当作现代滚动性能修复。
 - 在 `body` 上使用强制捕捉可能触发旧版 iOS 的滚动问题。优先把捕捉放在专门的滚动容器上。
+- iOS 上把模态框锁住时，只写 `overflow: hidden` 仍会滚动穿透。老办法是给被锁的元素同时加 `touch-action: none`、`-webkit-overflow-scrolling: none`、`overflow: hidden`、`overscroll-behavior: none`（iOS 13+ 有效）。现代目标只需要 `overscroll-behavior`，这条组合拳留给真机复现出穿透的场景。
