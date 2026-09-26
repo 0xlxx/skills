@@ -47,26 +47,38 @@ Chrome 扩展有两种快捷键，先分清作用域，再选实现：
 }
 ```
 
+`suggested_key` 允许的平台键只有 `default`、`chromeos`、`linux`、`mac`、`windows`；给字符串则是全平台同一个键。
+
+- 省略 `suggested_key`：命令保持未绑定，等用户自己指定。需要一个"存在但默认不占键"的命令时用它。
+- `description` 对标准命令是**必填**，会显示在快捷键管理 UI；对 `_execute_action` 等 Action 命令会被忽略。
+
+`_execute_action` / `_execute_browser_action` / `_execute_page_action` 是保留的命令名，只用来给扩展图标绑键，**不会**触发 `onCommand`。想响应弹窗打开，就在弹窗自己的脚本里监听 `DOMContentLoaded`。
+
 完成标志：命令会出现在 `chrome://extensions/shortcuts`，用户可以重新绑定。
 
 ### 2. 遵守 Commands API 限制
 
 官方支持：
 
-- `A`–`Z`
-- `0`–`9`
-- `Comma`、`Period`、`Home`、`End`、`PageUp`、`PageDown`、`Space`、`Insert`、`Delete`
-- 方向键和媒体键
-- `Ctrl`、`Alt`、`Shift`、`MacCtrl`、`Option`、`Command`
+- 字母：`A`–`Z`
+- 数字：`0`–`9`
+- 通用：`Comma`、`Period`、`Home`、`End`、`PageUp`、`PageDown`、`Space`、`Insert`、`Delete`
+- 方向键：`Up`、`Down`、`Left`、`Right`
+- 媒体键：`MediaNextTrack`、`MediaPlayPause`、`MediaPrevTrack`、`MediaStop`
+- 修饰键：`Ctrl`、`Alt`、`Shift`、`MacCtrl`（仅 macOS）、`Option`（仅 macOS）、`Command`（仅 macOS）、`Search`（仅 ChromeOS）
 
 关键约束：
 
-- 必须包含 `Ctrl` 或 `Alt`；macOS 可用 `Command`。
+- 必须包含 `Ctrl` 或 `Alt`；macOS 可用 `Command` 或 `MacCtrl` 代替，`Option` 代替 `Alt`。
 - `Shift` 可选。
-- `Ctrl+Alt` 不允许。
-- `Escape` 和 `Enter` 不是可注册的 Commands API 按键。
-- 每个扩展最多提供 4 个建议快捷键。
-- 系统或 Chrome 保留快捷键永远优先，扩展不能覆盖。
+- `Ctrl+Alt` 不允许（避免与 AltGr 冲突）。
+- 媒体键不能和任何修饰键组合。
+- `Escape` 和 `Enter` 不是可注册的 Commands API 按键 —— 这两个只能留在界面内 keymap。
+- 键名区分大小写：写成 `ctrl+k` 之类会导致**安装时 manifest 解析错误**，不是安静忽略。
+- `MacCtrl` 出现在非 macOS 平台的组合里会**校验失败、阻止安装**。
+- macOS 上 `Ctrl` 会被自动转换成 `Command`；确实要 Control 键时必须写 `MacCtrl`。
+- 每个扩展最多提供 4 个建议快捷键；更多只能由用户在 `chrome://extensions/shortcuts` 里手动加。
+- 系统或 Chrome 保留快捷键（窗口管理一类）永远优先，扩展不能覆盖。
 
 完成标志：每个默认键都符合平台语法，且没有使用不支持或已保留的键。
 
@@ -87,10 +99,16 @@ Chrome 扩展有两种快捷键，先分清作用域，再选实现：
 安装时检查：
 
 ```js
+const OWN_COMMANDS = ['toggle-panel'];
+
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason !== 'install') return;
   const commands = await chrome.commands.getAll();
-  const missing = commands.filter((command) => command.shortcut === '');
+  // 只看自己的命令：getAll() 还会返回 _execute_action 一族，
+  // 它们没有描述、shortcut 也常为空，会把这里误报成"冲突"。
+  const missing = commands.filter(
+    (command) => OWN_COMMANDS.includes(command.name) && command.shortcut === '',
+  );
   if (missing.length > 0) {
     // 在扩展 UI、badge 或设置页提示用户去 chrome://extensions/shortcuts 重新绑定
   }
@@ -117,6 +135,8 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
 - 返回非空 `shortcut`：Chrome 接受了你的建议键。
   注意这只说明"注册成功"，不代表按键在宿主页面上一定先到扩展 —— 系统与浏览器保留组合仍然优先。
 - 返回空串：注册失败（被别的扩展或系统占用）。这是正常结果，不是异常，必须让用户看见。
+
+`getAll()` 会连同保留的 Action 命令（`_execute_action` 等）一起返回，展示时同样要按名字过滤：它们没有描述，渲染出来就是一行没有名字的"未绑定"，看起来像功能坏了。
 
 各类测试手段的边界：
 
@@ -148,8 +168,9 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
 - Space、Tab、Escape 在按钮、菜单和输入控件中不能随意吞掉。
 - 自定义列表要用 `aria-activedescendant` 或真实焦点同步当前活动项。
 - 不能用全局 `preventDefault()` 把浏览器和宿主站点全部封死。
+- **别碰 Chrome 内置快捷键**：官方点名的是缩放组合（`Ctrl/Cmd` + `+`、`-`、`0`）。页面级 keydown 一旦 `preventDefault()` 掉这些键，用户就失去了缩放能力。
 
-完成标志：键盘操作完整闭环，输入法、选择器、Tab 顺序和辅助技术都能工作。
+完成标志：键盘操作完整闭环，输入法、选择器、Tab 顺序和辅助技术都能工作；Chrome 自带的导航与缩放组合仍然可用。
 
 ### 3. 焦点和可访问性
 
@@ -162,9 +183,22 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
 
 ### 4. 在设置页公开快捷键
 
-官方建议在 options page 中说明扩展快捷键。帮助浮层可以作为补充，但设置页应提供入口或完整列表。
+官方原文是"通过 options page 让用户知道有哪些快捷键"。帮助浮层可以作为补充，但设置页必须有入口或完整列表。
 
-完成标志：用户能在设置页查到快捷键，不需要猜。
+列出时要区分两类来源，别把两者混成一张表：
+
+- 浏览器级命令：展示 `getAll()` 读回来的**真实**绑定，附一个通往 `chrome://extensions/shortcuts` 的入口。
+- 界面内快捷键：展示你自己定义的键位。
+
+完成标志：用户能在设置页查到快捷键、知道哪些可以改、以及去哪里改。
+
+### 5. 通过 200% 缩放测试
+
+官方用 [WCAG 的 200% 测试](https://www.w3.org/TR/2008/REC-WCAG20-20081211/#visual-audio-contrast-scale)衡量 UI 的弹性：文本或页面放大到 200% 之后，界面是否仍然可用。
+
+快捷键面板最容易在这里翻车 —— 键位列通常用固定宽度排布，放大后要么被裁掉，要么把说明挤出可视区。
+
+完成标志：200% 缩放下快捷键面板与设置页仍可阅读、可操作，没有内容被裁切或需要横向滚动。
 
 ## 常见误用
 
@@ -186,7 +220,8 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
 - [ ] 用 `chrome.commands.getAll()` 验证过建议键真的注册成功（空绑定有提示）。
 - [ ] 界面内快捷键有明确作用域和传播规则。
 - [ ] 输入控件、选择器、IME、Tab 顺序和焦点环没有被破坏。
-- [ ] 设置页或帮助页列出了用户可用快捷键。
+- [ ] 设置页列出了浏览器级命令的真实绑定与重映射入口。
+- [ ] 200% 放大下快捷键面板与设置页仍可使用。
 - [ ] 只用键盘可以完成核心操作流程。
 
 ## 官方来源
