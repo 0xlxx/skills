@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `6d87a7f3fb1cabd1ee87d210d7c7b4a1e0a6bc21`
+- **Commit SHA**: `3e217cd1a3ee56db3ee88d5ef1bf1e07e5b71a52`
 - **Date**: 2026-09-26
-- **Commit**: feat(chrome-extension-shortcuts): add skill from Chrome official shortcut docs
+- **Commit**: docs(chrome-extension-shortcuts): 补齐官方硬约束与 a11y 缩放要求
 
 **Source documentation:**
 
@@ -199,13 +199,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 6d87a7f..HEAD -- '*/SKILL.md'
+git diff --name-only 3e217cd..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 6d87a7f..HEAD -- '*/SKILL.md'
+git diff 3e217cd..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 6d87a7f..HEAD -- '*/SKILL.md'
+git log --oneline 3e217cd..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -288,10 +288,11 @@ git log --oneline 6d87a7f..HEAD -- '*/SKILL.md'
 | 2026-09-24 | 85d1222 | remove(secret-handoff)：删除凭据交接 skill（SKILL.md + agents + references 3 + scripts 1）并清理 README / proxy-nodes 引用 — 18 active skills |
 | 2026-09-25 | ad84068 | Add scroll-experience — 从《CSS 如何改善滚动体验》和《CSS 的滚动捕捉》提炼滚动容器、滚动条、滚动链、平滑滚动、滚动捕捉、键盘/触控导航、验收流程（SKILL.md + references 2 files） — 19 active skills |
 | 2026-09-25 | 5b113c8 | docs(scroll-experience)：补充长按 repeat 在 scroll snap 下的最佳实践——同帧合并、repeat 即时滚动、单次平滑、捕捉延后交还 — 19 active skills |
+| 2026-09-26 | 3e217cd | docs(chrome-extension-shortcuts)：逐条复核官方四份文档后补齐硬约束（suggested_key 平台键白名单、媒体键不可组合修饰键、键名大小写、MacCtrl 平台限制、description 必填范围、_execute_action 不触发 onCommand）、a11y 缩放要求（不干扰 Chrome 缩放组合 + 200% 缩放测试）、getAll() 中保留命令的过滤 — 21 active skills |
 | 2026-09-26 | 6d87a7f | Add chrome-extension-shortcuts — 从 Chrome 官方 Commands API / Respond to commands / Support accessibility 文档提炼作用域决策、命令限制、冲突检测与验证边界（SKILL.md 1 file） — 21 active skills |
 | 2026-09-26 | 9fcbeef | Add subgrid-layout — 从《使用子网格构建 Web 布局》提炼共享轴判断、父子网格继承、fallback、几何验收，并披露六类布局配方（SKILL.md + references 1 file） — 20 active skills |
 
 ---
 
 Last updated: 2026-09-26
-Current SHA: 6d87a7f
+Current SHA: 3e217cd
