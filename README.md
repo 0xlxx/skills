@@ -19,6 +19,7 @@ npx skills add 0xlxx/skills -g
 - **[parallel-optimizing](./parallel-optimizing/SKILL.md)** — 行为等价下的并行算法优化工作流（JS/TS 性能与包体积）：热点分析、bench 驱动、bit-exact 浮点门禁、tree-shaking 瘦身。
 - **[proxy-nodes](./proxy-nodes/SKILL.md)** — 管理 VPS 代理节点：Bitwarden Secrets Manager 凭据、IP 体检、增删改验证、节点命名规范（SSOT 单一事实来源）。
 - **[scroll-experience](./scroll-experience/SKILL.md)** — 优化 Web 滚动体验：滚动容器、滚动条回流、滚动链、平滑滚动、scroll snap、键盘/触控导航与验收清单。
+- **[subgrid-layout](./subgrid-layout/SKILL.md)** — 用 CSS Subgrid 共享父子网格轨道，处理卡片组、纵向列表、页脚栏目、Branding 区域与图片墙的跨项对齐。
 - **[transcribe](./transcribe/SKILL.md)** — 把视频/音频转成文字稿：字幕优先，没有就用本地 whisper 听写两遍，再定点校对同音串字。
 - **[translate-subtitle](./translate-subtitle/SKILL.md)** — 字幕/文稿翻译：先合并语义块再翻，保留时间轴，本地 Hy-MT2 或云端 API 都行。
 
