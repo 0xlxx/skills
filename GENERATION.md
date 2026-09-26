@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `5b113c8656e7e49bf10be336a29e53fe5d2fdb92`
-- **Date**: 2026-09-25
-- **Commit**: docs(scroll-experience): 优化长按 repeat 与滚动捕捉协作
+- **Commit SHA**: `9fcbeef2b34bc417ab7c3545f1c78cce378f8227`
+- **Date**: 2026-09-26
+- **Commit**: feat(subgrid-layout): add CSS subgrid alignment skill
 
 **Source documentation:**
 
@@ -16,9 +16,10 @@ This document contains information about how these skills are maintained and how
 - Source articles:
   - `/Users/bjorn/Documents/book/设计与前端/掘金小册/防御式 CSS 精讲/19. CSS 如何改善滚动体验.md`
   - `/Users/bjorn/Documents/book/设计与前端/掘金小册/防御式 CSS 精讲/21. CSS 的滚动捕捉.md`
-- Skills are self-contained — `scroll-experience/SKILL.md` synthesizes the two source articles and is the authoritative skill source.
+  - `/Users/bjorn/Documents/book/设计与前端/掘金小册/现代 Web 布局/17. 使用子网格构建 Web 布局.md`
+- Skills are self-contained — `scroll-experience/SKILL.md` and `subgrid-layout/SKILL.md` synthesize their respective source articles and are the authoritative skill sources.
 
-**Generation date**: 2026-06-26
+**Generation date**: 2026-09-26
 
 ## Structure
 
@@ -70,6 +71,9 @@ skills/
 ├── scroll-experience/          # Active
 │   ├── SKILL.md                # Main skill file（滚动诊断流程、选择规则、风险与验收清单）
 │   └── references/             # 2 files: properties（滚动容器/滚动条/滚动链/平滑/捕捉/键盘属性语义）/ patterns（列表、轮播、全屏、嵌套滚动、弹层、键盘配方）
+├── subgrid-layout/             # Active
+│   ├── SKILL.md                # Main skill file（共享轴判断、父子网格继承、fallback、风险与验收清单）
+│   └── references/             # 1 file: patterns（横向卡片组、纵向列表、页脚栏目、Branding、图片墙、语义结构受限）
 ├── teach/                       # Active
 │   ├── SKILL.md                # Main skill file
 │   ├── GLOSSARY-FORMAT.md      # Glossary document format
@@ -119,7 +123,7 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (19)
+## Active Skills (20)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
@@ -137,6 +141,7 @@ skills/
 | `parallel-optimizing` | 行为等价下的并行算法优化工作流（parallel-porting 优化版，**面向 JS/TS**）——bit-exact 保持下做性能/体积优化：热点分析、bench 驱动循环、bit-exact 浮点门禁（豁免注册表）、顺序敏感性分类、双运行时校验（bun/Chrome）、tree-shaking 瘦身、拓扑合并。触发词：JS/TS 性能优化/算法优化/提速/benchmark/热点/bundle 瘦身/bit-exact。 | SKILL.md, references/ (5), scripts/ (4) |
 | `proxy-nodes` | 管理 VPS 代理节点——通用工作流（Bitwarden 凭据/IP 体检/增删改验证/命名约定/安全红线）+ 部署实例分层（FILES.md=实例，SKILL.md=通用）；SSOT 单一事实来源，SSH 必须通过 Bitwarden，公共版真实值全部脱敏。 | SKILL.md, FILES.md |
 | `scroll-experience` | 优化、诊断或评审 Web 滚动体验——滚动容器、滚动条回流、滚动链/下拉刷新、平滑滚动、scroll snap、吸附偏移、键盘/触控导航、长按 repeat 与捕捉协作及真实浏览器验收。 | SKILL.md, references/ (2): properties（属性语义、取值、触控兼容）/ patterns（列表、轮播、全屏、嵌套滚动、键盘配方、长按 repeat） |
+| `subgrid-layout` | 用 CSS Subgrid 共享父子网格轨道——先判断列/行共享轴，再处理卡片组、纵向列表、页脚栏目、Branding 区域、图片墙与语义结构受限的跨项对齐；含 fallback 和几何验收。 | SKILL.md, references/ (1): patterns（横向卡片组、纵向列表、页脚栏目、Branding、图片墙、语义结构受限） |
 | `teach` | 在工作区内教授用户一项新技能或概念——使命驱动，最近发展区选课，多文件 HTML 课程。 | SKILL.md, GLOSSARY-FORMAT.md, KATEX.md, LEARNING-RECORD-FORMAT.md, LESSON-FORMAT.md, MISSION-FORMAT.md, RESOURCES-FORMAT.md, STYLES.md |
 | `tourist` | 按 tourist 的优化哲学——降维、常数优先、最直接。性能优化、代码加速时使用。 | SKILL.md |
 | `unit-test` | 编写优秀的单元测试——FIRST、AAA、Right-BICEP。写单测、加测试、评审测试时使用。 | SKILL.md |
@@ -186,13 +191,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 5b113c8..HEAD -- '*/SKILL.md'
+git diff --name-only 9fcbeef..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 5b113c8..HEAD -- '*/SKILL.md'
+git diff 9fcbeef..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 5b113c8..HEAD -- '*/SKILL.md'
+git log --oneline 9fcbeef..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -275,8 +280,9 @@ git log --oneline 5b113c8..HEAD -- '*/SKILL.md'
 | 2026-09-24 | 85d1222 | remove(secret-handoff)：删除凭据交接 skill（SKILL.md + agents + references 3 + scripts 1）并清理 README / proxy-nodes 引用 — 18 active skills |
 | 2026-09-25 | ad84068 | Add scroll-experience — 从《CSS 如何改善滚动体验》和《CSS 的滚动捕捉》提炼滚动容器、滚动条、滚动链、平滑滚动、滚动捕捉、键盘/触控导航、验收流程（SKILL.md + references 2 files） — 19 active skills |
 | 2026-09-25 | 5b113c8 | docs(scroll-experience)：补充长按 repeat 在 scroll snap 下的最佳实践——同帧合并、repeat 即时滚动、单次平滑、捕捉延后交还 — 19 active skills |
+| 2026-09-26 | 9fcbeef | Add subgrid-layout — 从《使用子网格构建 Web 布局》提炼共享轴判断、父子网格继承、fallback、几何验收，并披露六类布局配方（SKILL.md + references 1 file） — 20 active skills |
 
 ---
 
-Last updated: 2026-09-25
-Current SHA: 5b113c8
+Last updated: 2026-09-26
+Current SHA: 9fcbeef
