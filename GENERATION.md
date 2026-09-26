@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `3d11f15c3bbda13a1e2a6bb6c9e2f3eb87d7cdbb`
+- **Commit SHA**: `ec0c8b4c9eae2d16cfd3c0b0d4dd7b0b9b6a9f2e`
 - **Date**: 2026-09-26
-- **Commit**: refactor(chrome-extension-shortcuts): 修掉子代理审出的三个 factual blocker 并按分支拆分
+- **Commit**: docs(chrome-extension-shortcuts): 补两条键位展示规则
 
 **Source documentation:**
 
@@ -46,7 +46,7 @@ skills/
 │   └── SKILL.md                # Main skill file
 ├── chrome-extension-shortcuts/ # Active
 │   ├── SKILL.md                # Main skill file（三问决策、跨分支要求、验收清单）
-│   └── references/             # 2 files: browser-commands（manifest 声明、键位与作用域限制、onCommand、冲突检测与验证边界）/ in-page-keymap（作用域栈、原生键、焦点与 ARIA、与浏览器内置键共存、可发现性）
+│   └── references/             # 2 files: browser-commands（manifest 声明、键位与作用域限制、onCommand、冲突检测与验证边界）/ in-page-keymap（作用域栈、原生键、焦点与 ARIA、与浏览器内置键共存、按平台展示真实绑定的可发现性）
 ├── direct-readme/              # Active
 │   ├── SKILL.md                # Main skill file
 │   └── evals/
@@ -200,13 +200,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 3d11f15..HEAD -- '*/SKILL.md'
+git diff --name-only ec0c8b4..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 3d11f15..HEAD -- '*/SKILL.md'
+git diff ec0c8b4..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 3d11f15..HEAD -- '*/SKILL.md'
+git log --oneline ec0c8b4..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -289,6 +289,7 @@ git log --oneline 3d11f15..HEAD -- '*/SKILL.md'
 | 2026-09-24 | 85d1222 | remove(secret-handoff)：删除凭据交接 skill（SKILL.md + agents + references 3 + scripts 1）并清理 README / proxy-nodes 引用 — 18 active skills |
 | 2026-09-25 | ad84068 | Add scroll-experience — 从《CSS 如何改善滚动体验》和《CSS 的滚动捕捉》提炼滚动容器、滚动条、滚动链、平滑滚动、滚动捕捉、键盘/触控导航、验收流程（SKILL.md + references 2 files） — 19 active skills |
 | 2026-09-25 | 5b113c8 | docs(scroll-experience)：补充长按 repeat 在 scroll snap 下的最佳实践——同帧合并、repeat 即时滚动、单次平滑、捕捉延后交还 — 19 active skills |
+| 2026-09-26 | ec0c8b4 | docs(chrome-extension-shortcuts)：补两条实现中验证过的键位展示规则——按平台分别存且只显示当前客户端那一套；平台显式下传而非就地探测（navigator.platform 在测试环境与开发机上取值不同） — 21 active skills |
 | 2026-09-26 | 3d11f15 | refactor(chrome-extension-shortcuts)：子代理对照官方四份文档审阅后修掉三个 factual blocker（缺 onCommand 注册步骤、getAll 空串语义、tabs.sendMessage 冒充 onCommand），并按分支拆出 references 2 文件、删掉与正文矛盾的验收门槛 — 21 active skills |
 | 2026-09-26 | 7ba2da7 | docs(chrome-extension-shortcuts)：界面内也要读实际绑定——帮助浮层/状态条的键位同样跟真实绑定走，内容脚本缺 chrome.commands 时由后台代读，不得退回写死默认值 — 21 active skills |
 | 2026-09-26 | 3e217cd | docs(chrome-extension-shortcuts)：逐条复核官方四份文档后补齐硬约束（suggested_key 平台键白名单、媒体键不可组合修饰键、键名大小写、MacCtrl 平台限制、description 必填范围、_execute_action 不触发 onCommand）、a11y 缩放要求（不干扰 Chrome 缩放组合 + 200% 缩放测试）、getAll() 中保留命令的过滤 — 21 active skills |
@@ -298,4 +299,4 @@ git log --oneline 3d11f15..HEAD -- '*/SKILL.md'
 ---
 
 Last updated: 2026-09-26
-Current SHA: 3d11f15
+Current SHA: ec0c8b4
