@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `9fcbeef2b34bc417ab7c3545f1c78cce378f8227`
+- **Commit SHA**: `6d87a7f3fb1cabd1ee87d210d7c7b4a1e0a6bc21`
 - **Date**: 2026-09-26
-- **Commit**: feat(subgrid-layout): add CSS subgrid alignment skill
+- **Commit**: feat(chrome-extension-shortcuts): add skill from Chrome official shortcut docs
 
 **Source documentation:**
 
@@ -17,7 +17,12 @@ This document contains information about how these skills are maintained and how
   - `/Users/bjorn/Documents/book/设计与前端/掘金小册/防御式 CSS 精讲/19. CSS 如何改善滚动体验.md`
   - `/Users/bjorn/Documents/book/设计与前端/掘金小册/防御式 CSS 精讲/21. CSS 的滚动捕捉.md`
   - `/Users/bjorn/Documents/book/设计与前端/掘金小册/现代 Web 布局/17. 使用子网格构建 Web 布局.md`
-- Skills are self-contained — `scroll-experience/SKILL.md` and `subgrid-layout/SKILL.md` synthesize their respective source articles and are the authoritative skill sources.
+- Chrome 官方文档（在线源，非仓库内文件）：
+  - https://developer.chrome.com/docs/extensions/reference/api/commands
+  - https://developer.chrome.com/docs/extensions/develop/ui/respond-to-commands
+  - https://developer.chrome.com/docs/extensions/how-to/ui/a11y
+  - https://support.google.com/chrome/answer/157179
+- Skills are self-contained — `scroll-experience/SKILL.md`、`subgrid-layout/SKILL.md` 与 `chrome-extension-shortcuts/SKILL.md` synthesize their respective source material and are the authoritative skill sources.
 
 **Generation date**: 2026-09-26
 
@@ -39,6 +44,8 @@ skills/
 │   └── BENCHMARKS.md           # Token/time benchmarks across 7 repos
 ├── bug-clarify/                # Active
 │   └── SKILL.md                # Main skill file
+├── chrome-extension-shortcuts/ # Active
+│   └── SKILL.md                # Main skill file（作用域决策、Commands API 限制、冲突检测、验证手段边界）
 ├── direct-readme/              # Active
 │   ├── SKILL.md                # Main skill file
 │   └── evals/
@@ -123,7 +130,7 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (20)
+## Active Skills (21)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
@@ -131,6 +138,7 @@ skills/
 | `apple-hig` | 把 Apple HIG 提炼为 Web 产品的设计取舍与界面 review 判据——clarity/deference/depth + 可执行清单（目标结构 / 状态与恢复 / 撤销拖放 / 导航搜索 / 无障碍适配）+ 严重度分级与反模式。 | SKILL.md, references/ (4) |
 | `ast-grep` | 使用 ast-grep outline 在读取文件前先了解其结构——声明、导入、导出、成员。探索代码库、定位符号、理解文件形态时使用。 | SKILL.md, BENCHMARKS.md |
 | `bug-clarify` | 修复 bug 前强制澄清——追问现象、复现步骤、预期、严重性、回归风险，确认后才动手。 | SKILL.md |
+| `chrome-extension-shortcuts` | 按 Chrome 官方文档设计扩展快捷键——先分清浏览器级 commands 与界面内 keymap，再处理平台化 suggested_key、支持键白名单、Escape/Enter 与 Ctrl+Alt 限制、安装时空绑定检查、设置页可发现性与 `chrome://extensions/shortcuts` 重映射；含验证手段边界（CDP 注入按键不经过加速表）。 | SKILL.md |
 | `direct-readme` | 编写或生成 GitHub 项目 README 文件——开门见山，开箱即用。 | SKILL.md, evals/evals.json |
 | `explain` | **强制（MUST USE）**：解释概念、原理、机制时必须使用——先讲本质，按需补前置知识，不堆砌细节。 | SKILL.md |
 | `feature-dev` | 递阶控制 + DAG 驱动的功能实现流程——从设计方案到逐节点实现再到归档。开始新功能、新模块时手动调用。 | SKILL.md, TODO_TEMPLATE.md |
@@ -191,13 +199,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 9fcbeef..HEAD -- '*/SKILL.md'
+git diff --name-only 6d87a7f..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 9fcbeef..HEAD -- '*/SKILL.md'
+git diff 6d87a7f..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 9fcbeef..HEAD -- '*/SKILL.md'
+git log --oneline 6d87a7f..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -280,9 +288,10 @@ git log --oneline 9fcbeef..HEAD -- '*/SKILL.md'
 | 2026-09-24 | 85d1222 | remove(secret-handoff)：删除凭据交接 skill（SKILL.md + agents + references 3 + scripts 1）并清理 README / proxy-nodes 引用 — 18 active skills |
 | 2026-09-25 | ad84068 | Add scroll-experience — 从《CSS 如何改善滚动体验》和《CSS 的滚动捕捉》提炼滚动容器、滚动条、滚动链、平滑滚动、滚动捕捉、键盘/触控导航、验收流程（SKILL.md + references 2 files） — 19 active skills |
 | 2026-09-25 | 5b113c8 | docs(scroll-experience)：补充长按 repeat 在 scroll snap 下的最佳实践——同帧合并、repeat 即时滚动、单次平滑、捕捉延后交还 — 19 active skills |
+| 2026-09-26 | 6d87a7f | Add chrome-extension-shortcuts — 从 Chrome 官方 Commands API / Respond to commands / Support accessibility 文档提炼作用域决策、命令限制、冲突检测与验证边界（SKILL.md 1 file） — 21 active skills |
 | 2026-09-26 | 9fcbeef | Add subgrid-layout — 从《使用子网格构建 Web 布局》提炼共享轴判断、父子网格继承、fallback、几何验收，并披露六类布局配方（SKILL.md + references 1 file） — 20 active skills |
 
 ---
 
 Last updated: 2026-09-26
-Current SHA: 9fcbeef
+Current SHA: 6d87a7f
