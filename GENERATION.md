@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `ec0c8b4c9eae2d16cfd3c0b0d4dd7b0b9b6a9f2e`
+- **Commit SHA**: `99e083196cc20efe6ceb3ce9d56bebddcc5ff839`
 - **Date**: 2026-09-26
-- **Commit**: docs(chrome-extension-shortcuts): 补两条键位展示规则
+- **Commit**: docs(scroll-experience): 补沟槽验证前提与 iOS 模态框穿透配方
 
 **Source documentation:**
 
@@ -200,13 +200,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only ec0c8b4..HEAD -- '*/SKILL.md'
+git diff --name-only 99e0831..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff ec0c8b4..HEAD -- '*/SKILL.md'
+git diff 99e0831..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline ec0c8b4..HEAD -- '*/SKILL.md'
+git log --oneline 99e0831..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -296,7 +296,9 @@ git log --oneline ec0c8b4..HEAD -- '*/SKILL.md'
 | 2026-09-26 | 6d87a7f | Add chrome-extension-shortcuts — 从 Chrome 官方 Commands API / Respond to commands / Support accessibility 文档提炼作用域决策、命令限制、冲突检测与验证边界（SKILL.md 1 file） — 21 active skills |
 | 2026-09-26 | 9fcbeef | Add subgrid-layout — 从《使用子网格构建 Web 布局》提炼共享轴判断、父子网格继承、fallback、几何验收，并披露六类布局配方（SKILL.md + references 1 file） — 20 active skills |
 
+| 2026-09-26 | 99e0831 | docs(scroll-experience): 补沟槽验证前提与 iOS 模态框穿透配方——沟槽只存在于经典型滚动条（macOS 需把系统「显示滚动条」设为「始终」才能验证）；iOS 模态框穿透的 `touch-action` + `-webkit-overflow-scrolling` 组合拳 — 21 active skills |
+
 ---
 
 Last updated: 2026-09-26
-Current SHA: ec0c8b4
+Current SHA: 99e0831
