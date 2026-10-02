@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `99e083196cc20efe6ceb3ce9d56bebddcc5ff839`
-- **Date**: 2026-09-26
-- **Commit**: docs(scroll-experience): 补沟槽验证前提与 iOS 模态框穿透配方
+- **Commit SHA**: `1c003a4064bcb695f47af76115d18495e4bbc536`
+- **Date**: 2026-10-03
+- **Commit**: feat: add learning-quiz and layout skills
 
 **Source documentation:**
 
@@ -17,14 +17,17 @@ This document contains information about how these skills are maintained and how
   - `/Users/bjorn/Documents/book/设计与前端/掘金小册/防御式 CSS 精讲/19. CSS 如何改善滚动体验.md`
   - `/Users/bjorn/Documents/book/设计与前端/掘金小册/防御式 CSS 精讲/21. CSS 的滚动捕捉.md`
   - `/Users/bjorn/Documents/book/设计与前端/掘金小册/现代 Web 布局/17. 使用子网格构建 Web 布局.md`
+  - `/Users/bjorn/Documents/book/设计与前端/掘金小册/现代 Web 布局/24. 内在 Web 设计.md`（modern-web-layout/reference/intrinsic-sizing.md 的来源）
+  - `/Users/bjorn/Documents/book/设计与前端/掘金小册/现代 Web 布局/27. 下一代响应式 Web 设计：组件驱动式 Web 设计.md`（modern-web-layout/reference/component-driven.md 的来源）
+  - `/Users/bjorn/Documents/book/设计与前端/掘金小册/现代 Web 布局/28. 下一代响应式 Web 设计：容器查询.md`（modern-web-layout/reference/container-queries.md 的来源）
 - Chrome 官方文档（在线源，非仓库内文件）：
   - https://developer.chrome.com/docs/extensions/reference/api/commands
   - https://developer.chrome.com/docs/extensions/develop/ui/respond-to-commands
   - https://developer.chrome.com/docs/extensions/how-to/ui/a11y
   - https://support.google.com/chrome/answer/157179
-- Skills are self-contained — `scroll-experience/SKILL.md`、`subgrid-layout/SKILL.md` 与 `chrome-extension-shortcuts/SKILL.md` synthesize their respective source material and are the authoritative skill sources.
+- Skills are self-contained — each skill 的 `SKILL.md` 是权威源；外部文章仅提供溯源。
 
-**Generation date**: 2026-09-26
+**Generation date**: 2026-10-03
 
 ## Structure
 
@@ -47,6 +50,8 @@ skills/
 ├── chrome-extension-shortcuts/ # Active
 │   ├── SKILL.md                # Main skill file（三问决策、跨分支要求、验收清单）
 │   └── references/             # 2 files: browser-commands（manifest 声明、键位与作用域限制、onCommand、冲突检测与验证边界）/ in-page-keymap（作用域栈、原生键、焦点与 ARIA、与浏览器内置键共存、按平台展示真实绑定的可发现性）
+├── component-responsive-layout/ # Active
+│   └── SKILL.md                # Main skill file（容器上下文→内容定型→结构分支→几何验收）
 ├── direct-readme/              # Active
 │   ├── SKILL.md                # Main skill file
 │   └── evals/
@@ -58,12 +63,19 @@ skills/
 │   └── TODO_TEMPLATE.md        # TODO.md template for step 3.3
 ├── intrinsic-design/           # Active
 │   └── SKILL.md                # Main skill file
+├── learning-quiz/              # Active
+│   ├── SKILL.md                # Main skill file（题库蓝图、误解闭环、掌握门禁）
+│   └── agents/openai.yaml      # UI metadata (display name / short description)
 ├── manifest/                   # Active
 │   ├── SKILL.md                # Main skill file
 │   └── TEMPLATE.md             # GENERATION.md template for step 4
 ├── mihomo-dns-config-debug/    # Active
 │   ├── SKILL.md                # Main skill file
 │   └── references/             # 3 files: flows（三类场景逐跳推演 / UDP 三种优先级 / 探针 / 双路判定 / 视角对齐）/ pitfalls（五个坑 + 泄露检测为什么测不准）/ config-skeleton（参数职责 + 带注释配置骨架）
+├── modern-web-layout/           # Active
+│   ├── SKILL.md                # Main skill file（内驱式、容器查询、组件驱动式）
+│   ├── GENERATION.md           # Source provenance and sync notes
+│   └── reference/              # 3 files: intrinsic-sizing / container-queries / component-driven
 ├── parallel-porting/           # Active
 │   ├── SKILL.md                # Main skill file
 │   ├── agents/openai.yaml      # UI metadata (display name / short description)
@@ -131,7 +143,7 @@ skills/
     └── zhihu-answer/           # SKILL.md + references/ (1 file)
 ```
 
-## Active Skills (21)
+## Active Skills (24)
 
 | Skill | Description | Files |
 |-------|-------------|-------|
@@ -140,12 +152,15 @@ skills/
 | `ast-grep` | 使用 ast-grep outline 在读取文件前先了解其结构——声明、导入、导出、成员。探索代码库、定位符号、理解文件形态时使用。 | SKILL.md, BENCHMARKS.md |
 | `bug-clarify` | 修复 bug 前强制澄清——追问现象、复现步骤、预期、严重性、回归风险，确认后才动手。 | SKILL.md |
 | `chrome-extension-shortcuts` | 按 Chrome 官方文档设计或排查扩展快捷键——三问路由决定 browser commands 还是 in-page keymap，再处理平台默认键与保留键、onCommand 注册与定向投递、冲突/未绑定提示、设置页真实绑定与 200% 缩放一致性。 | SKILL.md, references/ (2): browser-commands（声明/限制/onCommand/冲突与验证边界）/ in-page-keymap（作用域栈/原生键/焦点与 ARIA/与内置键共存/可发现性） |
+| `component-responsive-layout` | 组件驱动响应式布局——先界定最近容器，再让内容生成尺寸，只给真实结构变化加容器查询，最后用几何断言验收。 | SKILL.md |
 | `direct-readme` | 编写或生成 GitHub 项目 README 文件——开门见山，开箱即用。 | SKILL.md, evals/evals.json |
 | `explain` | **强制（MUST USE）**：解释概念、原理、机制时必须使用——先讲本质，按需补前置知识，不堆砌细节。 | SKILL.md |
 | `feature-dev` | 递阶控制 + DAG 驱动的功能实现流程——从设计方案到逐节点实现再到归档。开始新功能、新模块时手动调用。 | SKILL.md, TODO_TEMPLATE.md |
 | `intrinsic-design` | Intrinsic Web Design — content-driven CSS layout using intrinsic sizing, Grid, Flexbox, and fluid values without media queries. | SKILL.md |
+| `learning-quiz` | 运行自适应学习测验——覆盖每个知识点，一次一题，定位并修复误解，用变式复测到多次独立正确；重点/难点额外延迟回测。 | SKILL.md, agents/openai.yaml |
 | `manifest` | 生成并维护 skills/GENERATION.md 溯源清单，追踪每个 skill 的来源、结构与更新流程。 | SKILL.md, TEMPLATE.md |
 | `mihomo-dns-config-debug` | 配置和排查 mihomo / Clash.Meta 系内核的 DNS 分流与防泄露——fake-ip 名单、探针、双路判定、UDP 精度、QUIC 阻断、专用解析器、五个坑（源自七尺宇 mihomo DNS 深度精讲）。 | SKILL.md, references/ (3) |
+| `modern-web-layout` | 现代 Web 布局实操——内容决定尺寸、设计只给约束；内在尺寸改造、容器查询与组件驱动式响应式，含三篇原文精炼参考。 | SKILL.md, GENERATION.md, reference/ (3): intrinsic-sizing / container-queries / component-driven |
 | `parallel-porting` | 大规模 1:1 移植 / 并行重构工作流（Bun 方法论落地）——worktree 分片并行、对抗审查闭环、机器可检查退出条件、备注回流、拓扑合并。移植/port/1:1 对齐/SSOT 场景使用。 | SKILL.md, agents/openai.yaml, references/ (4), scripts/ (3) |
 | `parallel-optimizing` | 行为等价下的并行算法优化工作流（parallel-porting 优化版，**面向 JS/TS**）——bit-exact 保持下做性能/体积优化：热点分析、bench 驱动循环、bit-exact 浮点门禁（豁免注册表）、顺序敏感性分类、双运行时校验（bun/Chrome）、tree-shaking 瘦身、拓扑合并。触发词：JS/TS 性能优化/算法优化/提速/benchmark/热点/bundle 瘦身/bit-exact。 | SKILL.md, references/ (5), scripts/ (4) |
 | `proxy-nodes` | 管理 VPS 代理节点——通用工作流（Bitwarden 凭据/IP 体检/增删改验证/命名约定/安全红线）+ 部署实例分层（FILES.md=实例，SKILL.md=通用）；SSOT 单一事实来源，SSH 必须通过 Bitwarden，公共版真实值全部脱敏。 | SKILL.md, FILES.md |
@@ -200,13 +215,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 99e0831..HEAD -- '*/SKILL.md'
+git diff --name-only 1c003a4..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 99e0831..HEAD -- '*/SKILL.md'
+git diff 1c003a4..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 99e0831..HEAD -- '*/SKILL.md'
+git log --oneline 1c003a4..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -298,7 +313,9 @@ git log --oneline 99e0831..HEAD -- '*/SKILL.md'
 
 | 2026-09-26 | 99e0831 | docs(scroll-experience): 补沟槽验证前提与 iOS 模态框穿透配方——沟槽只存在于经典型滚动条（macOS 需把系统「显示滚动条」设为「始终」才能验证）；iOS 模态框穿透的 `touch-action` + `-webkit-overflow-scrolling` 组合拳 — 21 active skills |
 
+| 2026-10-03 | 1c003a4 | Add learning-quiz、component-responsive-layout、modern-web-layout — 自适应测验闭环（误解定位/修复/变式复测/掌握门禁）与两套响应式布局 skill；更新 README 索引、GENERATION 结构与主动清单 — 24 active skills |
+
 ---
 
-Last updated: 2026-09-26
-Current SHA: 99e0831
+Last updated: 2026-10-03
+Current SHA: 1c003a4
