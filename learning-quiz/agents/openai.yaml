@@ -1,0 +1,5 @@
+interface:
+  display_name: "Learning Quiz"
+  short_description: "Adaptive quizzes that close misconceptions"
+policy:
+  allow_implicit_invocation: true

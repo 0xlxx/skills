@@ -12,9 +12,12 @@ npx skills add 0xlxx/skills -g
 - **[apple-hig](./apple-hig/SKILL.md)** — 把 Apple HIG 提炼为 Web 产品的设计取舍与界面 review 判据：clarity / deference / depth、状态与恢复、无障碍与适配。
 - **[bug-clarify](./bug-clarify/SKILL.md)** — 修 bug 前强制澄清：现象、复现、预期、严重性、回归风险。
 - **[chrome-extension-shortcuts](./chrome-extension-shortcuts/SKILL.md)** — 按 Chrome 官方文档设计或排查扩展快捷键：browser commands 与 in-page keymap 的分支路由、冲突与未绑定、平台默认键、global、键盘可达性与设置页可发现性。
+- **[component-responsive-layout](./component-responsive-layout/SKILL.md)** — 用最近容器、内在尺寸和容器查询设计组件级响应式布局，处理动态文本、媒体/无媒体与窄容器分支。
 - **[direct-readme](./direct-readme/SKILL.md)** — 编写 GitHub 项目 README，简单、直接、开箱即用。
 - **[explain](./explain/SKILL.md)** — 解释概念、原理、机制时**必须**使用：先讲本质，按需补前置知识，不堆砌细节。
+- **[learning-quiz](./learning-quiz/SKILL.md)** — 用自适应测验检验学习成果：覆盖每个知识点，定位并修复误解，变式复测到多次独立正确。
 - **[manifest](./manifest/SKILL.md)** — 生成并维护 skills/GENERATION.md 溯源清单。
+- **[modern-web-layout](./modern-web-layout/SKILL.md)** — 现代 Web 布局实操：内在尺寸（内驱）改造、容器查询、组件驱动式响应式；含三篇长文精炼后的按需参考与验收线。
 - **[mihomo-dns-config-debug](./mihomo-dns-config-debug/SKILL.md)** — 配置和排查 mihomo（Clash.Meta 系内核）的 DNS 分流与防泄露：fake-ip 名单、探针、双路判定、UDP 精度、QUIC 阻断、五个坑。
 - **[parallel-porting](./parallel-porting/SKILL.md)** — 大规模 1:1 移植 / 并行重构工作流（Bun 方法论）：worktree 分片、对抗审查、机器可检查门禁、备注回流。
 - **[parallel-optimizing](./parallel-optimizing/SKILL.md)** — 行为等价下的并行算法优化工作流（JS/TS 性能与包体积）：热点分析、bench 驱动、bit-exact 浮点门禁、tree-shaking 瘦身。
