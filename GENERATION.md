@@ -6,9 +6,9 @@ This document contains information about how these skills are maintained and how
 
 **Generated at:**
 
-- **Commit SHA**: `1c003a4064bcb695f47af76115d18495e4bbc536`
+- **Commit SHA**: `82015e1f7642ff05ab1be7ceda5b423e0fdab5b4`
 - **Date**: 2026-10-03
-- **Commit**: feat: add learning-quiz and layout skills
+- **Commit**: feat(learning-quiz): record logic misconceptions to a local markdown ledger
 
 **Source documentation:**
 
@@ -157,7 +157,7 @@ skills/
 | `explain` | **强制（MUST USE）**：解释概念、原理、机制时必须使用——先讲本质，按需补前置知识，不堆砌细节。 | SKILL.md |
 | `feature-dev` | 递阶控制 + DAG 驱动的功能实现流程——从设计方案到逐节点实现再到归档。开始新功能、新模块时手动调用。 | SKILL.md, TODO_TEMPLATE.md |
 | `intrinsic-design` | Intrinsic Web Design — content-driven CSS layout using intrinsic sizing, Grid, Flexbox, and fluid values without media queries. | SKILL.md |
-| `learning-quiz` | 运行自适应学习测验——覆盖每个知识点，一次一题，定位并修复误解，用变式复测到多次独立正确；重点/难点额外延迟回测。 | SKILL.md, agents/openai.yaml |
+| `learning-quiz` | 运行自适应学习测验——覆盖每个知识点，一次一题，定位并修复误解，用变式复测到多次独立正确；逻辑误区沉淀到本地档案（`~/.learning-quiz/`）跨会话保留，识别即写、同误区只更新不新建、修复后只改状态永不删除。 | SKILL.md, agents/openai.yaml |
 | `manifest` | 生成并维护 skills/GENERATION.md 溯源清单，追踪每个 skill 的来源、结构与更新流程。 | SKILL.md, TEMPLATE.md |
 | `mihomo-dns-config-debug` | 配置和排查 mihomo / Clash.Meta 系内核的 DNS 分流与防泄露——fake-ip 名单、探针、双路判定、UDP 精度、QUIC 阻断、专用解析器、五个坑（源自七尺宇 mihomo DNS 深度精讲）。 | SKILL.md, references/ (3) |
 | `modern-web-layout` | 现代 Web 布局实操——内容决定尺寸、设计只给约束；内在尺寸改造、容器查询与组件驱动式响应式，含三篇原文精炼参考。 | SKILL.md, GENERATION.md, reference/ (3): intrinsic-sizing / container-queries / component-driven |
@@ -215,13 +215,13 @@ This project's skills are self-contained — each `SKILL.md` is the authoritativ
 
 ```bash
 # List skills modified since last generation
-git diff --name-only 1c003a4..HEAD -- '*/SKILL.md'
+git diff --name-only 82015e1..HEAD -- '*/SKILL.md'
 
 # See full diff of skill changes
-git diff 1c003a4..HEAD -- '*/SKILL.md'
+git diff 82015e1..HEAD -- '*/SKILL.md'
 
 # See commit log for skills
-git log --oneline 1c003a4..HEAD -- '*/SKILL.md'
+git log --oneline 82015e1..HEAD -- '*/SKILL.md'
 ```
 
 ### 2. Update Process
@@ -315,7 +315,9 @@ git log --oneline 1c003a4..HEAD -- '*/SKILL.md'
 
 | 2026-10-03 | 1c003a4 | Add learning-quiz、component-responsive-layout、modern-web-layout — 自适应测验闭环（误解定位/修复/变式复测/掌握门禁）与两套响应式布局 skill；更新 README 索引、GENERATION 结构与主动清单 — 24 active skills |
 
+| 2026-10-03 | 82015e1 | feat(learning-quiz): 逻辑误区沉淀到本地 markdown 档案（`~/.learning-quiz/`）——开场读档并把未修复/反复出现的条目列为优先复测点、识别即写、同误区只更新不新建、修复后只改状态永不删除；误解闭环新增「记录」一步 — 24 active skills |
+
 ---
 
 Last updated: 2026-10-03
-Current SHA: 1c003a4
+Current SHA: 82015e1
